@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GoProfileHistory">
+    <profile entry="$USER_HOME$/GoLandProfiles/dev-heap_with_gc-2026-07-27-234309-167.pprof">
+      <GoProfileMapEntry>
+        <option name="buildAnchorMillis" value="1785175981300" />
+        <option name="file" value="dev-heap_with_gc-2026-07-27-234309-167.pprof" />
+        <option name="ours" value="true" />
+        <option name="profileType" value="HEAP_GC" />
+      </GoProfileMapEntry>
+    </profile>
+    <profile entry="$USER_HOME$/GoLandProfiles/dev-allocs-2026-07-27-234327-677.pprof">
+      <GoProfileMapEntry>
+        <option name="buildAnchorMillis" value="1785175981300" />
+        <option name="file" value="dev-allocs-2026-07-27-234327-677.pprof" />
+        <option name="ours" value="true" />
+        <option name="profileType" value="ALLOCS" />
+      </GoProfileMapEntry>
+    </profile>
+    <profile entry="$USER_HOME$/GoLandProfiles/dev-allocs-2026-07-27-234556-579.pprof">
+      <GoProfileMapEntry>
+        <option name="buildAnchorMillis" value="1785175981300" />
+        <option name="file" value="dev-allocs-2026-07-27-234556-579.pprof" />
+        <option name="ours" value="true" />
+        <option name="profileType" value="ALLOCS" />
+      </GoProfileMapEntry>
+    </profile>
+  </component>
+</project>

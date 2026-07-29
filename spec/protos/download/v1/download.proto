@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package download.v1;
+
+option go_package = "github.com/ra341/homework/generated/api/download/v1";
+
+service DownloadService {
+  rpc Download(DownloadRequest) returns (DownloadResponse) {}
+}
+
+message DownloadRequest {
+  string url = 1;
+  string path = 2;
+}
+
+message DownloadResponse {}

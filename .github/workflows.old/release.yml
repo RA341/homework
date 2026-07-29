@@ -1,0 +1,36 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  get-tag:
+    runs-on: ubuntu-latest
+    outputs:
+      tag_name: ${{ steps.extract_tag.outputs.tag }}
+    steps:
+      - name: Extract tag name
+        id: extract_tag
+        run: echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+  android-release:
+    needs: get-tag
+    permissions:
+      contents: write
+    uses: ./.github/workflows/android.yml
+    with:
+      tag_name: ${{ needs.get-tag.outputs.tag_name }}
+      is_prerelease: false
+    secrets: inherit
+
+  docker-release:
+    needs: get-tag
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/docker.yml
+    with:
+      tag_name: ${{ needs.get-tag.outputs.tag_name }}
+    secrets: inherit

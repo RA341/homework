@@ -1,0 +1,161 @@
+package app
+
+import (
+	"fmt"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/ra341/homework/common/database"
+	"github.com/ra341/homework/internal/downloads"
+	"github.com/ra341/homework/internal/media"
+	"github.com/ra341/homework/internal/media/asset"
+	"github.com/ra341/homework/internal/media/content"
+	"github.com/ra341/homework/internal/upload"
+	"github.com/rs/zerolog/log"
+)
+
+type App struct {
+	downloads      *downloads.Service
+	uploads        *upload.Service
+	mediaService   *media.Service
+	contentService *content.Service
+	assetService   *asset.Service
+}
+
+func (a *App) RegisterServices() {
+	dir, err := os.Getwd()
+	if err != nil {
+		log.Fatal().Err(err).Msg("could not get working directory")
+	}
+
+	config := downloads.NewConfig(dir)
+	fmt.Println(config)
+
+	dataPath := filepath.Join(dir, "data")
+	err = os.MkdirAll(dataPath, 0755)
+	if err != nil {
+		log.Fatal().Err(err).Str("path", dataPath).Msg("could make data dir")
+	}
+
+	dbPath := filepath.Join(dataPath, "hw.db")
+	db, err := database.InitDB(dbPath)
+	if err != nil {
+		log.Fatal().Err(err).Str("path", dbPath).Msg("could not init database")
+	}
+
+	models := []any{
+		&asset.Asset{},
+		&content.Content{},
+	}
+	err = db.AutoMigrate(models...)
+	if err != nil {
+		log.Fatal().Err(err).Msg("could auto migrate models database")
+	}
+
+	assetStore := asset.NewStore(db)
+	a.assetService = asset.NewService(assetStore)
+
+	contentStore := content.NewStore(db)
+	a.contentService = content.NewService(contentStore)
+
+	a.mediaService = media.NewService(a.contentService, a.assetService)
+
+	//a.downloads, err = downloads.NewService(config)
+	//if err != nil {
+	//	// todo handle gracefully
+	//	log.Fatal().Err(err).Msg("could not create downloads service")
+	//}
+
+	a.uploads, err = upload.NewService("temp", a.mediaService)
+	if err != nil {
+		log.Fatal().Err(err).Msg("could not create upload service")
+	}
+
+	//_, err = downloadService.Download("https://www.youtube.com/watch?v=fVNgE-HaKxo")
+	//if err != nil {
+	//	log.Fatal().Err(err).Msg("could not download video")
+	//}
+}
+
+func (a *App) RegisterHandlers(r *http.ServeMux) {
+	ro := Rou{parentMux: r}
+
+	const ApiPrefix = "/api"
+	apiMux := http.NewServeMux()
+	a.registerApiHandlers(apiMux)
+	ro.AddRouter(ApiPrefix, loggerMiddleware(apiMux))
+
+	const uiPrefix = "/"
+	uiMux := http.NewServeMux()
+	a.registerUIHandler(uiMux)
+	ro.AddRouter(uiPrefix, uiMux)
+}
+
+func (a *App) registerApiHandlers(r *http.ServeMux) {
+	r.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("pong"))
+	})
+
+	rou := Rou{parentMux: r}
+
+	// normal http handler needs prefix stripping
+	rou.AddRouter(upload.NewHandler(a.uploads))
+	rou.AddRouter(asset.NewHandler(a.assetService))
+
+	// connect rpc should not strip the prefix
+	rou.AddHandler(downloads.NewHandler(a.downloads))
+	rou.AddHandler(content.NewHandler(a.contentService))
+}
+
+func (a *App) registerUIHandler(r *http.ServeMux) {
+	// todo
+}
+
+func loggerMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Info().Str("method", r.Method).
+			Str("path", r.URL.Path).
+			Msg("request started")
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+type Rou struct {
+	parentMux *http.ServeMux
+}
+
+// AddRouter registers a childMux under path on parentMux, stripping the prefix.
+func (r *Rou) AddRouter(path string, childMux http.Handler) {
+	pattern := path
+	if pattern == "" {
+		pattern = "/"
+	}
+	if pattern != "/" && !strings.HasSuffix(pattern, "/") {
+		pattern = pattern + "/"
+	}
+
+	prefix := strings.TrimSuffix(path, "/")
+
+	var handler = childMux
+	if prefix != "" && prefix != "/" {
+		handler = http.StripPrefix(prefix, childMux)
+	}
+
+	r.parentMux.Handle(pattern, handler)
+}
+
+// AddHandler registers a handler under path on parentMux without stripping the prefix.
+func (r *Rou) AddHandler(path string, handler http.Handler) {
+	pattern := path
+	if pattern == "" {
+		pattern = "/"
+	}
+	if pattern != "/" && !strings.HasSuffix(pattern, "/") {
+		pattern = pattern + "/"
+	}
+
+	r.parentMux.Handle(pattern, handler)
+}

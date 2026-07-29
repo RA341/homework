@@ -1,0 +1,64 @@
+name: Development
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'ui/**'
+      - 'server/**'
+      - 'db/**'
+      - 'core/**'
+      - '../../Dockerfile.downloader'
+      - 'pyproject.toml'
+      - 'uv.lock'
+      - '.github/workflows/dev.yml'
+      - '.github/workflows/android.yml'
+      - '.github/workflows/docker.yml'
+  workflow_dispatch:
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      android: ${{ steps.filter.outputs.android }}
+      docker: ${{ steps.filter.outputs.docker }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            android:
+              - 'ui/**'
+              - '.github/workflows/android.yml'
+            docker:
+              - 'server/**'
+              - 'db/**'
+              - 'core/**'
+              - 'Dockerfile'
+              - 'pyproject.toml'
+              - 'uv.lock'
+              - '.github/workflows/docker.yml'
+
+  android-dev:
+    needs: changes
+    if: ${{ needs.changes.outputs.android == 'true' }}
+    permissions:
+      contents: write
+    uses: ./.github/workflows/android.yml
+    with:
+      tag_name: dev
+      is_prerelease: true
+    secrets: inherit
+
+  docker-dev:
+    needs: changes
+    if: ${{ needs.changes.outputs.docker == 'true' }}
+    permissions:
+      contents: read
+      packages: write
+    uses: ./.github/workflows/docker.yml
+    with:
+      tag_name: dev
+    secrets: inherit

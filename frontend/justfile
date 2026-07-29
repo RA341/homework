@@ -1,0 +1,5 @@
+route-bd:
+    dart run build_runner build --delete-conflicting-outputs
+
+route-watch:
+    dart run build_runner watch

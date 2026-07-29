@@ -1,0 +1,39 @@
+FROM python:3.14-slim-trixie AS scipt-exec
+
+WORKDIR /build
+
+COPY downloader/entrypoint.sh entrypoint.sh
+
+RUN chmod +x entrypoint.sh
+
+FROM python:3.14-slim-trixie AS backend
+
+RUN apt-get update && apt-get install -y \
+    ffmpeg \
+    curl \
+    unzip \
+    gosu \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install deno, uv, and ffmpeg globally for use by non-root users
+COPY --from=denoland/deno:latest /usr/bin/deno /usr/bin/deno
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
+
+RUN uv --help
+RUN deno --version
+RUN ffmpeg -version
+RUN ffprobe -version
+
+WORKDIR /app
+
+COPY downloader/pyproject.toml downloader/uv.lock ./
+
+# Use a cache mount for uv to speed up builds
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen
+
+COPY --from=scipt-exec /build/entrypoint.sh entrypoint.sh
+
+COPY downloader .
+
+CMD ["./entrypoint.sh"]

@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package content.v1;
+
+option go_package = "github.com/ra341/homework/generated/api/content/v1";
+
+service ContentService {
+  rpc List(ListRequest) returns (ListResponse) {}
+}
+
+message ListRequest {
+  string query = 1;
+  uint64 after = 2;
+  uint64 before = 3;
+  uint64 limit = 4;
+}
+
+message ListResponse {
+  repeated Content results = 1;
+  uint64 after = 2;
+  uint64 before = 3;
+  uint64 count = 4;
+}
+
+message Content {
+  uint64 Id = 4;
+  int64 CreatedAt = 5;
+  int64 UpdatedAt = 6;
+
+  string Type = 1;
+  string Title = 2;
+  string Description = 3;
+}
