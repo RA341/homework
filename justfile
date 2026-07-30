@@ -1,3 +1,6 @@
+default:
+   just --list
+
 dk:
     docker build . -f Dockerfile.core -t homework/api:dev
 

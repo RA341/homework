@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:homework/common/api/basepath_provider.dart';
 import 'package:homework/common/api/endpoints/upload_provider.dart';
+import 'package:homework/common/result/result.dart';
 import 'package:homework/common/upload/job.dart';
 import 'package:homework/common/api/endpoints/upload_dto.dart';
 
@@ -95,44 +96,45 @@ class UploadQueueNotifier extends Notifier<List<UploadJob>> {
     }).toList();
     await _saveQueue();
 
-    try {
-      final uploadService = ref.read(uploadServiceProvider);
+    final uploadService = ref.read(uploadServiceProvider);
 
-      await uploadService.upload(
-        dto: job.dto,
-        onProgress: (bytesSent, totalBytes) {
-          final progress = totalBytes > 0 ? bytesSent / totalBytes : 0.0;
-          state = state.map((j) {
-            if (j.id == job.id) {
-              return j.copyWith(progress: progress);
-            }
-            return j;
-          }).toList();
-        },
-      );
+    final result = await uploadService.upload(
+      dto: job.dto,
+      onProgress: (bytesSent, totalBytes) {
+        final progress = totalBytes > 0 ? bytesSent / totalBytes : 0.0;
+        state = state.map((j) {
+          if (j.id == job.id) {
+            return j.copyWith(progress: progress);
+          }
+          return j;
+        }).toList();
+      },
+    );
 
-      state = state.map((j) {
-        if (j.id == job.id) {
-          return j.copyWith(status: 'completed', progress: 1.0);
-        }
-        return j;
-      }).toList();
-    } catch (e) {
-      final err = e.toString().replaceFirst('Exception: ', '');
-      state = state.map((j) {
-        if (j.id == job.id) {
-          return j.copyWith(status: 'failed', error: err);
-        }
-        return j;
-      }).toList();
-    } finally {
-      await _saveQueue();
-      _isProcessing = false;
-      // Yield execution then process the next one
-      Future.delayed(
-        const Duration(milliseconds: 100),
-        () => _processNextJob(),
-      );
+    switch (result) {
+      case Ok():
+        state = state.map((j) {
+          if (j.id == job.id) {
+            return j.copyWith(status: 'completed', progress: 1.0);
+          }
+          return j;
+        }).toList();
+      case Error(:final error):
+        final err = error.replaceFirst('Exception: ', '');
+        state = state.map((j) {
+          if (j.id == job.id) {
+            return j.copyWith(status: 'failed', error: err);
+          }
+          return j;
+        }).toList();
     }
+
+    await _saveQueue();
+    _isProcessing = false;
+    // Yield execution then process the next one
+    Future.delayed(
+      const Duration(milliseconds: 100),
+      () => _processNextJob(),
+    );
   }
 }

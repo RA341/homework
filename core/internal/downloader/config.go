@@ -1,4 +1,4 @@
-package downloads
+package downloader
 
 import (
 	"github.com/ra341/homework/common/pick"

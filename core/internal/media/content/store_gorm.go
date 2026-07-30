@@ -14,7 +14,7 @@ func NewStore(db *gorm.DB) Store {
 }
 
 // List after, before is ignored if query is passed
-func (s *StoreGorm) List(query string, after, before, limit uint) (pagination.Pagintion[Content], error) {
+func (s *StoreGorm) List(query string, after, before, limit uint) (pagination.Result[Content], error) {
 	var count int64
 	countTx := s.db.Model(&Content{})
 	if query != "" {
@@ -22,7 +22,7 @@ func (s *StoreGorm) List(query string, after, before, limit uint) (pagination.Pa
 		countTx = countTx.Where("title LIKE ? OR description LIKE ?", likePattern, likePattern)
 	}
 	if err := countTx.Count(&count).Error; err != nil {
-		return pagination.Pagintion[Content]{}, err
+		return pagination.Result[Content]{}, err
 	}
 
 	tx := s.db.Model(&Content{})
@@ -46,7 +46,7 @@ func (s *StoreGorm) List(query string, after, before, limit uint) (pagination.Pa
 
 	var results []Content
 	if err := tx.Find(&results).Error; err != nil {
-		return pagination.Pagintion[Content]{}, err
+		return pagination.Result[Content]{}, err
 	}
 
 	if query == "" && before > 0 {
@@ -61,7 +61,7 @@ func (s *StoreGorm) List(query string, after, before, limit uint) (pagination.Pa
 		lastID = results[len(results)-1].ID
 	}
 
-	return pagination.Pagintion[Content]{
+	return pagination.Result[Content]{
 		Results: results,
 		After:   lastID,
 		Before:  firstID,

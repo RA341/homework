@@ -1,6 +1,6 @@
 // This is a generated file - do not edit.
 //
-// Generated from download/v1/download.proto.
+// Generated from downloader/v1/downloader.proto.
 
 // @dart = 3.3
 
@@ -21,10 +21,12 @@ class DownloadRequest extends $pb.GeneratedMessage {
   factory DownloadRequest({
     $core.String? url,
     $core.String? path,
+    $core.String? name,
   }) {
     final result = create();
     if (url != null) result.url = url;
     if (path != null) result.path = path;
+    if (name != null) result.name = name;
     return result;
   }
 
@@ -39,10 +41,11 @@ class DownloadRequest extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'DownloadRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'download.v1'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'downloader.v1'),
       createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'url')
-    ..aOS(2, _omitFieldNames ? '' : 'path')
+    ..aOS(1, _omitFieldNames ? '' : 'Url', protoName: 'Url')
+    ..aOS(2, _omitFieldNames ? '' : 'Path', protoName: 'Path')
+    ..aOS(3, _omitFieldNames ? '' : 'Name', protoName: 'Name')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -83,6 +86,15 @@ class DownloadRequest extends $pb.GeneratedMessage {
   $core.bool hasPath() => $_has(1);
   @$pb.TagNumber(2)
   void clearPath() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get name => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set name($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasName() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearName() => $_clearField(3);
 }
 
 class DownloadResponse extends $pb.GeneratedMessage {
@@ -99,7 +111,7 @@ class DownloadResponse extends $pb.GeneratedMessage {
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'DownloadResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'download.v1'),
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'downloader.v1'),
       createEmptyInstance: create)
     ..hasRequiredFields = false;
 
@@ -125,15 +137,15 @@ class DownloadResponse extends $pb.GeneratedMessage {
   static DownloadResponse? _defaultInstance;
 }
 
-class DownloadServiceApi {
+class DownloaderServiceApi {
   final $pb.RpcClient _client;
 
-  DownloadServiceApi(this._client);
+  DownloaderServiceApi(this._client);
 
   $async.Future<DownloadResponse> download(
           $pb.ClientContext? ctx, DownloadRequest request) =>
       _client.invoke<DownloadResponse>(
-          ctx, 'DownloadService', 'Download', request, DownloadResponse());
+          ctx, 'DownloaderService', 'Download', request, DownloadResponse());
 }
 
 const $core.bool _omitFieldNames =

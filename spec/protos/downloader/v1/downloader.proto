@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package downloader.v1;
+
+option go_package = "github.com/ra341/homework/generated/api/downloader/v1";
+
+service DownloaderService {
+  rpc Download(DownloadRequest) returns (DownloadResponse) {}
+}
+
+message DownloadRequest {
+  string Name = 3;
+  string Url = 1;
+  string Path = 2;
+}
+
+message DownloadResponse {}

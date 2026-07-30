@@ -1,6 +1,6 @@
 // This is a generated file - do not edit.
 //
-// Generated from download/v1/download.proto.
+// Generated from downloader/v1/downloader.proto.
 
 // @dart = 3.3
 
@@ -18,15 +18,16 @@ import 'dart:typed_data' as $typed_data;
 const DownloadRequest$json = {
   '1': 'DownloadRequest',
   '2': [
-    {'1': 'url', '3': 1, '4': 1, '5': 9, '10': 'url'},
-    {'1': 'path', '3': 2, '4': 1, '5': 9, '10': 'path'},
+    {'1': 'Name', '3': 3, '4': 1, '5': 9, '10': 'Name'},
+    {'1': 'Url', '3': 1, '4': 1, '5': 9, '10': 'Url'},
+    {'1': 'Path', '3': 2, '4': 1, '5': 9, '10': 'Path'},
   ],
 };
 
 /// Descriptor for `DownloadRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List downloadRequestDescriptor = $convert.base64Decode(
-    'Cg9Eb3dubG9hZFJlcXVlc3QSEAoDdXJsGAEgASgJUgN1cmwSEgoEcGF0aBgCIAEoCVIEcGF0aA'
-    '==');
+    'Cg9Eb3dubG9hZFJlcXVlc3QSEgoETmFtZRgDIAEoCVIETmFtZRIQCgNVcmwYASABKAlSA1VybB'
+    'ISCgRQYXRoGAIgASgJUgRQYXRo');
 
 @$core.Deprecated('Use downloadResponseDescriptor instead')
 const DownloadResponse$json = {
@@ -37,26 +38,26 @@ const DownloadResponse$json = {
 final $typed_data.Uint8List downloadResponseDescriptor =
     $convert.base64Decode('ChBEb3dubG9hZFJlc3BvbnNl');
 
-const $core.Map<$core.String, $core.dynamic> DownloadServiceBase$json = {
-  '1': 'DownloadService',
+const $core.Map<$core.String, $core.dynamic> DownloaderServiceBase$json = {
+  '1': 'DownloaderService',
   '2': [
     {
       '1': 'Download',
-      '2': '.download.v1.DownloadRequest',
-      '3': '.download.v1.DownloadResponse',
+      '2': '.downloader.v1.DownloadRequest',
+      '3': '.downloader.v1.DownloadResponse',
       '4': {}
     },
   ],
 };
 
-@$core.Deprecated('Use downloadServiceDescriptor instead')
+@$core.Deprecated('Use downloaderServiceDescriptor instead')
 const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
-    DownloadServiceBase$messageJson = {
-  '.download.v1.DownloadRequest': DownloadRequest$json,
-  '.download.v1.DownloadResponse': DownloadResponse$json,
+    DownloaderServiceBase$messageJson = {
+  '.downloader.v1.DownloadRequest': DownloadRequest$json,
+  '.downloader.v1.DownloadResponse': DownloadResponse$json,
 };
 
-/// Descriptor for `DownloadService`. Decode as a `google.protobuf.ServiceDescriptorProto`.
-final $typed_data.Uint8List downloadServiceDescriptor = $convert.base64Decode(
-    'Cg9Eb3dubG9hZFNlcnZpY2USSQoIRG93bmxvYWQSHC5kb3dubG9hZC52MS5Eb3dubG9hZFJlcX'
-    'Vlc3QaHS5kb3dubG9hZC52MS5Eb3dubG9hZFJlc3BvbnNlIgA=');
+/// Descriptor for `DownloaderService`. Decode as a `google.protobuf.ServiceDescriptorProto`.
+final $typed_data.Uint8List downloaderServiceDescriptor = $convert.base64Decode(
+    'ChFEb3dubG9hZGVyU2VydmljZRJNCghEb3dubG9hZBIeLmRvd25sb2FkZXIudjEuRG93bmxvYW'
+    'RSZXF1ZXN0Gh8uZG93bmxvYWRlci52MS5Eb3dubG9hZFJlc3BvbnNlIgA=');

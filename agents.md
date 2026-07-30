@@ -25,3 +25,25 @@ Organize features and sub-features using strict folder nesting:
             └── profile/             <-- Sub-page of settings
                 └── +page.dart
         ```
+
+## 3. Error Handling and API Calls
+
+To maintain consistent error handling across the application:
+
+*   **gRPC / Connect Clients**: Keep client classes generated and raw (e.g. `DownloaderServiceClient`). In the UI or controllers, wrap their calls with the `runReq` helper from `lib/common/api/runner.dart` to yield an `ErrorResult`. Never write raw `try-catch` blocks in UI code.
+*   **Non-gRPC / Custom Services**: Custom services/endpoints (e.g., `UploadService`) must return `ErrorResult<T>` (typedef for `Result<T, String>` defined in `lib/common/result/result.dart`) directly and utilize the `runReq` helper internally.
+*   **Result Pattern Matching**: Process the returned `ErrorResult` inside the UI or queue providers using Dart's switch pattern matching:
+    ```dart
+    // For gRPC calls:
+    final result = await runReq(() => downloader.download(...));
+
+    // For custom services:
+    final result = await uploadService.upload(...);
+
+    switch (result) {
+      case Ok(:final value):
+        // handle success
+      case Error(:final error):
+        // handle error string directly (e.g. display in UI)
+    }
+    ```

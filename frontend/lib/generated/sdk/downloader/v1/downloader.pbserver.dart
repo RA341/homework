@@ -1,6 +1,6 @@
 // This is a generated file - do not edit.
 //
-// Generated from download/v1/download.proto.
+// Generated from downloader/v1/downloader.proto.
 
 // @dart = 3.3
 
@@ -15,12 +15,12 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'download.pb.dart' as $0;
-import 'download.pbjson.dart';
+import 'downloader.pb.dart' as $0;
+import 'downloader.pbjson.dart';
 
-export 'download.pb.dart';
+export 'downloader.pb.dart';
 
-abstract class DownloadServiceBase extends $pb.GeneratedService {
+abstract class DownloaderServiceBase extends $pb.GeneratedService {
   $async.Future<$0.DownloadResponse> download(
       $pb.ServerContext ctx, $0.DownloadRequest request);
 
@@ -43,7 +43,8 @@ abstract class DownloadServiceBase extends $pb.GeneratedService {
     }
   }
 
-  $core.Map<$core.String, $core.dynamic> get $json => DownloadServiceBase$json;
+  $core.Map<$core.String, $core.dynamic> get $json =>
+      DownloaderServiceBase$json;
   $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
-      get $messageJson => DownloadServiceBase$messageJson;
+      get $messageJson => DownloaderServiceBase$messageJson;
 }

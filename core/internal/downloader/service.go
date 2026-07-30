@@ -1,4 +1,4 @@
-package downloads
+package downloader
 
 import (
 	"bufio"
@@ -10,21 +10,38 @@ import (
 	"net"
 	"net/http"
 	"strings"
+	"sync"
 
 	"github.com/ra341/homework/common/fu"
+	"github.com/rs/zerolog/log"
 )
 
 type Service struct {
-	conf *Config
-	cli  *http.Client
+	store Store
+	conf  *Config
+	cli   *http.Client
+
+	maxDownloads int
+	mu           chan struct{}
 }
 
-func NewService(conf *Config) (*Service, error) {
+func NewService(conf *Config, store Store) (*Service, error) {
 	s := &Service{
-		conf: conf,
+		conf:  conf,
+		store: store,
+		mu:    make(chan struct{}, 1),
 	}
-	err := s.Init()
-	return s, err
+
+	if s.maxDownloads == 0 {
+		s.maxDownloads = 5
+	}
+
+	// todo
+	//err := s.Init()
+
+	s.launchWorker()
+
+	return s, nil
 }
 
 func (s *Service) Init() error {
@@ -37,9 +54,30 @@ func (s *Service) Init() error {
 			},
 		},
 	}
-
 	s.cli = client
 
+	return s.PingDownloader()
+}
+
+func (s *Service) AddDownload(Name string, DownloadLink string, DownloadPath string) error {
+	download := Download{
+		Status: Queued,
+
+		Name:         Name,
+		DownloadLink: DownloadLink,
+		DownloadPath: DownloadPath,
+	}
+
+	err := s.store.AddDownload(download)
+	if err != nil {
+		return err
+	}
+
+	s.launchWorker()
+	return nil
+}
+
+func (s *Service) PingDownloader() error {
 	get, err := s.cli.Get(s.formatUrl("/hello"))
 	if err != nil {
 		return err
@@ -57,7 +95,62 @@ func (s *Service) Init() error {
 	return nil
 }
 
-func (s *Service) Download(video string) (string, error) {
+func (s *Service) launchWorker() {
+	select {
+	case s.mu <- struct{}{}:
+		log.Info().Msg("launched worker")
+		go s.worker()
+	default:
+		log.Info().Msg("worker is already running")
+	}
+}
+
+func (s *Service) worker() {
+	defer func() { <-s.mu }()
+
+	for {
+		downloading, err := s.store.LoadQueued(s.maxDownloads)
+		if err != nil {
+			log.Warn().Err(err).Msg("Could not load downloading items")
+			return
+		}
+
+		l := len(downloading)
+		if l == 0 {
+			log.Info().Msg("No items found, exiting worker")
+			return
+		}
+
+		log.Info().Int("Count", l).Msg("Found downloading items")
+
+		wg := sync.WaitGroup{}
+		for _, d := range downloading {
+			wg.Go(func() {
+				s.Download(&d)
+			})
+		}
+
+		wg.Wait()
+	}
+}
+
+func (s *Service) Download(msg *Download) {
+	_, err := s.RunDownload(msg.DownloadLink)
+	if err != nil {
+		err := s.store.SetDownloadErr(msg.ID, err.Error())
+		if err != nil {
+			log.Warn().Err(err).Uint("id", msg.ID).
+				Msg("Could not set error status for download")
+		}
+		return
+	}
+
+	// todo start asset scan
+}
+
+func (s *Service) RunDownload(video string) (string, error) {
+	return "", fmt.Errorf("implement me idiot")
+
 	endpoint := s.formatUrl("/ytdlp/download")
 
 	body := map[string]string{
@@ -107,10 +200,10 @@ func (s *Service) Download(video string) (string, error) {
 			fmt.Print(line)
 
 			// SSE event formatting: "event: <name>\n", "data: <content>\n"
-			if strings.HasPrefix(line, "event:") {
-				lastEvent = strings.TrimSpace(strings.TrimPrefix(line, "event:"))
-			} else if strings.HasPrefix(line, "data:") {
-				dataVal := strings.TrimSpace(strings.TrimPrefix(line, "data:"))
+			if after, ok := strings.CutPrefix(line, "event:"); ok {
+				lastEvent = strings.TrimSpace(after)
+			} else if after0, ok0 := strings.CutPrefix(line, "data:"); ok0 {
+				dataVal := strings.TrimSpace(after0)
 				if lastEvent == "error" {
 					var errData struct {
 						Message string `json:"message"`

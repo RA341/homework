@@ -6,7 +6,9 @@ import 'package:homework/common/result/result.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-final basePathProvider = NotifierProvider<BasePathNotifier, String>(BasePathNotifier.new);
+final basePathProvider = NotifierProvider<BasePathNotifier, String>(
+  BasePathNotifier.new,
+);
 
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
   throw UnimplementedError('sharedPreferencesProvider was not overridden');
@@ -22,7 +24,8 @@ class BasePathNotifier extends Notifier<String> {
   String build() {
     final prefs = ref.watch(sharedPreferencesProvider);
     final storedPath = prefs.getString('basepath') ?? 'http://localhost:9911';
-    if (!storedPath.startsWith('http://') && !storedPath.startsWith('https://')) {
+    if (!storedPath.startsWith('http://') &&
+        !storedPath.startsWith('https://')) {
       return 'http://$storedPath/api';
     }
     return "$storedPath/api";
@@ -39,11 +42,13 @@ class BasePathNotifier extends Notifier<String> {
     final bool hasProtocol = hasHttp || hasHttps;
 
     // Determine the protocol scheme if provided
-    final String? providedScheme = hasHttp ? 'http' : (hasHttps ? 'https' : null);
+    final String? providedScheme = hasHttp
+        ? 'http'
+        : (hasHttps ? 'https' : null);
 
     // Strip protocol if present to parse host & port
-    final String rest = hasProtocol 
-        ? trimmed.substring(hasHttp ? 7 : 8) 
+    final String rest = hasProtocol
+        ? trimmed.substring(hasHttp ? 7 : 8)
         : trimmed;
 
     // Parse rest to find host, port, path, query, fragment
@@ -98,9 +103,7 @@ class BasePathNotifier extends Notifier<String> {
 
   Future<bool> _pingUrl(String url) async {
     try {
-      final pingUrl = url.endsWith('/')
-          ? '${url}api/ping'
-          : '$url/api/ping';
+      final pingUrl = url.endsWith('/') ? '${url}api/ping' : '$url/api/ping';
 
       final uri = Uri.parse(pingUrl);
       final response = await http.get(uri).timeout(const Duration(seconds: 5));
@@ -118,51 +121,52 @@ class BasePathNotifier extends Notifier<String> {
     bool hasSucceeded = false;
 
     for (final candidate in candidates) {
-      _pingUrl(candidate).then((succeeded) {
-        if (completer.isCompleted) return;
-        if (succeeded) {
-          hasSucceeded = true;
-          completer.complete(candidate);
-        } else {
-          completedCount++;
-          if (completedCount == candidates.length && !hasSucceeded) {
-            completer.complete(null);
-          }
-        }
-      }).catchError((_) {
-        if (completer.isCompleted) return;
-        completedCount++;
-        if (completedCount == candidates.length && !hasSucceeded) {
-          completer.complete(null);
-        }
-      });
+      _pingUrl(candidate)
+          .then((succeeded) {
+            if (completer.isCompleted) return;
+            if (succeeded) {
+              hasSucceeded = true;
+              completer.complete(candidate);
+            } else {
+              completedCount++;
+              if (completedCount == candidates.length && !hasSucceeded) {
+                completer.complete(null);
+              }
+            }
+          })
+          .catchError((_) {
+            if (completer.isCompleted) return;
+            completedCount++;
+            if (completedCount == candidates.length && !hasSucceeded) {
+              completer.complete(null);
+            }
+          });
     }
 
     return completer.future;
   }
 
-  Future<Result<String>> setBasePath(String newPath) async {
+  Future<ErrorResult<String>> setBasePath(String newPath) async {
     final prefs = ref.read(sharedPreferencesProvider);
 
     var normalizedPath = newPath.trim();
     if (normalizedPath.isEmpty) {
-      return Result.error(Exception('Path cannot be empty'));
+      return Error('Path cannot be empty');
     }
 
     final candidates = generateCandidates(normalizedPath);
     final successfulPath = await _findFirstSuccessfulCandidate(candidates);
 
     if (successfulPath == null) {
-      return Result.error(Exception('No responsive candidate server found. Tried: ${candidates.join(", ")}'));
+      return Error(
+        'No responsive candidate server found. Tried: ${candidates.join(", ")}',
+      );
     }
 
     await prefs.setString('basepath', successfulPath);
     await prefs.setBool('url_verified', true);
     state = successfulPath;
     ref.read(isUrlVerifiedProvider.notifier).state = true;
-    return Result.ok(successfulPath);
+    return Ok(successfulPath);
   }
 }
-
-
-

@@ -1,6 +1,6 @@
 // This is a generated file - do not edit.
 //
-// Generated from download/v1/download.proto.
+// Generated from downloader/v1/downloader.proto.
 
 // @dart = 3.3
 

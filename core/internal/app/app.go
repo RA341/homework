@@ -1,27 +1,33 @@
 package app
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/ra341/homework/common/database"
-	"github.com/ra341/homework/internal/downloads"
+	"github.com/ra341/homework/internal/downloader"
 	"github.com/ra341/homework/internal/media"
 	"github.com/ra341/homework/internal/media/asset"
 	"github.com/ra341/homework/internal/media/content"
 	"github.com/ra341/homework/internal/upload"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"gorm.io/gorm"
 )
 
+func init() {
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"})
+}
+
 type App struct {
-	downloads      *downloads.Service
+	downloads      *downloader.Service
 	uploads        *upload.Service
 	mediaService   *media.Service
 	contentService *content.Service
 	assetService   *asset.Service
+	db             *gorm.DB
 }
 
 func (a *App) RegisterServices() {
@@ -30,8 +36,8 @@ func (a *App) RegisterServices() {
 		log.Fatal().Err(err).Msg("could not get working directory")
 	}
 
-	config := downloads.NewConfig(dir)
-	fmt.Println(config)
+	config := downloader.NewConfig(dir)
+	log.Debug().Any("val", config).Msg("config")
 
 	dataPath := filepath.Join(dir, "data")
 	err = os.MkdirAll(dataPath, 0755)
@@ -39,34 +45,22 @@ func (a *App) RegisterServices() {
 		log.Fatal().Err(err).Str("path", dataPath).Msg("could make data dir")
 	}
 
-	dbPath := filepath.Join(dataPath, "hw.db")
-	db, err := database.InitDB(dbPath)
-	if err != nil {
-		log.Fatal().Err(err).Str("path", dbPath).Msg("could not init database")
-	}
+	a.InitDB(dataPath)
 
-	models := []any{
-		&asset.Asset{},
-		&content.Content{},
-	}
-	err = db.AutoMigrate(models...)
-	if err != nil {
-		log.Fatal().Err(err).Msg("could auto migrate models database")
-	}
-
-	assetStore := asset.NewStore(db)
+	assetStore := asset.NewStore(a.db)
 	a.assetService = asset.NewService(assetStore)
 
-	contentStore := content.NewStore(db)
+	contentStore := content.NewStore(a.db)
 	a.contentService = content.NewService(contentStore)
 
 	a.mediaService = media.NewService(a.contentService, a.assetService)
 
-	//a.downloads, err = downloads.NewService(config)
-	//if err != nil {
-	//	// todo handle gracefully
-	//	log.Fatal().Err(err).Msg("could not create downloads service")
-	//}
+	downloadDb := downloader.NewStoreGorm(a.db)
+	a.downloads, err = downloader.NewService(config, downloadDb)
+	if err != nil {
+		// todo handle gracefully
+		log.Fatal().Err(err).Msg("could not create downloads service")
+	}
 
 	a.uploads, err = upload.NewService("temp", a.mediaService)
 	if err != nil {
@@ -77,6 +71,27 @@ func (a *App) RegisterServices() {
 	//if err != nil {
 	//	log.Fatal().Err(err).Msg("could not download video")
 	//}
+}
+
+func (a *App) InitDB(dataPath string) {
+	dbPath := filepath.Join(dataPath, "hw.db")
+	db, err := database.InitDB(dbPath)
+	if err != nil {
+		log.Fatal().Err(err).Str("path", dbPath).Msg("could not init database")
+	}
+
+	models := []any{
+		&asset.Asset{},
+		&content.Content{},
+		&downloader.Download{},
+	}
+
+	err = db.AutoMigrate(models...)
+	if err != nil {
+		log.Fatal().Err(err).Msg("could auto migrate models database")
+	}
+
+	a.db = db
 }
 
 func (a *App) RegisterHandlers(r *http.ServeMux) {
@@ -105,7 +120,7 @@ func (a *App) registerApiHandlers(r *http.ServeMux) {
 	rou.AddRouter(asset.NewHandler(a.assetService))
 
 	// connect rpc should not strip the prefix
-	rou.AddHandler(downloads.NewHandler(a.downloads))
+	rou.AddHandler(downloader.NewHandler(a.downloads))
 	rou.AddHandler(content.NewHandler(a.contentService))
 }
 

@@ -1,22 +1,22 @@
 //
 //  Generated code. Do not modify.
-//  source: download/v1/download.proto
+//  source: downloader/v1/downloader.proto
 //
 
 import "package:connectrpc/connect.dart" as connect;
-import "download.pb.dart" as downloadv1download;
-import "download.connect.spec.dart" as specs;
+import "downloader.pb.dart" as downloaderv1downloader;
+import "downloader.connect.spec.dart" as specs;
 
-extension type DownloadServiceClient (connect.Transport _transport) {
-  Future<downloadv1download.DownloadResponse> download(
-    downloadv1download.DownloadRequest input, {
+extension type DownloaderServiceClient (connect.Transport _transport) {
+  Future<downloaderv1downloader.DownloadResponse> download(
+    downloaderv1downloader.DownloadRequest input, {
     connect.Headers? headers,
     connect.AbortSignal? signal,
     Function(connect.Headers)? onHeader,
     Function(connect.Headers)? onTrailer,
   }) {
     return connect.Client(_transport).unary(
-      specs.DownloadService.download,
+      specs.DownloaderService.download,
       input,
       signal: signal,
       headers: headers,

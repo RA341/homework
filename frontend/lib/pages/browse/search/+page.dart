@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:homework/common/api/endpoints/download_provider.dart';
+import 'package:homework/common/api/runner.dart';
+import 'package:homework/common/result/result.dart';
 import 'package:homework/common/theme/design_system.dart';
+import 'package:homework/generated/sdk/downloader/v1/downloader.pb.dart';
 import 'package:homework/pages/browse/+layout.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class SearchPage extends StatelessWidget {
+class SearchPage extends ConsumerWidget {
   const SearchPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return BrowseLayout(
       activeTab: 0,
       child: Padding(
@@ -15,31 +21,14 @@ class SearchPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Placeholder Search Bar to show how it will look
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              decoration: BoxDecoration(
-                color: AppColors.level1,
-                borderRadius: AppShapes.radiusDefault,
-                border: Border.all(
-                  color: AppColors.outlineVariant,
-                  width: 1.0,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.search_rounded,
-                    color: AppColors.onSurfaceVariant.withAlpha(120),
-                  ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Search assets...',
-                    style: AppTypography.bodySm.copyWith(
-                      color: AppColors.onSurfaceVariant.withAlpha(120),
-                    ),
-                  ),
-                ],
-              ),
+            ElevatedButton(
+              child: Text("Download"),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AddDownloadDialog(),
+                );
+              },
             ),
             const Expanded(
               child: Center(
@@ -77,6 +66,224 @@ class SearchPage extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class AddDownloadDialog extends HookConsumerWidget {
+  const AddDownloadDialog({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final downloader = ref.watch(downloaderApiProvider);
+
+    final nameField = useTextEditingController();
+    final downloadLinkField = useTextEditingController();
+    final filepathField = useTextEditingController();
+
+    final errorMessage = useState<String?>(null);
+    final isLoading = useState(false);
+
+    void clearError() {
+      if (errorMessage.value != null) {
+        errorMessage.value = null;
+      }
+    }
+
+    Future<void> handleAdd() async {
+      final name = nameField.text.trim();
+      final url = downloadLinkField.text.trim();
+      final path = filepathField.text.trim();
+
+      if (name.isEmpty || url.isEmpty || path.isEmpty) {
+        errorMessage.value = 'All fields are required.';
+        return;
+      }
+
+      errorMessage.value = null;
+      isLoading.value = true;
+
+      final result = await runReq(() => downloader.download(
+            DownloadRequest(
+              name: name,
+              url: url,
+              path: path,
+            ),
+          ));
+
+      if (context.mounted) {
+        isLoading.value = false;
+
+        switch (result) {
+          case Ok():
+            Navigator.of(context).pop();
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: [
+                    const Icon(
+                      Icons.check_circle_outline,
+                      color: AppColors.primary,
+                    ),
+                    const SizedBox(width: AppSpacing.base),
+                    Expanded(
+                      child: Text(
+                        'Started downloading "$name"',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+                backgroundColor: AppColors.level2,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: AppShapes.radiusDefault,
+                  side: const BorderSide(
+                    color: AppColors.outlineVariant,
+                    width: 1.0,
+                  ),
+                ),
+              ),
+            );
+          case Error(:final error):
+            errorMessage.value = error;
+        }
+      }
+    }
+
+    return Dialog(
+      backgroundColor: AppColors.level2,
+      shape: RoundedRectangleBorder(
+        borderRadius: AppShapes.radiusLg,
+        side: const BorderSide(
+          color: AppColors.outlineVariant,
+          width: 1.0,
+        ),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 480),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.gutter),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.download_rounded,
+                      color: AppColors.primary,
+                      size: 24,
+                    ),
+                    const SizedBox(width: AppSpacing.base * 1.5),
+                    Text(
+                      'Add Download',
+                      style: AppTypography.headlineLgMobile.copyWith(
+                        color: AppColors.onSurface,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.base * 3),
+                TextField(
+                  controller: nameField,
+                  decoration: const InputDecoration(
+                    labelText: 'Name',
+                    hintText: 'Enter file or task name',
+                    prefixIcon: Icon(Icons.drive_file_rename_outline_rounded, color: AppColors.outline),
+                  ),
+                  onChanged: (_) => clearError(),
+                ),
+                const SizedBox(height: AppSpacing.base * 2.5),
+                TextField(
+                  controller: downloadLinkField,
+                  decoration: const InputDecoration(
+                    labelText: 'Download Link',
+                    hintText: 'e.g., https://example.com/file.mp4',
+                    prefixIcon: Icon(Icons.link_rounded, color: AppColors.outline),
+                  ),
+                  onChanged: (_) => clearError(),
+                ),
+                const SizedBox(height: AppSpacing.base * 2.5),
+                TextField(
+                  controller: filepathField,
+                  decoration: const InputDecoration(
+                    labelText: 'Download Path',
+                    hintText: 'e.g., downloads/file.mp4',
+                    prefixIcon: Icon(Icons.folder_open_rounded, color: AppColors.outline),
+                  ),
+                  onChanged: (_) => clearError(),
+                ),
+                const SizedBox(height: AppSpacing.base * 3),
+                if (errorMessage.value != null) ...[
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.base * 1.5),
+                    decoration: BoxDecoration(
+                      color: AppColors.errorContainer.withAlpha(35),
+                      borderRadius: AppShapes.radiusDefault,
+                      border: Border.all(
+                        color: AppColors.error.withAlpha(80),
+                        width: 1.0,
+                      ),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.error_outline_rounded,
+                          color: AppColors.error,
+                          size: 16,
+                        ),
+                        const SizedBox(width: AppSpacing.base * 1.5),
+                        Expanded(
+                          child: Text(
+                            errorMessage.value!,
+                            style: AppTypography.bodySm.copyWith(
+                              color: AppColors.error,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.base * 3),
+                ],
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: isLoading.value ? null : Navigator.of(context).pop,
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.onSurfaceVariant,
+                        textStyle: AppTypography.labelMd.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      child: const Text('Cancel'),
+                    ),
+                    const SizedBox(width: AppSpacing.base * 1.5),
+                    ElevatedButton(
+                      onPressed: isLoading.value ? null : handleAdd,
+                      child: isLoading.value
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.onPrimary,
+                              ),
+                            )
+                          : const Text('Add'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

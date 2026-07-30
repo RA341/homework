@@ -21,7 +21,7 @@ func NewService(
 	}
 }
 
-func (s *Service) List(query string, after, before, limit uint) (pagination.Pagintion[content.Content], error) {
+func (s *Service) List(query string, after, before, limit uint) (pagination.Result[content.Content], error) {
 	return s.content.List(query, after, before, limit)
 }
 

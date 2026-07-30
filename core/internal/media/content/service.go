@@ -10,7 +10,7 @@ func NewService(store Store) *Service {
 	return &Service{Db: store}
 }
 
-func (s *Service) List(query string, after uint, before uint, limit uint) (pagination.Pagintion[Content], error) {
+func (s *Service) List(query string, after uint, before uint, limit uint) (pagination.Result[Content], error) {
 	return s.Db.List(query, after, before, limit)
 }
 
