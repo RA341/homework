@@ -17,8 +17,8 @@ type Service struct {
 	mu           chan struct{}
 }
 
-func NewService(conf *Config, store Store) (*Service, error) {
-	s := &Service{
+func NewService(conf *Config, store Store) (s *Service, err error) {
+	s = &Service{
 		conf:  conf,
 		store: store,
 		mu:    make(chan struct{}, 1),
@@ -28,11 +28,12 @@ func NewService(conf *Config, store Store) (*Service, error) {
 		s.maxDownloads = 5
 	}
 
-	// todo
-	//err := s.Init()
+	s.downloadClient, err = NewClient(conf.SocketPath)
+	if err != nil {
+		return nil, err
+	}
 
 	s.launchWorker()
-
 	return s, nil
 }
 
@@ -117,7 +118,12 @@ func (s *Service) download(msg *Download) {
 		return
 	}
 
-	_, err = s.runDownload(msg.DownloadLink)
+	state, err := s.runDownload(msg.DownloadLink)
+	if err != nil {
+		return
+	}
+
+	err = s.store.SetStatus(msg.ID, state)
 	if err != nil {
 		return
 	}
@@ -125,10 +131,10 @@ func (s *Service) download(msg *Download) {
 	// todo start asset scan
 }
 
-func (s *Service) runDownload(video string) (string, error) {
+func (s *Service) runDownload(video string) (DownloadState, error) {
 	downloadId, err := s.downloadClient.download(video)
 	if err != nil {
-		return "", err
+		return 0, err
 	}
 
 	tick := time.NewTicker(time.Minute)
@@ -137,15 +143,21 @@ func (s *Service) runDownload(video string) (string, error) {
 	for {
 		select {
 		case <-tick.C:
-			status, err := s.downloadClient.Status(downloadId)
+			status, progress, err := s.downloadClient.Status(downloadId)
 			if err != nil {
 				log.Warn().Err(err).Msg("Could not get download status")
 				continue
 			}
 
-			err = s.store.setProgress(&status)
+			err = s.store.setProgress(&progress)
 			if err != nil {
 				log.Warn().Err(err).Msg("Could not set download progress")
+			}
+
+			log.Debug().Any("data", progress).Msg("Download progress")
+
+			if status == Complete || status == Error {
+				return status, nil
 			}
 		}
 	}

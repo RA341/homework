@@ -24,8 +24,13 @@ def root():
     return {"hello": "from download worker"}
 
 
+
+class DownloadRequest(BaseModel):
+    url: str
 @app.post("/download")
-def download_endpoint():
+def download_endpoint(download: DownloadRequest):
+    print("received download link", download.url)
+
     raise HTTPException(status_code=500, detail="unimplemented")
 
 

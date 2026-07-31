@@ -49,17 +49,17 @@ func (s *StoreGorm) LoadQueued(limit int) ([]Download, error) {
 	return downloads, err
 }
 
-func (s *StoreGorm) SetDownloadErr(id uint, err string) error {
-	err2 := s.db.
+func (s *StoreGorm) SetDownloadErr(id uint, errStr string) error {
+	return s.db.
 		Model(&Download{}).
 		Where("id = ?", id).
-		Updates(map[string]any{
-			"status": Error,
-			"error":  err,
+		Updates(Download{
+			Status: Error,
+			Progress: DownloadProgress{
+				Error: errStr,
+			},
 		}).
 		Error
-
-	return err2
 }
 
 func (s *StoreGorm) AddDownload(download Download) error {

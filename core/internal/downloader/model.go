@@ -10,7 +10,7 @@ const (
 	Queued DownloadState = iota
 	Downloading
 	Error
-	Success
+	Complete
 )
 
 type Download struct {
@@ -21,7 +21,7 @@ type Download struct {
 
 	Status DownloadState
 
-	Progress DownloadProgress `gorm:"embedded;embeddedPrefix:,progress_"`
+	Progress DownloadProgress `gorm:"embedded;embeddedPrefix:progress_"`
 
 	DownloadPath string
 }

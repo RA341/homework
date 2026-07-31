@@ -16,7 +16,7 @@ type Asset struct {
 	Type      Type
 
 	StoragePath string
-	fm          FileMetadata `gorm:"embedded;embeddedPrefix:,metadata_"`
+	fm          FileMetadata `gorm:"embedded;embeddedPrefix:metadata_"`
 }
 
 type FileMetadata struct {

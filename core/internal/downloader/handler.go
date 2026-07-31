@@ -6,16 +6,15 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/ra341/homework/common/list"
-	"github.com/ra341/homework/common/pagination"
 	v1 "github.com/ra341/homework/generated/api/downloader/v1"
 	"github.com/ra341/homework/generated/api/downloader/v1/v1connect"
 )
 
-//go:generate autospec -struct IHandler -service DownloaderService -package downloader.v1 -go_package github.com/ra341/homework/generated/api/downloader/v1 -out ../../../spec/protos/downloader/v1/downloader.proto
-type IHandler interface {
-	Download(name, downloadLink, filepath string)
-	List(base pagination.Base[string]) (pagination.Result[Download], error)
-}
+////go:generate autospec -struct IHandler -service DownloaderService -package downloader.v1 -go_package github.com/ra341/homework/generated/api/downloader/v1 -out ../../../spec/protos/downloader/v1/downloader.proto
+//type IHandler interface {
+//	Download(name, downloadLink, filepath string)
+//	List(base pagination.Base[string]) (pagination.Result[Download], error)
+//}
 
 type Handler struct {
 	srv *Service
