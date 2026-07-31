@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:homework/common/api/endpoints/asset_provider.dart';
 import 'package:homework/common/theme/design_system.dart';
 import 'package:homework/pages/home/content_browser_provider.dart';
@@ -10,6 +9,7 @@ import 'package:homework/pages/home/widgets/content_area.dart';
 import 'package:homework/pages/home/widgets/home_header.dart';
 import 'package:homework/pages/home/widgets/search_filter_bar.dart';
 import 'package:homework/pages/home/widgets/video_player_screen.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class HomePage extends HookConsumerWidget {
   const HomePage({super.key});
@@ -113,9 +113,9 @@ class HomePage extends HookConsumerWidget {
                       final type = item.type.toLowerCase();
                       if (type.contains('video')) {
                         final videoUrl = ref.read(assetServiceProvider).load(
-                              contentId: item.id.toInt(),
-                              assetRole: 'Main',
-                            );
+                          contentId: item.id.toInt(),
+                          assetRole: 'Main',
+                        );
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => VideoPlayerScreen(

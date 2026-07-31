@@ -14,3 +14,7 @@ dkd:
 [working-directory("core")]
 gen:
     go generate ./...
+
+sdk:
+    @just gen
+    cd spec && task gen

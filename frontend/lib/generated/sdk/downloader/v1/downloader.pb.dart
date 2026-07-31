@@ -19,14 +19,14 @@ export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
 class DownloadRequest extends $pb.GeneratedMessage {
   factory DownloadRequest({
-    $core.String? url,
-    $core.String? path,
     $core.String? name,
+    $core.String? downloadLink,
+    $core.String? filepath,
   }) {
     final result = create();
-    if (url != null) result.url = url;
-    if (path != null) result.path = path;
     if (name != null) result.name = name;
+    if (downloadLink != null) result.downloadLink = downloadLink;
+    if (filepath != null) result.filepath = filepath;
     return result;
   }
 
@@ -43,9 +43,9 @@ class DownloadRequest extends $pb.GeneratedMessage {
       _omitMessageNames ? '' : 'DownloadRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'downloader.v1'),
       createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'Url', protoName: 'Url')
-    ..aOS(2, _omitFieldNames ? '' : 'Path', protoName: 'Path')
-    ..aOS(3, _omitFieldNames ? '' : 'Name', protoName: 'Name')
+    ..aOS(1, _omitFieldNames ? '' : 'name')
+    ..aOS(2, _omitFieldNames ? '' : 'downloadLink')
+    ..aOS(3, _omitFieldNames ? '' : 'filepath')
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -70,31 +70,31 @@ class DownloadRequest extends $pb.GeneratedMessage {
   static DownloadRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.String get url => $_getSZ(0);
+  $core.String get name => $_getSZ(0);
   @$pb.TagNumber(1)
-  set url($core.String value) => $_setString(0, value);
+  set name($core.String value) => $_setString(0, value);
   @$pb.TagNumber(1)
-  $core.bool hasUrl() => $_has(0);
+  $core.bool hasName() => $_has(0);
   @$pb.TagNumber(1)
-  void clearUrl() => $_clearField(1);
+  void clearName() => $_clearField(1);
 
   @$pb.TagNumber(2)
-  $core.String get path => $_getSZ(1);
+  $core.String get downloadLink => $_getSZ(1);
   @$pb.TagNumber(2)
-  set path($core.String value) => $_setString(1, value);
+  set downloadLink($core.String value) => $_setString(1, value);
   @$pb.TagNumber(2)
-  $core.bool hasPath() => $_has(1);
+  $core.bool hasDownloadLink() => $_has(1);
   @$pb.TagNumber(2)
-  void clearPath() => $_clearField(2);
+  void clearDownloadLink() => $_clearField(2);
 
   @$pb.TagNumber(3)
-  $core.String get name => $_getSZ(2);
+  $core.String get filepath => $_getSZ(2);
   @$pb.TagNumber(3)
-  set name($core.String value) => $_setString(2, value);
+  set filepath($core.String value) => $_setString(2, value);
   @$pb.TagNumber(3)
-  $core.bool hasName() => $_has(2);
+  $core.bool hasFilepath() => $_has(2);
   @$pb.TagNumber(3)
-  void clearName() => $_clearField(3);
+  void clearFilepath() => $_clearField(3);
 }
 
 class DownloadResponse extends $pb.GeneratedMessage {

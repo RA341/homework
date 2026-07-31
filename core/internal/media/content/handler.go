@@ -10,6 +10,11 @@ import (
 	"github.com/ra341/homework/generated/api/content/v1/v1connect"
 )
 
+////go:generate autospec -struct IHandler -service ContentService -package content.v1 -go_package github.com/ra341/homework/generated/api/content/v1 -out ../../../../spec/protos/content/v1/content.proto
+//type IHandler interface {
+//	List(query string, after uint, before uint, limit uint) (pagination.Result[Dto], error)
+//}
+
 type Handler struct {
 	srv *Service
 }

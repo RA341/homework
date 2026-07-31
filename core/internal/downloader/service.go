@@ -44,7 +44,7 @@ func NewService(conf *Config, store Store) (*Service, error) {
 	return s, nil
 }
 
-func (s *Service) Init() error {
+func (s *Service) init() error {
 	socketPath := s.conf.SocketPath
 
 	client := &http.Client{
@@ -56,7 +56,7 @@ func (s *Service) Init() error {
 	}
 	s.cli = client
 
-	return s.PingDownloader()
+	return s.pingDownloader()
 }
 
 func (s *Service) AddDownload(Name string, DownloadLink string, DownloadPath string) error {
@@ -77,7 +77,21 @@ func (s *Service) AddDownload(Name string, DownloadLink string, DownloadPath str
 	return nil
 }
 
-func (s *Service) PingDownloader() error {
+func (s *Service) Download(msg *Download) {
+	_, err := s.runDownload(msg.DownloadLink)
+	if err != nil {
+		err := s.store.SetDownloadErr(msg.ID, err.Error())
+		if err != nil {
+			log.Warn().Err(err).Uint("id", msg.ID).
+				Msg("Could not set error status for download")
+		}
+		return
+	}
+
+	// todo start asset scan
+}
+
+func (s *Service) pingDownloader() error {
 	get, err := s.cli.Get(s.formatUrl("/hello"))
 	if err != nil {
 		return err
@@ -134,21 +148,7 @@ func (s *Service) worker() {
 	}
 }
 
-func (s *Service) Download(msg *Download) {
-	_, err := s.RunDownload(msg.DownloadLink)
-	if err != nil {
-		err := s.store.SetDownloadErr(msg.ID, err.Error())
-		if err != nil {
-			log.Warn().Err(err).Uint("id", msg.ID).
-				Msg("Could not set error status for download")
-		}
-		return
-	}
-
-	// todo start asset scan
-}
-
-func (s *Service) RunDownload(video string) (string, error) {
+func (s *Service) runDownload(video string) (string, error) {
 	return "", fmt.Errorf("implement me idiot")
 
 	endpoint := s.formatUrl("/ytdlp/download")

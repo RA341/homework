@@ -6,10 +6,10 @@ import 'package:homework/common/api/endpoints/content_provider.dart';
 import 'package:homework/generated/sdk/content/v1/content.pb.dart';
 
 final contentBrowserProvider =
-    NotifierProvider<ContentBrowserNotifier, ContentBrowserState>(
-      ContentBrowserNotifier.new,
-      isAutoDispose: true,
-    );
+NotifierProvider<ContentBrowserNotifier, ContentBrowserState>(
+  ContentBrowserNotifier.new,
+  isAutoDispose: true,
+);
 
 // State model for the content browser page
 class ContentBrowserState {
@@ -89,7 +89,7 @@ class ContentBrowserNotifier extends Notifier<ContentBrowserState> {
       // If server returned after > 0 and results matching the limit, we assume more exist
       final hasMore =
           response.after != Int64.ZERO &&
-          response.results.length >= state.limit;
+              response.results.length >= state.limit;
 
       state = state.copyWith(
         items: updatedItems,
