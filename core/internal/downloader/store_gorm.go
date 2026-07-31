@@ -38,7 +38,7 @@ func (s *StoreGorm) List(query string, after string, before string, limit uint) 
 	return downloads, err
 }
 
-func (s *StoreGorm) LoadQueued(limit int) ([]Download, error) {
+func (s *StoreGorm) ListQueued(limit int) ([]Download, error) {
 	var downloads []Download
 	err := s.db.
 		Where("status = ?", Queued).
@@ -66,8 +66,11 @@ func (s *StoreGorm) AddDownload(download Download) error {
 	return s.db.Create(&download).Error
 }
 
-func (s *StoreGorm) setProgress(status *DownloadProgress) error {
-	return s.db.Model(&Download{}).Updates(
-		Download{Progress: *status},
-	).Error
+func (s *StoreGorm) setProgress(id uint, status *DownloadProgress) error {
+	return s.db.Model(&Download{}).
+		Where("id = ?", id).
+		Updates(
+			Download{Progress: *status},
+		).
+		Error
 }

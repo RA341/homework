@@ -43,8 +43,8 @@ class AddDownloadDialog extends HookConsumerWidget {
       final result = await runReq(() => downloader.download(
         DownloadRequest(
           name: name,
-          filepath: url,
-          downloadLink: path,
+          filepath: path,
+          downloadLink: url,
         ),
       ));
 

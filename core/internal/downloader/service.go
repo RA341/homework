@@ -1,6 +1,7 @@
 package downloader
 
 import (
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -80,7 +81,7 @@ func (s *Service) worker() {
 	defer func() { <-s.mu }()
 
 	for {
-		downloading, err := s.store.LoadQueued(s.maxDownloads)
+		downloading, err := s.store.ListQueued(s.maxDownloads)
 		if err != nil {
 			log.Warn().Err(err).Msg("Could not load downloading items")
 			return
@@ -94,6 +95,7 @@ func (s *Service) worker() {
 
 		log.Info().Int("Count", l).Msg("Found downloading items")
 
+		// todo make it a continuous queue new downloads are added as soon as old one are done
 		wg := sync.WaitGroup{}
 		for _, d := range downloading {
 			wg.Go(func() {
@@ -118,7 +120,7 @@ func (s *Service) download(msg *Download) {
 		return
 	}
 
-	state, err := s.runDownload(msg.DownloadLink)
+	state, err := s.runDownload(msg)
 	if err != nil {
 		return
 	}
@@ -131,13 +133,20 @@ func (s *Service) download(msg *Download) {
 	// todo start asset scan
 }
 
-func (s *Service) runDownload(video string) (DownloadState, error) {
-	downloadId, err := s.downloadClient.download(video)
+func (s *Service) runDownload(down *Download) (DownloadState, error) {
+	absPath, err := filepath.Abs(down.DownloadPath)
 	if err != nil {
 		return 0, err
 	}
 
-	tick := time.NewTicker(time.Minute)
+	downloadId, err := s.downloadClient.download(down.DownloadLink, absPath)
+	if err != nil {
+		return 0, err
+	}
+
+	checkInterval := 5 * time.Second
+
+	tick := time.NewTicker(checkInterval)
 	defer tick.Stop()
 
 	for {
@@ -149,7 +158,7 @@ func (s *Service) runDownload(video string) (DownloadState, error) {
 				continue
 			}
 
-			err = s.store.setProgress(&progress)
+			err = s.store.setProgress(down.ID, progress)
 			if err != nil {
 				log.Warn().Err(err).Msg("Could not set download progress")
 			}

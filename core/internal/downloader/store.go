@@ -1,11 +1,12 @@
 package downloader
 
 type Store interface {
-	LoadQueued(limit int) ([]Download, error)
-	SetDownloadErr(id uint, err string) error
+	ListQueued(limit int) ([]Download, error)
 	AddDownload(download Download) error
 	List(query string, after string, before string, limit uint) ([]Download, error)
 	Get(id uint) (Download, error)
+
+	SetDownloadErr(id uint, err string) error
 	SetStatus(id uint, state DownloadState) error
-	setProgress(status *DownloadProgress) error
+	setProgress(id uint, status *DownloadProgress) error
 }

@@ -50,11 +50,12 @@ func (s *DownloadClient) ping() error {
 	return nil
 }
 
-func (s *DownloadClient) download(video string) (downloadId string, err error) {
+func (s *DownloadClient) download(video string, downloadPath string) (downloadId string, err error) {
 	endpoint := s.formatUrl("/download")
 
 	body := map[string]string{
-		"url": video,
+		"url":           video,
+		"download_path": downloadPath,
 	}
 
 	// todo context
@@ -76,20 +77,52 @@ func (s *DownloadClient) download(video string) (downloadId string, err error) {
 	}
 	defer fu.CloseCloser(resp.Body)
 
-	respBody, err := io.ReadAll(resp.Body)
+	respBody, err := s.readBodyAndStatus(err, resp)
 	if err != nil {
-		return "", fmt.Errorf("could not read body %w", err)
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, respBody)
+		return "", err
 	}
 
 	return string(respBody), nil
 }
 
-func (s *DownloadClient) Status(id string) (DownloadState, DownloadProgress, error) {
-	return Error, DownloadProgress{}, fmt.Errorf("implement me")
+func (s *DownloadClient) Status(id string) (DownloadState, *DownloadProgress, error) {
+	resp, err := s.cli.Get(s.formatUrl("/status?id=" + id))
+	if err != nil {
+		return Error, nil, err
+	}
+	defer fu.CloseCloser(resp.Body)
+
+	progress := &DownloadProgress{}
+
+	respBody, err := s.readBodyAndStatus(err, resp)
+	if err != nil {
+		return Error, progress, err
+	}
+
+	err = json.Unmarshal(respBody, progress)
+	if err != nil {
+		return 0, nil, err
+	}
+
+	if resp.StatusCode == http.StatusOK {
+		return Complete, progress, nil
+	}
+
+	// 206 downloading
+	return Downloading, progress, nil
+}
+
+func (s *DownloadClient) readBodyAndStatus(err error, resp *http.Response) ([]byte, error) {
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("could not read body %w", err)
+	}
+
+	if resp.StatusCode >= http.StatusMultipleChoices {
+		return nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, respBody)
+	}
+
+	return respBody, nil
 }
 
 func (s *DownloadClient) formatUrl(path string) string {

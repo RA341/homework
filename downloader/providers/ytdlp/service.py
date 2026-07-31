@@ -27,6 +27,7 @@ class MyLogger:
 
 class VideoItem(BaseModel):
     url: str
+    download_path: str
 
 # ℹ️ See "progress_hooks" in help(yt_dlp.YoutubeDL)
 async def download(video: VideoItem) -> AsyncGenerator[dict, None]:
@@ -43,6 +44,7 @@ async def download(video: VideoItem) -> AsyncGenerator[dict, None]:
             ydl_opts = {
                 'logger': MyLogger(),
                 'progress_hooks': [progress_hook],
+                'paths': {'home': video.download_path},
             }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([video.url])
