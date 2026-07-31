@@ -22,9 +22,9 @@ RouteBase get $appShellRouteData => ShellRouteData.$route(
       factory: $BrowseRoute._fromState,
       routes: [
         GoRouteData.$route(
-          path: 'search',
+          path: 'download',
           hasOverriddenOnExit: false,
-          factory: $SearchRoute._fromState,
+          factory: $DownloadRoute._fromState,
         ),
         GoRouteData.$route(
           path: 'upload',
@@ -86,11 +86,11 @@ mixin $BrowseRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin $SearchRoute on GoRouteData {
-  static SearchRoute _fromState(GoRouterState state) => const SearchRoute();
+mixin $DownloadRoute on GoRouteData {
+  static DownloadRoute _fromState(GoRouterState state) => const DownloadRoute();
 
   @override
-  String get location => GoRouteData.$location('/browse/search');
+  String get location => GoRouteData.$location('/browse/download');
 
   @override
   void go(BuildContext context) => context.go(location);

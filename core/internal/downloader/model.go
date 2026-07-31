@@ -1,6 +1,8 @@
 package downloader
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type DownloadState int
 
@@ -19,6 +21,16 @@ type Download struct {
 
 	Status DownloadState
 
-	Error        string
+	Progress DownloadProgress `gorm:"embedded;embeddedPrefix:,progress_"`
+
 	DownloadPath string
+}
+
+type DownloadProgress struct {
+	TimeLeftSecs           uint
+	DownloadBytesPerSecond uint
+
+	Complete uint
+	Left     uint
+	Error    string
 }

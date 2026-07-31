@@ -5,72 +5,7 @@ import 'package:homework/common/api/runner.dart';
 import 'package:homework/common/result/result.dart';
 import 'package:homework/common/theme/design_system.dart';
 import 'package:homework/generated/sdk/downloader/v1/downloader.pb.dart';
-import 'package:homework/pages/browse/+layout.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
-class SearchPage extends ConsumerWidget {
-  const SearchPage({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return BrowseLayout(
-      activeTab: 0,
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.gutter),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Placeholder Search Bar to show how it will look
-            ElevatedButton(
-              child: Text("Download"),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => AddDownloadDialog(),
-                );
-              },
-            ),
-            const Expanded(
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.search_off_rounded,
-                      color: AppColors.outline,
-                      size: 64,
-                    ),
-                    SizedBox(height: AppSpacing.base * 2.5),
-                    Text(
-                      'Asset Search Stub',
-                      style: TextStyle(
-                        fontFamily: 'Sora',
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.onSurface,
-                      ),
-                    ),
-                    SizedBox(height: AppSpacing.base * 1.5),
-                    Text(
-                      'Search functionality is currently a placeholder.\nUse the Upload tab to add files to the queue.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Inter',
-                        fontSize: 14,
-                        color: AppColors.onSurfaceVariant,
-                        height: 1.4,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 class AddDownloadDialog extends HookConsumerWidget {
   const AddDownloadDialog({super.key});
@@ -106,12 +41,12 @@ class AddDownloadDialog extends HookConsumerWidget {
       isLoading.value = true;
 
       final result = await runReq(() => downloader.download(
-            DownloadRequest(
-              name: name,
-              filepath: url,
-              downloadLink: path,
-            ),
-          ));
+        DownloadRequest(
+          name: name,
+          filepath: url,
+          downloadLink: path,
+        ),
+      ));
 
       if (context.mounted) {
         isLoading.value = false;
@@ -270,13 +205,13 @@ class AddDownloadDialog extends HookConsumerWidget {
                       onPressed: isLoading.value ? null : handleAdd,
                       child: isLoading.value
                           ? const SizedBox(
-                              width: 16,
-                              height: 16,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: AppColors.onPrimary,
-                              ),
-                            )
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.onPrimary,
+                        ),
+                      )
                           : const Text('Add'),
                     ),
                   ],

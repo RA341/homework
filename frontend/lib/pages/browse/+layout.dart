@@ -32,10 +32,10 @@ class BrowseLayout extends StatelessWidget {
             children: [
               _buildTab(
                 context,
-                title: 'Search',
+                title: 'Download',
                 icon: Icons.search_rounded,
                 index: 0,
-                path: '/browse/search',
+                path: '/browse/download',
               ),
               const SizedBox(width: AppSpacing.base * 4),
               _buildTab(

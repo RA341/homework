@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:homework/common/api/basepath_provider.dart';
 import 'package:homework/common/navigation/+layout.dart';
-import 'package:homework/pages/browse/search/+page.dart';
+import 'package:homework/pages/browse/download/+page.dart';
 import 'package:homework/pages/browse/upload/+page.dart';
 import 'package:homework/pages/home/+page.dart';
 import 'package:homework/pages/login/url/+page.dart';
@@ -88,7 +88,7 @@ final navItems = <NavItem>[
     TypedGoRoute<BrowseRoute>(
       path: '/browse',
       routes: <TypedRoute<RouteData>>[
-        TypedGoRoute<SearchRoute>(path: 'search'),
+        TypedGoRoute<DownloadRoute>(path: 'download'),
         TypedGoRoute<UploadRoute>(path: 'upload'),
       ],
     ),

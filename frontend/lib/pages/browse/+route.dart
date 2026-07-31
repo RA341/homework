@@ -7,7 +7,7 @@ class BrowseRoute extends GoRouteData with $BrowseRoute {
   FutureOr<String?> redirect(BuildContext context, GoRouterState state) {
     final path = state.uri.path;
     if (path == '/browse' || path == '/browse/') {
-      return '/browse/search';
+      return '/browse/download';
     }
     return null;
   }
@@ -16,11 +16,11 @@ class BrowseRoute extends GoRouteData with $BrowseRoute {
   Widget build(BuildContext context, GoRouterState state) => const SizedBox.shrink();
 }
 
-class SearchRoute extends GoRouteData with $SearchRoute {
-  const SearchRoute();
+class DownloadRoute extends GoRouteData with $DownloadRoute {
+  const DownloadRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => const SearchPage();
+  Widget build(BuildContext context, GoRouterState state) => const DownloadPage();
 }
 
 class UploadRoute extends GoRouteData with $UploadRoute {

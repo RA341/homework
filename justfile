@@ -17,4 +17,7 @@ gen:
 
 sdk:
     @just gen
-    cd spec && task gen
+
+[working-directory("spec")]
+gensdk:
+    task gen

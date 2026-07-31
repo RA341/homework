@@ -6,8 +6,16 @@ package downloader.v1;
 option go_package = "github.com/ra341/homework/generated/api/downloader/v1";
 
 service DownloaderService {
+  rpc Retry(RetryRequest) returns (RetryResponse) {}
   rpc Download (DownloadRequest) returns (DownloadResponse);
+  rpc List (ListRequest) returns (ListResponse);
 }
+
+message RetryRequest {
+  uint64 id = 1;
+}
+
+message RetryResponse {}
 
 message DownloadRequest {
   string name = 1;
@@ -16,5 +24,49 @@ message DownloadRequest {
 }
 
 message DownloadResponse {
+}
+
+message ListRequest {
+  string query = 3;
+  string after = 4;
+  string before = 2;
+  uint64 limit = 5;
+}
+
+message ListResponse {
+  Result_Download value1 = 1;
+}
+
+enum DownloadState {
+  DOWNLOAD_STATE_QUEUED = 0;
+  DOWNLOAD_STATE_DOWNLOADING = 1;
+  DOWNLOAD_STATE_ERROR = 2;
+  DOWNLOAD_STATE_SUCCESS = 3;
+}
+
+message Base_string {
+  string params = 1;
+  uint32 after = 2;
+  uint32 before = 3;
+  uint32 limit = 4;
+}
+
+message Download {
+  uint64 id = 1;
+  uint64 createdAtSec = 7;
+  uint64 updatedAtSec = 8;
+
+  string name = 2;
+  string download_link = 3;
+  DownloadState status = 4;
+  string error = 5;
+  string download_path = 6;
+}
+
+message Result_Download {
+  repeated Download results = 1;
+  uint32 after = 2;
+  uint32 before = 3;
+  uint32 count = 4;
 }
 

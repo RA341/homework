@@ -21,13 +21,21 @@ import 'downloader.pbjson.dart';
 export 'downloader.pb.dart';
 
 abstract class DownloaderServiceBase extends $pb.GeneratedService {
+  $async.Future<$0.RetryResponse> retry(
+      $pb.ServerContext ctx, $0.RetryRequest request);
   $async.Future<$0.DownloadResponse> download(
       $pb.ServerContext ctx, $0.DownloadRequest request);
+  $async.Future<$0.ListResponse> list(
+      $pb.ServerContext ctx, $0.ListRequest request);
 
   $pb.GeneratedMessage createRequest($core.String methodName) {
     switch (methodName) {
+      case 'Retry':
+        return $0.RetryRequest();
       case 'Download':
         return $0.DownloadRequest();
+      case 'List':
+        return $0.ListRequest();
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }
@@ -36,8 +44,12 @@ abstract class DownloaderServiceBase extends $pb.GeneratedService {
   $async.Future<$pb.GeneratedMessage> handleCall($pb.ServerContext ctx,
       $core.String methodName, $pb.GeneratedMessage request) {
     switch (methodName) {
+      case 'Retry':
+        return retry(ctx, request as $0.RetryRequest);
       case 'Download':
         return download(ctx, request as $0.DownloadRequest);
+      case 'List':
+        return list(ctx, request as $0.ListRequest);
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }
