@@ -12,11 +12,11 @@ import (
 	"github.com/ra341/homework/common/fu"
 )
 
-type DownloadClient struct {
+type PythonDownloader struct {
 	cli *http.Client
 }
 
-func NewClient(socketPath string) (*DownloadClient, error) {
+func NewClient(socketPath string) (*PythonDownloader, error) {
 	client := &http.Client{
 		Transport: &http.Transport{
 			DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
@@ -25,14 +25,14 @@ func NewClient(socketPath string) (*DownloadClient, error) {
 		},
 	}
 
-	c := &DownloadClient{
+	c := &PythonDownloader{
 		cli: client,
 	}
 
 	return c, c.ping()
 }
 
-func (s *DownloadClient) ping() error {
+func (s *PythonDownloader) ping() error {
 	get, err := s.cli.Get(s.formatUrl("/hello"))
 	if err != nil {
 		return err
@@ -50,7 +50,7 @@ func (s *DownloadClient) ping() error {
 	return nil
 }
 
-func (s *DownloadClient) download(video string, downloadPath string) (downloadId string, err error) {
+func (s *PythonDownloader) download(video string, downloadPath string) (downloadId string, err error) {
 	endpoint := s.formatUrl("/download")
 
 	body := map[string]string{
@@ -85,7 +85,7 @@ func (s *DownloadClient) download(video string, downloadPath string) (downloadId
 	return string(respBody), nil
 }
 
-func (s *DownloadClient) progress(id string) (DownloadState, *DownloadProgress, error) {
+func (s *PythonDownloader) progress(id string) (DownloadState, *DownloadProgress, error) {
 	resp, err := s.cli.Get(s.formatUrl("/status?id=" + id))
 	if err != nil {
 		return Error, nil, err
@@ -112,7 +112,7 @@ func (s *DownloadClient) progress(id string) (DownloadState, *DownloadProgress, 
 	return Downloading, progress, nil
 }
 
-func (s *DownloadClient) readBodyAndStatus(err error, resp *http.Response) ([]byte, error) {
+func (s *PythonDownloader) readBodyAndStatus(err error, resp *http.Response) ([]byte, error) {
 	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("could not read body %w", err)
@@ -125,6 +125,6 @@ func (s *DownloadClient) readBodyAndStatus(err error, resp *http.Response) ([]by
 	return respBody, nil
 }
 
-func (s *DownloadClient) formatUrl(path string) string {
+func (s *PythonDownloader) formatUrl(path string) string {
 	return fmt.Sprintf("%s%s", "http://unix", path)
 }

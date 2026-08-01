@@ -7,6 +7,8 @@ import (
 type Config struct {
 	SocketPath   string
 	DownloadsDir string
+
+	ProgressCheckThreshold int
 }
 
 const DefaultSocket = "/tmp/hw.sock"

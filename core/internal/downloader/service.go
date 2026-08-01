@@ -9,30 +9,31 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+type DownloadClient interface {
+	download(video string, downloadPath string) (downloadId string, err error)
+	progress(id string) (DownloadState, *DownloadProgress, error)
+}
+
 type Service struct {
 	store Store
 	conf  *Config
 
-	downloadClient *DownloadClient
+	cli DownloadClient
 
 	maxDownloads int
-	mu           chan struct{}
+	workerLock   chan struct{}
 }
 
-func NewService(conf *Config, store Store) (s *Service, err error) {
+func NewService(conf *Config, store Store, cli DownloadClient) (s *Service, err error) {
 	s = &Service{
-		conf:  conf,
-		store: store,
-		mu:    make(chan struct{}, 1),
+		conf:       conf,
+		store:      store,
+		cli:        cli,
+		workerLock: make(chan struct{}, 1),
 	}
 
 	if s.maxDownloads == 0 {
 		s.maxDownloads = 5
-	}
-
-	s.downloadClient, err = NewClient(conf.SocketPath)
-	if err != nil {
-		return nil, err
 	}
 
 	s.launchWorker()
@@ -70,7 +71,7 @@ func (s *Service) Retry(id uint) error {
 
 func (s *Service) launchWorker() {
 	select {
-	case s.mu <- struct{}{}:
+	case s.workerLock <- struct{}{}:
 		log.Info().Msg("launched worker")
 		go s.worker()
 	default:
@@ -79,9 +80,22 @@ func (s *Service) launchWorker() {
 }
 
 func (s *Service) worker() {
-	defer func() { <-s.mu }()
+	defer func() {
+		<-s.workerLock
+	}()
+
+	sem := make(chan struct{}, s.maxDownloads)
+	wg := sync.WaitGroup{}
+
+	strikes := 0
+	const exitThreshold = 5
 
 	for {
+		if strikes > exitThreshold {
+			log.Info().Int("strikes", strikes).Msg("no downloads found, exiting worker")
+			return
+		}
+
 		downloading, err := s.store.ListQueued(s.maxDownloads)
 		if err != nil {
 			log.Warn().Err(err).Msg("Could not load downloading items")
@@ -90,21 +104,25 @@ func (s *Service) worker() {
 
 		l := len(downloading)
 		if l == 0 {
-			log.Info().Msg("No items found, exiting worker")
-			return
+			log.Info().Msg("No additional downloading items found, waiting for existing downloads to complete")
+			wg.Wait()
+			strikes++
+			<-time.After(time.Second)
 		}
 
-		log.Info().Int("Count", l).Msg("Found downloading items")
+		log.Debug().Int("Count", l).Msg("Found downloading items")
+		strikes = 0
 
-		// todo make it a continuous queue new downloads are added as soon as old one are done
-		wg := sync.WaitGroup{}
 		for _, d := range downloading {
 			wg.Go(func() {
+				sem <- struct{}{}
+				defer func() {
+					<-sem
+				}()
+
 				s.download(&d)
 			})
 		}
-
-		wg.Wait()
 	}
 }
 
@@ -140,7 +158,7 @@ func (s *Service) runDownload(down *Download) (DownloadState, error) {
 		return 0, err
 	}
 
-	downloadId, err := s.downloadClient.download(down.DownloadLink, absPath)
+	downloadId, err := s.cli.download(down.DownloadLink, absPath)
 	if err != nil {
 		return 0, err
 	}
@@ -151,18 +169,17 @@ func (s *Service) runDownload(down *Download) (DownloadState, error) {
 	defer tick.Stop()
 
 	// todo move to config
-	const threshold = 10
 
 	strikes := 0
 
 	for {
 		select {
 		case <-tick.C:
-			if strikes > threshold {
-				return Error, fmt.Errorf("could not get progress after %d tries, please check logs", threshold)
+			if strikes > s.conf.ProgressCheckThreshold {
+				return Error, fmt.Errorf("could not get progress after %d tries, please check logs", strikes)
 			}
 
-			status, progress, err := s.downloadClient.progress(downloadId)
+			status, progress, err := s.cli.progress(downloadId)
 			if err != nil {
 				strikes++
 				log.Warn().
