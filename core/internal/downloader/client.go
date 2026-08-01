@@ -16,7 +16,7 @@ type PythonDownloader struct {
 	cli *http.Client
 }
 
-func NewClient(socketPath string) (*PythonDownloader, error) {
+func NewPyClient(socketPath string) (DownloadClient, error) {
 	client := &http.Client{
 		Transport: &http.Transport{
 			DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {

@@ -20,8 +20,8 @@ type Service struct {
 
 	cli DownloadClient
 
-	maxDownloads int
-	workerLock   chan struct{}
+	workerLock    chan struct{}
+	workerRunning bool
 }
 
 func NewService(conf *Config, store Store, cli DownloadClient) (s *Service, err error) {
@@ -32,8 +32,11 @@ func NewService(conf *Config, store Store, cli DownloadClient) (s *Service, err 
 		workerLock: make(chan struct{}, 1),
 	}
 
-	if s.maxDownloads == 0 {
-		s.maxDownloads = 5
+	if s.conf.MaxDownloads == 0 {
+		s.conf.MaxDownloads = 5
+	}
+	if s.conf.CheckIntervalSecs == 0 {
+		s.conf.CheckIntervalSecs = 5
 	}
 
 	s.launchWorker()
@@ -80,23 +83,25 @@ func (s *Service) launchWorker() {
 }
 
 func (s *Service) worker() {
+	s.workerRunning = true
 	defer func() {
 		<-s.workerLock
+		s.workerRunning = false
 	}()
 
-	sem := make(chan struct{}, s.maxDownloads)
+	sem := make(chan struct{}, s.conf.MaxDownloads)
 	wg := sync.WaitGroup{}
 
 	strikes := 0
-	const exitThreshold = 5
+	const exitThreshold = 2
 
 	for {
-		if strikes > exitThreshold {
+		if strikes >= exitThreshold {
 			log.Info().Int("strikes", strikes).Msg("no downloads found, exiting worker")
 			return
 		}
 
-		downloading, err := s.store.ListQueued(s.maxDownloads)
+		downloading, err := s.store.ListQueued(s.conf.MaxDownloads)
 		if err != nil {
 			log.Warn().Err(err).Msg("Could not load downloading items")
 			return
@@ -104,18 +109,22 @@ func (s *Service) worker() {
 
 		l := len(downloading)
 		if l == 0 {
-			log.Info().Msg("No additional downloading items found, waiting for existing downloads to complete")
+			log.Info().
+				Int("strikes", strikes+1).
+				Msg("No additional downloads found, waiting for existing downloads to complete")
 			wg.Wait()
+
 			strikes++
 			<-time.After(time.Second)
+			continue
 		}
 
 		log.Debug().Int("Count", l).Msg("Found downloading items")
 		strikes = 0
 
 		for _, d := range downloading {
+			sem <- struct{}{}
 			wg.Go(func() {
-				sem <- struct{}{}
 				defer func() {
 					<-sem
 				}()
@@ -163,7 +172,7 @@ func (s *Service) runDownload(down *Download) (DownloadState, error) {
 		return 0, err
 	}
 
-	checkInterval := 5 * time.Second
+	checkInterval := time.Duration(s.conf.CheckIntervalSecs) * time.Second
 
 	tick := time.NewTicker(checkInterval)
 	defer tick.Stop()

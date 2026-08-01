@@ -9,6 +9,8 @@ type Config struct {
 	DownloadsDir string
 
 	ProgressCheckThreshold int
+	CheckIntervalSecs      int
+	MaxDownloads           int
 }
 
 const DefaultSocket = "/tmp/hw.sock"

@@ -56,7 +56,12 @@ func (a *App) RegisterServices() {
 	a.mediaService = media.NewService(a.contentService, a.assetService)
 
 	downloadDb := downloader.NewStoreGorm(a.db)
-	a.downloads, err = downloader.NewService(config, downloadDb)
+	pyDownloader, err := downloader.NewPyClient(config.SocketPath)
+	if err != nil {
+		log.Fatal().Err(err).Msg("could not create py downloader")
+	}
+
+	a.downloads, err = downloader.NewService(config, downloadDb, pyDownloader)
 	if err != nil {
 		// todo handle gracefully
 		log.Fatal().Err(err).Msg("could not create downloads service")
@@ -126,6 +131,9 @@ func (a *App) registerApiHandlers(r *http.ServeMux) {
 
 func (a *App) registerUIHandler(r *http.ServeMux) {
 	// todo
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("No ui set fuck off"))
+	})
 }
 
 func loggerMiddleware(next http.Handler) http.Handler {

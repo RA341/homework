@@ -18,11 +18,8 @@ type Download struct {
 
 	Name         string
 	DownloadLink string
-
-	Status DownloadState
-
-	Progress DownloadProgress `gorm:"embedded;embeddedPrefix:progress_"`
-
+	Status       DownloadState
+	Progress     DownloadProgress `gorm:"embedded;embeddedPrefix:progress_"`
 	DownloadPath string
 }
 

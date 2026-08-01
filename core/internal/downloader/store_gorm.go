@@ -30,7 +30,7 @@ func NewStoreGorm(db *gorm.DB) Store {
 
 func (s *StoreGorm) List(query string, after string, before string, limit uint) ([]Download, error) {
 	var downloads []Download
-
+	// todo fix list
 	err := s.db.Limit(int(limit)).
 		Find(&downloads).
 		Error
