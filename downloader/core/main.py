@@ -1,18 +1,14 @@
-import os
-import json
-import uuid
-import hashlib
 import asyncio
-from typing import Dict, List, Set
-from fastapi import FastAPI, Request, HTTPException, WebSocket, Response
-from pydantic import BaseModel
-from sse_starlette.sse import EventSourceResponse
-import uvicorn
+import hashlib
 from pathlib import Path
+from typing import Dict, List, Set
 
+import uvicorn
+from fastapi import FastAPI, HTTPException, Response, WebSocket
 from fastapi.responses import PlainTextResponse
+from pydantic import BaseModel
 
-from core.logger import setup_logging
+from utils.logger import setup_logging
 from providers.ytdlp.service import VideoItem, download
 
 setup_logging()
@@ -50,9 +46,9 @@ downloads: Dict[str, DownloadState] = {}
 async def run_download(download_id: str, item: VideoItem):
     state = downloads[download_id]
     try:
-        async for progress in download(item):
-            if "error" in progress:
-                err_msg = progress["error"]
+        async for prog in download(item):
+            if "error" in prog:
+                err_msg = prog["error"]
                 state.progress.Error = err_msg
                 line = f"ERROR: {err_msg}"
                 state.lines.append(line)
@@ -60,7 +56,7 @@ async def run_download(download_id: str, item: VideoItem):
                     await queue.put(line)
                 break
 
-            data = progress.get("data", {})
+            data = prog.get("data", {})
             status_val = data.get("status", "")
             downloaded_bytes = data.get("downloaded_bytes") or 0
             total_bytes = data.get("total_bytes") or data.get("total_bytes_estimate") or 0
@@ -76,7 +72,7 @@ async def run_download(download_id: str, item: VideoItem):
 
             percent = (downloaded_bytes / total_bytes * 100) if total_bytes > 0 else 0
             line = f"Status: {status_val} | Progress: {percent:.2f}% | Complete: {downloaded_bytes}/{total_bytes} bytes | Speed: {speed/1024/1024:.2f} MB/s | ETA: {eta}s"
-            
+
             state.lines.append(line)
             for queue in list(state.listeners):
                 await queue.put(line)
@@ -159,41 +155,6 @@ async def progress(websocket: WebSocket, id: str = ""):
     finally:
         state.listeners.discard(queue)
         await websocket.close()
-
-
-# @app.post("/ytdlp/download")
-# def download_yt_dlp(item: VideoItem, request: Request):
-#     return EventSourceResponse(event_generator(item, request))
-
-
-# async def event_generator(item: VideoItem, request: Request):
-#     async for progress in download(item):
-#         # Check if the client disconnected to prevent resource leaks
-#         if await request.is_disconnected():
-#             print("Client disconnected.")
-#             break
-#
-#         if "error" in progress:
-#             yield {
-#                 "event": "error",
-#                 "data": json.dumps({"message": progress["error"]})
-#             }
-#             break
-#
-#         # Safely clean and extract only serializable progress metrics
-#         data = progress.get("data", {})
-#
-#         print(data)
-#
-#         cleaned_data = {}
-#         for key in ['status', 'downloaded_bytes', 'total_bytes', 'total_bytes_estimate', 'filename', 'tmpfilename', 'eta', 'speed', 'elapsed']:
-#             if key in data:
-#                 cleaned_data[key] = data[key]
-#
-#         yield {
-#             "event": "progress",
-#             "data": json.dumps({"data": cleaned_data})
-#         }
 
 if __name__ == "__main__":
     uvicorn.run("main:app", uds=DEFAULT_SOCKET, reload=True)

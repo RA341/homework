@@ -85,7 +85,7 @@ func (s *DownloadClient) download(video string, downloadPath string) (downloadId
 	return string(respBody), nil
 }
 
-func (s *DownloadClient) Status(id string) (DownloadState, *DownloadProgress, error) {
+func (s *DownloadClient) progress(id string) (DownloadState, *DownloadProgress, error) {
 	resp, err := s.cli.Get(s.formatUrl("/status?id=" + id))
 	if err != nil {
 		return Error, nil, err

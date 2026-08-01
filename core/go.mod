@@ -4,6 +4,7 @@ go 1.25.0
 
 require (
 	connectrpc.com/connect v1.20.0
+	github.com/gorilla/websocket v1.5.3
 	github.com/rs/zerolog v1.35.1
 	google.golang.org/protobuf v1.36.11
 	gorm.io/driver/sqlite v1.6.0

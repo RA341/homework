@@ -1,6 +1,7 @@
 package downloader
 
 import (
+	"fmt"
 	"path/filepath"
 	"sync"
 	"time"
@@ -149,14 +150,29 @@ func (s *Service) runDownload(down *Download) (DownloadState, error) {
 	tick := time.NewTicker(checkInterval)
 	defer tick.Stop()
 
+	// todo move to config
+	const threshold = 10
+
+	strikes := 0
+
 	for {
 		select {
 		case <-tick.C:
-			status, progress, err := s.downloadClient.Status(downloadId)
+			if strikes > threshold {
+				return Error, fmt.Errorf("could not get progress after %d tries, please check logs", threshold)
+			}
+
+			status, progress, err := s.downloadClient.progress(downloadId)
 			if err != nil {
-				log.Warn().Err(err).Msg("Could not get download status")
+				strikes++
+				log.Warn().
+					Err(err).
+					Int("strikes", strikes).
+					Msg("Could not get download status, increasing strikes")
 				continue
 			}
+
+			strikes = 0
 
 			err = s.store.setProgress(down.ID, progress)
 			if err != nil {
