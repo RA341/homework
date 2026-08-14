@@ -5,52 +5,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:homework/common/api/endpoints/content_provider.dart';
 import 'package:homework/generated/sdk/content/v1/content.pb.dart';
 
-final contentBrowserProvider =
-NotifierProvider<ContentBrowserNotifier, ContentBrowserState>(
+final contentBrowserProvider = NotifierProvider<
+    ContentBrowserNotifier,
+    ContentBrowserState
+>(
   ContentBrowserNotifier.new,
   isAutoDispose: true,
 );
 
-// State model for the content browser page
-class ContentBrowserState {
-  final List<Content> items;
-  final bool isLoading;
-  final String? errorMessage;
-  final String query;
-  final int limit;
-  final Int64? after;
-  final bool hasMore;
-
-  ContentBrowserState({
-    required this.items,
-    required this.isLoading,
-    this.errorMessage,
-    required this.query,
-    required this.limit,
-    this.after,
-    required this.hasMore,
-  });
-
-  ContentBrowserState copyWith({
-    List<Content>? items,
-    bool? isLoading,
-    String? errorMessage,
-    String? query,
-    int? limit,
-    Int64? after,
-    bool? hasMore,
-  }) {
-    return ContentBrowserState(
-      items: items ?? this.items,
-      isLoading: isLoading ?? this.isLoading,
-      errorMessage: errorMessage ?? this.errorMessage,
-      query: query ?? this.query,
-      limit: limit ?? this.limit,
-      after: after ?? this.after,
-      hasMore: hasMore ?? this.hasMore,
-    );
-  }
-}
 
 // Notifier that handles querying and pagination for ContentServiceClient
 class ContentBrowserNotifier extends Notifier<ContentBrowserState> {
@@ -112,5 +74,46 @@ class ContentBrowserNotifier extends Notifier<ContentBrowserState> {
       hasMore: true,
     );
     loadNextPage(reset: true);
+  }
+}
+
+// State model for the content browser page
+class ContentBrowserState {
+  final List<Content> items;
+  final bool isLoading;
+  final String? errorMessage;
+  final String query;
+  final int limit;
+  final Int64? after;
+  final bool hasMore;
+
+  ContentBrowserState({
+    required this.items,
+    required this.isLoading,
+    this.errorMessage,
+    required this.query,
+    required this.limit,
+    this.after,
+    required this.hasMore,
+  });
+
+  ContentBrowserState copyWith({
+    List<Content>? items,
+    bool? isLoading,
+    String? errorMessage,
+    String? query,
+    int? limit,
+    Int64? after,
+    bool? hasMore,
+  }) {
+    return ContentBrowserState(
+      items: items ?? this.items,
+      isLoading: isLoading ?? this.isLoading,
+      errorMessage: errorMessage ?? this.errorMessage,
+      query: query ?? this.query,
+      limit: limit ?? this.limit,
+      after: after ?? this.after,
+      hasMore: hasMore ?? this.hasMore,
+    );
   }
 }

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:homework/common/api/endpoints/download_provider.dart';
+import 'package:homework/common/api/endpoints/media_provider.dart';
 import 'package:homework/common/api/runner.dart';
 import 'package:homework/common/result/result.dart';
 import 'package:homework/common/theme/design_system.dart';
-import 'package:homework/generated/sdk/downloader/v1/downloader.pb.dart';
+import 'package:homework/generated/sdk/media/v1/media.pb.dart';
+import 'package:homework/pages/browse/download/enums.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class AddDownloadDialog extends HookConsumerWidget {
@@ -12,78 +13,52 @@ class AddDownloadDialog extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final downloader = ref.watch(downloaderApiProvider);
+    final media = ref.watch(mediaApiProvider);
 
     final nameField = useTextEditingController();
+    final descField = useTextEditingController();
     final downloadLinkField = useTextEditingController();
     final filepathField = useTextEditingController();
 
-    final errorMessage = useState<String?>(null);
+    final contentType = useState<ContentType>(ContentType.CONTENT_TYPE_VIDEO);
+    final assetType = useState<AssetType>(AssetType.ASSET_TYPE_VIDEO);
+    final assetRole = useState<AssetRole>(AssetRole.ASSET_ROLE_MAIN);
+
     final isLoading = useState(false);
+    final errorMessage = useState<String?>(null);
 
     void clearError() {
-      if (errorMessage.value != null) {
-        errorMessage.value = null;
-      }
+      errorMessage.value = null;
     }
 
     Future<void> handleAdd() async {
-      final name = nameField.text.trim();
-      final url = downloadLinkField.text.trim();
-      final path = filepathField.text.trim();
-
-      if (name.isEmpty || url.isEmpty || path.isEmpty) {
-        errorMessage.value = 'All fields are required.';
-        return;
-      }
-
-      errorMessage.value = null;
       isLoading.value = true;
+      clearError();
 
-      final result = await runReq(() => downloader.download(
-        DownloadRequest(
-          name: name,
-          filepath: path,
-          downloadLink: url,
+      final request = AddAndDownloadRequest(
+        media: CreateMedia(
+          content: CreateContent(
+            title: nameField.text,
+            desc: descField.text,
+            contentType: contentType.value,
+          ),
+          asset: CreateAsset(
+            filepath: filepathField.text,
+            assetType: assetType.value,
+            assetRole: assetRole.value,
+          ),
         ),
-      ));
+        downloadLink: downloadLinkField.text,
+      );
 
+      final result = await runReq(() => media.addAndDownload(request));
       if (context.mounted) {
         isLoading.value = false;
-
         switch (result) {
           case Ok():
-            Navigator.of(context).pop();
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    const Icon(
-                      Icons.check_circle_outline,
-                      color: AppColors.primary,
-                    ),
-                    const SizedBox(width: AppSpacing.base),
-                    Expanded(
-                      child: Text(
-                        'Started downloading "$name"',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ],
-                ),
-                backgroundColor: AppColors.level2,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: AppShapes.radiusDefault,
-                  side: const BorderSide(
-                    color: AppColors.outlineVariant,
-                    width: 1.0,
-                  ),
-                ),
-              ),
-            );
-          case Error(:final error):
-            errorMessage.value = error;
+            Navigator.of(context).pop(true);
+          case Error(error: final err):
+            errorMessage.value = err;
         }
       }
     }
@@ -92,10 +67,7 @@ class AddDownloadDialog extends HookConsumerWidget {
       backgroundColor: AppColors.level2,
       shape: RoundedRectangleBorder(
         borderRadius: AppShapes.radiusLg,
-        side: const BorderSide(
-          color: AppColors.outlineVariant,
-          width: 1.0,
-        ),
+        side: const BorderSide(color: AppColors.outlineVariant, width: 1.0),
       ),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 480),
@@ -128,9 +100,50 @@ class AddDownloadDialog extends HookConsumerWidget {
                   decoration: const InputDecoration(
                     labelText: 'Name',
                     hintText: 'Enter file or task name',
-                    prefixIcon: Icon(Icons.drive_file_rename_outline_rounded, color: AppColors.outline),
+                    prefixIcon: Icon(
+                      Icons.drive_file_rename_outline_rounded,
+                      color: AppColors.outline,
+                    ),
                   ),
                   onChanged: (_) => clearError(),
+                ),
+                const SizedBox(height: AppSpacing.base * 2.5),
+                TextField(
+                  controller: descField,
+                  maxLines: 2,
+                  decoration: const InputDecoration(
+                    labelText: 'Description',
+                    hintText: 'Enter a short description',
+                    prefixIcon: Icon(
+                      Icons.description_rounded,
+                      color: AppColors.outline,
+                    ),
+                  ),
+                  onChanged: (_) => clearError(),
+                ),
+                const SizedBox(height: AppSpacing.base * 2.5),
+                DropdownButtonFormField<ContentType>(
+                  initialValue: contentType.value,
+                  decoration: const InputDecoration(
+                    labelText: 'Content Type',
+                    prefixIcon: Icon(
+                      Icons.category_rounded,
+                      color: AppColors.outline,
+                    ),
+                  ),
+                  dropdownColor: AppColors.level2,
+                  items: ContentType.values.map((type) {
+                    return DropdownMenuItem(
+                      value: type,
+                      child: Text(getContentTypeName(type)),
+                    );
+                  }).toList(),
+                  onChanged: (val) {
+                    if (val != null) {
+                      contentType.value = val;
+                      clearError();
+                    }
+                  },
                 ),
                 const SizedBox(height: AppSpacing.base * 2.5),
                 TextField(
@@ -138,7 +151,10 @@ class AddDownloadDialog extends HookConsumerWidget {
                   decoration: const InputDecoration(
                     labelText: 'Download Link',
                     hintText: 'e.g., https://example.com/file.mp4',
-                    prefixIcon: Icon(Icons.link_rounded, color: AppColors.outline),
+                    prefixIcon: Icon(
+                      Icons.link_rounded,
+                      color: AppColors.outline,
+                    ),
                   ),
                   onChanged: (_) => clearError(),
                 ),
@@ -148,9 +164,68 @@ class AddDownloadDialog extends HookConsumerWidget {
                   decoration: const InputDecoration(
                     labelText: 'Download Path',
                     hintText: 'e.g., downloads/file.mp4',
-                    prefixIcon: Icon(Icons.folder_open_rounded, color: AppColors.outline),
+                    prefixIcon: Icon(
+                      Icons.folder_open_rounded,
+                      color: AppColors.outline,
+                    ),
                   ),
                   onChanged: (_) => clearError(),
+                ),
+                const SizedBox(height: AppSpacing.base * 2.5),
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<AssetType>(
+                        initialValue: assetType.value,
+                        decoration: const InputDecoration(
+                          labelText: 'Asset Type',
+                          prefixIcon: Icon(
+                            Icons.extension_rounded,
+                            color: AppColors.outline,
+                          ),
+                        ),
+                        dropdownColor: AppColors.level2,
+                        items: AssetType.values.map((type) {
+                          return DropdownMenuItem(
+                            value: type,
+                            child: Text(getAssetTypeName(type)),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            assetType.value = val;
+                            clearError();
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.base * 2),
+                    Expanded(
+                      child: DropdownButtonFormField<AssetRole>(
+                        initialValue: assetRole.value,
+                        decoration: const InputDecoration(
+                          labelText: 'Asset Role',
+                          prefixIcon: Icon(
+                            Icons.label_rounded,
+                            color: AppColors.outline,
+                          ),
+                        ),
+                        dropdownColor: AppColors.level2,
+                        items: AssetRole.values.map((role) {
+                          return DropdownMenuItem(
+                            value: role,
+                            child: Text(getAssetRoleName(role)),
+                          );
+                        }).toList(),
+                        onChanged: (val) {
+                          if (val != null) {
+                            assetRole.value = val;
+                            clearError();
+                          }
+                        },
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: AppSpacing.base * 3),
                 if (errorMessage.value != null) ...[
@@ -191,7 +266,9 @@ class AddDownloadDialog extends HookConsumerWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TextButton(
-                      onPressed: isLoading.value ? null : Navigator.of(context).pop,
+                      onPressed: isLoading.value
+                          ? null
+                          : Navigator.of(context).pop,
                       style: TextButton.styleFrom(
                         foregroundColor: AppColors.onSurfaceVariant,
                         textStyle: AppTypography.labelMd.copyWith(
@@ -205,13 +282,13 @@ class AddDownloadDialog extends HookConsumerWidget {
                       onPressed: isLoading.value ? null : handleAdd,
                       child: isLoading.value
                           ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: AppColors.onPrimary,
-                        ),
-                      )
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: AppColors.onPrimary,
+                              ),
+                            )
                           : const Text('Add'),
                     ),
                   ],

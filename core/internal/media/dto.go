@@ -1,6 +1,8 @@
 package media
 
 import (
+	"io"
+
 	"github.com/ra341/homework/internal/media/asset"
 	"github.com/ra341/homework/internal/media/content"
 )
@@ -10,19 +12,12 @@ type CreateDownloadMedia struct {
 	downloadLink string
 }
 
+type CreateUploadMedia struct {
+	media  CreateMedia
+	upload io.Reader
+}
+
 type CreateMedia struct {
-	Content CreateContent
-	Asset   CreateAsset
-}
-
-type CreateContent struct {
-	Title       string
-	Desc        string
-	ContentType content.Type
-}
-
-type CreateAsset struct {
-	AssetType asset.Type
-	AssetRole asset.Role
-	Filepath  string
+	Content content.CreateContent
+	Asset   asset.CreateAsset
 }

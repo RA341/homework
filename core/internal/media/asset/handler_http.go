@@ -8,7 +8,7 @@ type HandlerHttp struct {
 	srv *Service
 }
 
-func NewHandler(srv *Service) (string, http.Handler) {
+func NewHandlerHttp(srv *Service) (string, http.Handler) {
 	h := HandlerHttp{srv: srv}
 
 	mux := http.NewServeMux()

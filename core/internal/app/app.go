@@ -11,7 +11,7 @@ import (
 	"github.com/ra341/homework/internal/media"
 	"github.com/ra341/homework/internal/media/asset"
 	"github.com/ra341/homework/internal/media/content"
-	"github.com/ra341/homework/internal/upload"
+
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
@@ -23,7 +23,6 @@ func init() {
 
 type App struct {
 	downloads      *downloader.Service
-	uploads        *upload.Service
 	mediaService   *media.Service
 	contentService *content.Service
 	assetService   *asset.Service
@@ -59,17 +58,17 @@ func (a *App) RegisterServices() {
 	//if err != nil {
 	//	log.Fatal().Err(err).Msg("could not create py downloader")
 	//}
+
 	a.downloads, err = downloader.NewService(config, downloadDb, pyDownloader)
 	if err != nil {
 		// todo handle gracefully
 		log.Fatal().Err(err).Msg("could not create downloads service")
 	}
 
-	a.mediaService = media.NewService(a.contentService, a.assetService, a.downloads)
-
-	a.uploads, err = upload.NewService("temp", a.mediaService)
+	const uploadFolder = "temp"
+	a.mediaService, err = media.NewService(a.contentService, a.assetService, a.downloads, uploadFolder)
 	if err != nil {
-		log.Fatal().Err(err).Msg("could not create upload service")
+		log.Fatal().Err(err).Msg("could not create media service")
 	}
 
 	//_, err = downloadService.Download("https://www.youtube.com/watch?v=fVNgE-HaKxo")
@@ -105,7 +104,10 @@ func (a *App) RegisterHandlers(r *http.ServeMux) {
 	const ApiPrefix = "/api"
 	apiMux := http.NewServeMux()
 	a.registerApiHandlers(apiMux)
-	ro.AddRouter(ApiPrefix, loggerMiddleware(apiMux))
+
+	logger := loggerMiddleware(false)
+
+	ro.AddRouter(ApiPrefix, logger(apiMux))
 
 	const uiPrefix = "/"
 	uiMux := http.NewServeMux()
@@ -120,11 +122,12 @@ func (a *App) registerApiHandlers(r *http.ServeMux) {
 
 	rou := Rou{parentMux: r}
 
-	// normal http handler needs prefix stripping
-	rou.AddRouter(upload.NewHandler(a.uploads))
-	rou.AddRouter(asset.NewHandler(a.assetService))
+	// normal http handlers need prefix stripping
+	rou.AddRouter(media.NewHandlerHttp(a.mediaService))
+	rou.AddRouter(asset.NewHandlerHttp(a.assetService))
 
 	// connect rpc should not strip the prefix
+	rou.AddHandler(media.NewHandler(a.mediaService))
 	rou.AddHandler(downloader.NewHandler(a.downloads))
 	rou.AddHandler(content.NewHandler(a.contentService))
 }
@@ -136,14 +139,18 @@ func (a *App) registerUIHandler(r *http.ServeMux) {
 	})
 }
 
-func loggerMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Info().Str("method", r.Method).
-			Str("path", r.URL.Path).
-			Msg("request started")
-
-		next.ServeHTTP(w, r)
-	})
+func loggerMiddleware(enable bool) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		if !enable {
+			return next
+		}
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			log.Info().Str("method", r.Method).
+				Str("path", r.URL.Path).
+				Msg("request started")
+			next.ServeHTTP(w, r)
+		})
+	}
 }
 
 type Rou struct {

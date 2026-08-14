@@ -1,4 +1,4 @@
-package upload
+package media
 
 import (
 	"net/http"
@@ -8,11 +8,11 @@ import (
 	"github.com/ra341/homework/internal/media/content"
 )
 
-type Handler struct {
+type HandlerHttp struct {
 	srv *Service
 }
 
-func NewHandler(srv *Service) (string, http.Handler) {
+func NewHandlerHttp(srv *Service) (string, http.Handler) {
 	han := Handler{srv: srv}
 
 	mux := http.NewServeMux()
@@ -64,15 +64,24 @@ func (h *Handler) UploadFile(w http.ResponseWriter, r *http.Request) {
 		filename = head.Filename
 	}
 
-	err = h.srv.Upload(
-		title,
-		desc,
-		filename,
-		contentType,
-		assetType,
-		assetRole,
-		file,
-	)
+	med := CreateMedia{
+		Content: content.CreateContent{
+			Title:       title,
+			Desc:        desc,
+			ContentType: contentType,
+		},
+		Asset: asset.CreateAsset{
+			AssetType: assetType,
+			AssetRole: assetRole,
+		},
+	}
+
+	uploadMedia := CreateUploadMedia{
+		media:  med,
+		upload: file,
+	}
+
+	err = h.srv.CreateAndUpload(&uploadMedia)
 	if err != nil {
 		http.Error(w, "Error uploading file: "+err.Error(), http.StatusInternalServerError)
 		return

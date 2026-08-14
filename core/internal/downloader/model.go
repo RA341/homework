@@ -9,8 +9,12 @@ type DownloadState int
 const (
 	Queued DownloadState = iota
 	Downloading
+	// Error indicates failed download
 	Error
+	// Complete indicates a successful download
 	Complete
+	// Failed indicates if something with the server is wrong (not download issues)
+	Failed
 )
 
 type Download struct {

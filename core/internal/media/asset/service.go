@@ -2,11 +2,16 @@ package asset
 
 import (
 	"fmt"
+	"path/filepath"
 	"strconv"
 )
 
 type Service struct {
 	Db Store
+}
+
+func NewService(store Store) *Service {
+	return &Service{Db: store}
 }
 
 func (s *Service) Get(contentIdStr string, assetRoleStr string) (*Asset, error) {
@@ -23,10 +28,12 @@ func (s *Service) Get(contentIdStr string, assetRoleStr string) (*Asset, error) 
 	return s.Db.Get(int(contentId), assetRole)
 }
 
-func NewService(store Store) *Service {
-	return &Service{Db: store}
-}
+func (s *Service) Create(id uint, c *CreateAsset) (Asset, error) {
+	abs, err := filepath.Abs(c.Filepath)
+	if err != nil {
+		return Asset{}, err
+	}
 
-//func (s *Service) Create(assetType Type, StoragePath string) (Asset, error) {
-//	return s.Db.CreateAsset(assetType, StoragePath)
-//}
+	c.Filepath = abs
+	return s.Db.Create(id, c.AssetType, c.AssetRole, c.Filepath)
+}

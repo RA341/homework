@@ -72,13 +72,13 @@ class _UploadPageState extends ConsumerState<UploadPage> {
         allowMultiple: false,
       );
 
-      if (result != null && result.files.isNotEmpty) {
-        final file = result.files.first;
+      if (result.isNotEmpty) {
+        final file = result.first;
         if (file.path != null) {
-          setState(() {
+          setState(() async {
             _selectedFilePath = file.path;
             _selectedFileName = file.name;
-            _selectedFileSize = file.size;
+            _selectedFileSize = await file.length();
 
             // Auto-populate Title if empty
             if (_titleController.text.isEmpty) {

@@ -88,20 +88,31 @@ func (s *PythonDownloader) download(video string, downloadPath string) (download
 func (s *PythonDownloader) progress(id string) (DownloadState, *DownloadProgress, error) {
 	resp, err := s.cli.Get(s.formatUrl("/status?id=" + id))
 	if err != nil {
-		return Error, nil, err
+		return Failed, nil, err
 	}
 	defer fu.CloseCloser(resp.Body)
 
 	progress := &DownloadProgress{}
 
-	respBody, err := s.readBodyAndStatus(err, resp)
+	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return Error, progress, err
+		return Failed, nil, fmt.Errorf("could not read body %w", err)
+	}
+
+	// returns 400 when a download has an error
+	isExpectedErrorResp := resp.StatusCode == http.StatusBadRequest
+
+	if resp.StatusCode >= http.StatusMultipleChoices && !isExpectedErrorResp {
+		return Failed, nil, fmt.Errorf("unexpected status code: %d, body: %s", resp.StatusCode, respBody)
 	}
 
 	err = json.Unmarshal(respBody, progress)
 	if err != nil {
 		return 0, nil, err
+	}
+
+	if isExpectedErrorResp {
+		return Error, progress, nil
 	}
 
 	if resp.StatusCode == http.StatusOK {

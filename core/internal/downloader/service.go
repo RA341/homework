@@ -97,21 +97,21 @@ func (s *Service) worker() {
 
 	for {
 		if strikes >= exitThreshold {
-			log.Info().Int("strikes", strikes).Msg("no downloads found, exiting worker")
+			log.Info().Int("strikes", strikes).Msg("no additional queued items found, exiting worker")
 			return
 		}
 
-		downloading, err := s.store.ListQueued(s.conf.MaxDownloads)
+		queued, err := s.store.ListQueued(s.conf.MaxDownloads)
 		if err != nil {
 			log.Warn().Err(err).Msg("Could not load downloading items")
 			return
 		}
 
-		l := len(downloading)
+		l := len(queued)
 		if l == 0 {
 			log.Info().
 				Int("strikes", strikes+1).
-				Msg("No additional downloads found, waiting for existing downloads to complete")
+				Msg("waiting for existing downloads to complete")
 			wg.Wait()
 
 			strikes++
@@ -119,11 +119,18 @@ func (s *Service) worker() {
 			continue
 		}
 
-		log.Debug().Int("Count", l).Msg("Found downloading items")
+		log.Debug().Int("Count", l).Msg("Found queued items")
 		strikes = 0
 
-		for _, d := range downloading {
+		for _, d := range queued {
 			sem <- struct{}{}
+
+			err = s.store.SetStatus(d.ID, Downloading)
+			if err != nil {
+				log.Warn().Err(err).Any("download", d).Msg("Could not set status to downloading, skipping...")
+				continue
+			}
+
 			wg.Go(func() {
 				defer func() {
 					<-sem
@@ -142,11 +149,6 @@ func (s *Service) download(msg *Download) {
 			s.setErr(msg, err)
 		}
 	}()
-
-	err = s.store.SetStatus(msg.ID, Downloading)
-	if err != nil {
-		return
-	}
 
 	state, err := s.runDownload(msg)
 	if err != nil {
@@ -183,7 +185,7 @@ func (s *Service) runDownload(down *Download) (DownloadState, error) {
 		select {
 		case <-tick.C:
 			if strikes > s.conf.ProgressCheckThreshold {
-				return Error, fmt.Errorf("could not get progress after %d tries, please check logs", strikes)
+				return Failed, fmt.Errorf("could not get progress after %d tries, please check logs", strikes)
 			}
 
 			status, progress, err := s.cli.progress(downloadId)

@@ -1,0 +1,60 @@
+syntax = "proto3";
+
+package media.v1;
+
+option go_package = "github.com/ra341/homework/generated/api/media/v1";
+
+service MediaService {
+  rpc AddAndDownload(AddAndDownloadRequest) returns (AddAndDownloadResponse) {}
+}
+
+message AddAndDownloadRequest {
+  CreateMedia media = 1;
+  string downloadLink = 2;
+}
+
+message AddAndDownloadResponse {}
+
+message CreateContent {
+  string title = 1;
+  string desc = 2;
+  ContentType content_type = 3;
+}
+
+message CreateMedia {
+  CreateContent content = 1;
+  CreateAsset asset = 2;
+}
+
+message CreateAsset {
+  AssetType asset_type = 1;
+  AssetRole asset_role = 2;
+  string filepath = 3;
+}
+
+enum ContentType {
+  CONTENT_TYPE_UNKNOWN = 0;
+  CONTENT_TYPE_MOVIE = 1;
+  CONTENT_TYPE_SERIES = 2;
+  CONTENT_TYPE_EPISODE = 3;
+  CONTENT_TYPE_VIDEO = 4;
+  CONTENT_TYPE_IMAGE = 5;
+  CONTENT_TYPE_GALLERY = 6;
+  CONTENT_TYPE_SEASON = 7;
+}
+
+enum AssetType {
+  ASSET_TYPE_UNKNOWN = 0;
+  ASSET_TYPE_VIDEO = 1;
+  ASSET_TYPE_IMAGE = 2;
+  ASSET_TYPE_SUBTITLE = 3;
+  ASSET_TYPE_AUDIO = 4;
+}
+
+enum AssetRole {
+  ASSET_ROLE_MAIN = 0;
+  ASSET_ROLE_THUMBNAIL = 1;
+  ASSET_ROLE_BACKDROP = 2;
+  ASSET_ROLE_TRAILER = 3;
+  ASSET_ROLE_POSTER = 4;
+}
