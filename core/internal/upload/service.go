@@ -59,17 +59,18 @@ func (s *Service) Upload(
 		return err
 	}
 
-	err = s.media.Create(
-		title,
-		desc,
-		contentType,
-		assetType,
-		assetRole,
-		uploadPath,
-	)
-	if err != nil {
-		return err
+	med := media.CreateMedia{
+		Content: media.CreateContent{
+			Title:       title,
+			Desc:        desc,
+			ContentType: contentType,
+		},
+		Asset: media.CreateAsset{
+			AssetType: assetType,
+			AssetRole: assetRole,
+			Filepath:  uploadPath,
+		},
 	}
 
-	return nil
+	return s.media.Create(&med)
 }

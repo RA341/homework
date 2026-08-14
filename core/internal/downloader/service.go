@@ -43,7 +43,7 @@ func NewService(conf *Config, store Store, cli DownloadClient) (s *Service, err 
 	return s, nil
 }
 
-func (s *Service) AddDownload(Name string, DownloadLink string, DownloadPath string) error {
+func (s *Service) Add(Name string, DownloadLink string, DownloadPath string) error {
 	download := Download{
 		Status: Queued,
 
@@ -176,8 +176,6 @@ func (s *Service) runDownload(down *Download) (DownloadState, error) {
 
 	tick := time.NewTicker(checkInterval)
 	defer tick.Stop()
-
-	// todo move to config
 
 	strikes := 0
 

@@ -48,7 +48,7 @@ func TestServiceDownloads(t *testing.T) {
 			name := fmt.Sprintf("video_batch_%d_%d", batch, i)
 			link := fmt.Sprintf("http://example.com/video_%d_%d.mp4", batch, i)
 			path := fmt.Sprintf("/tmp/downloads/video_%d_%d.mp4", batch, i)
-			err := s.AddDownload(name, link, path)
+			err := s.Add(name, link, path)
 			if err != nil {
 				t.Fatalf("failed to add download: %v", err)
 			}

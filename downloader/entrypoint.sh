@@ -19,6 +19,7 @@ fi
 
 # Ensure /app and /app/config are owned by the depot user
 # This is necessary for sqlite and downloads to work correctly
+mkdir -p /app/config
 chown -R depot:depot /app/config
 
 # If running as root (default Docker behavior), drop privileges using gosu

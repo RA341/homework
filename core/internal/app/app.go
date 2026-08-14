@@ -53,19 +53,19 @@ func (a *App) RegisterServices() {
 	contentStore := content.NewStore(a.db)
 	a.contentService = content.NewService(contentStore)
 
-	a.mediaService = media.NewService(a.contentService, a.assetService)
-
 	downloadDb := downloader.NewStoreGorm(a.db)
 	pyDownloader, err := downloader.NewPyClient(config.SocketPath)
-	if err != nil {
-		log.Fatal().Err(err).Msg("could not create py downloader")
-	}
-
+	// todo handle gracefully
+	//if err != nil {
+	//	log.Fatal().Err(err).Msg("could not create py downloader")
+	//}
 	a.downloads, err = downloader.NewService(config, downloadDb, pyDownloader)
 	if err != nil {
 		// todo handle gracefully
 		log.Fatal().Err(err).Msg("could not create downloads service")
 	}
+
+	a.mediaService = media.NewService(a.contentService, a.assetService, a.downloads)
 
 	a.uploads, err = upload.NewService("temp", a.mediaService)
 	if err != nil {

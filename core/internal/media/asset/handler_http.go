@@ -4,12 +4,12 @@ import (
 	"net/http"
 )
 
-type Handler struct {
+type HandlerHttp struct {
 	srv *Service
 }
 
 func NewHandler(srv *Service) (string, http.Handler) {
-	h := Handler{srv: srv}
+	h := HandlerHttp{srv: srv}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/load", h.Load)
@@ -17,7 +17,7 @@ func NewHandler(srv *Service) (string, http.Handler) {
 	return "/assets", mux
 }
 
-func (h *Handler) Load(w http.ResponseWriter, r *http.Request) {
+func (h *HandlerHttp) Load(w http.ResponseWriter, r *http.Request) {
 	params := r.URL.Query()
 
 	contentIdStr := params.Get("contentId")
