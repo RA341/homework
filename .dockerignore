@@ -20,7 +20,7 @@ frontend/.history
 frontend/.svn/
 frontend/.swiftpm/
 frontend/migrate_working_dir/
-
+frontend/build
 # IntelliJ related
 frontend/*.iml
 frontend/*.ipr
@@ -39,7 +39,6 @@ frontend/.dart_tool/
 frontend/.flutter-plugins-dependencies
 frontend/.pub-cache/
 frontend/.pub/
-frontend//build/
 frontend/coverage/
 
 # Symbolication related

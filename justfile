@@ -11,6 +11,10 @@ dkr:
 dkd:
     docker build . -f Dockerfile.downloader -t homework/downloader:dev
 
+dkdr:
+    just dkd
+    docker run --rm homework/downloader:dev
+
 [working-directory("core")]
 gen:
     go generate ./...
