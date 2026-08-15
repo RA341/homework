@@ -13,7 +13,7 @@ dkd:
 
 dkdr:
     just dkd
-    docker run --rm homework/downloader:dev
+    docker run --rm -p 8000:8000 -v ./.build:/home/ra341/Dev/go/homework/.build homework/downloader:dev
 
 [working-directory("core")]
 gen:
