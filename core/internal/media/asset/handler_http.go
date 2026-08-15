@@ -23,7 +23,7 @@ func (h *HandlerHttp) Load(w http.ResponseWriter, r *http.Request) {
 	contentIdStr := params.Get("contentId")
 	assetRoleStr := params.Get("assetRole")
 
-	asset, err := h.srv.Get(contentIdStr, assetRoleStr)
+	asset, err := h.srv.GetByContentId(contentIdStr, assetRoleStr)
 	if err != nil {
 		_, _ = w.Write([]byte(err.Error()))
 		return

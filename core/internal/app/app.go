@@ -47,19 +47,22 @@ func (a *App) RegisterServices() {
 	a.InitDB(dataPath)
 
 	assetStore := asset.NewStore(a.db)
-	a.assetService = asset.NewService(assetStore)
+	assetFolder := "assets"
+	a.assetService = asset.NewService(assetStore, assetFolder)
 
 	contentStore := content.NewStore(a.db)
 	a.contentService = content.NewService(contentStore)
 
 	downloadDb := downloader.NewStoreGorm(a.db)
-	pyDownloader, err := downloader.NewPyClient(config.SocketPath)
-	// todo handle gracefully
-	//if err != nil {
-	//	log.Fatal().Err(err).Msg("could not create py downloader")
-	//}
 
-	a.downloads, err = downloader.NewService(config, downloadDb, pyDownloader)
+	pyDownloader, err := downloader.NewPyClient(config.ServerUrl)
+	if err != nil {
+		log.Warn().Err(err).Msg("could not create ping downloader")
+		// todo handle gracefully
+		//log.Fatal().Err(err).Msg("could not create py downloader")
+	}
+
+	a.downloads, err = downloader.NewService(config, downloadDb, pyDownloader, a.assetService)
 	if err != nil {
 		// todo handle gracefully
 		log.Fatal().Err(err).Msg("could not create downloads service")

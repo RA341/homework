@@ -11,7 +11,7 @@ import (
 )
 
 type Downloader interface {
-	Add(Name string, DownloadLink string, DownloadPath string) error
+	Add(AssetId uint, Name string, DownloadLink string) error
 }
 
 type Service struct {
@@ -70,28 +70,32 @@ func (s *Service) CreateAndUpload(uploadMedia *CreateUploadMedia) (err error) {
 	}
 
 	uploadMedia.media.Asset.Filepath = uploadPath
-	return s.Create(&uploadMedia.media)
+	_, err = s.Create(&uploadMedia.media)
+	return err
 }
 
 func (s *Service) CreateAndDownload(content *CreateDownloadMedia) error {
-	err := s.Create(&content.media)
+	assetId, err := s.Create(&content.media)
 	if err != nil {
 		return err
 	}
 
 	return s.downloader.Add(
+		assetId,
 		content.media.Content.Title,
 		content.downloadLink,
-		content.media.Asset.Filepath,
 	)
 }
 
-func (s *Service) Create(con *CreateMedia) error {
+func (s *Service) Create(con *CreateMedia) (uint, error) {
 	cont, err := s.content.Create(con.Content.Title, con.Content.Desc, con.Content.ContentType)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	_, err = s.asset.Create(cont.ID, &con.Asset)
-	return err
+	ass, err := s.asset.Create(cont.ID, &con.Asset)
+	if err != nil {
+		return 0, err
+	}
+	return ass.ID, nil
 }
