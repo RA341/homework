@@ -8,28 +8,34 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"time"
 
 	"github.com/ra341/homework/common/fu"
 )
 
 type PythonDownloader struct {
-	cli *http.Client
+	cli     *http.Client
+	baseUrl string
 }
 
-func NewPyClient(socketPath string) (DownloadClient, error) {
+func NewPyClient(baseUrl string) (DownloadClient, error) {
 	client := &http.Client{
+		Timeout: 10 * time.Second,
 		Transport: &http.Transport{
-			DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
-				return net.Dial("unix", socketPath)
-			},
+			DialContext: (&net.Dialer{
+				Timeout: 5 * time.Second,
+			}).DialContext,
+			TLSHandshakeTimeout: 5 * time.Second,
 		},
 	}
 
 	c := &PythonDownloader{
-		cli: client,
+		cli:     client,
+		baseUrl: baseUrl,
 	}
 
-	return c, c.ping()
+	err := c.ping()
+	return c, err
 }
 
 func (s *PythonDownloader) ping() error {
@@ -137,5 +143,6 @@ func (s *PythonDownloader) readBodyAndStatus(err error, resp *http.Response) ([]
 }
 
 func (s *PythonDownloader) formatUrl(path string) string {
-	return fmt.Sprintf("%s%s", "http://unix", path)
+
+	return fmt.Sprintf("%s%s", s.baseUrl, path)
 }

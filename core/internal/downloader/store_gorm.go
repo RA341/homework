@@ -62,7 +62,7 @@ func (s *StoreGorm) SetDownloadErr(id uint, errStr string) error {
 		Error
 }
 
-func (s *StoreGorm) AddDownload(download Download) error {
+func (s *StoreGorm) AddDownload(download *Download) error {
 	return s.db.Create(&download).Error
 }
 

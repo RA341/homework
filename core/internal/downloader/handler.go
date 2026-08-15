@@ -18,6 +18,7 @@ import (
 
 type Handler struct {
 	srv *Service
+	v1connect.UnimplementedDownloaderServiceHandler
 }
 
 func NewHandler(srv *Service) (string, http.Handler) {
@@ -27,14 +28,18 @@ func NewHandler(srv *Service) (string, http.Handler) {
 	return v1connect.NewDownloaderServiceHandler(h)
 }
 
-func (h *Handler) Download(_ context.Context, c *connect.Request[v1.DownloadRequest]) (*connect.Response[v1.DownloadResponse], error) {
-	err := h.srv.Add(c.Msg.Name, c.Msg.DownloadLink, c.Msg.Filepath)
-	if err != nil {
-		return nil, err
-	}
-
-	return connect.NewResponse(&v1.DownloadResponse{}), nil
-}
+//func (h *Handler) Download(_ context.Context, c *connect.Request[v1.DownloadRequest]) (*connect.Response[v1.DownloadResponse], error) {
+//
+//
+//	return v1connect.DownloaderServiceHandler()
+//
+//	//err := h.srv.Add(c.Msg.Name, c.Msg.DownloadLink, c.Msg.Filepath)
+//	//if err != nil {
+//	//	return nil, err
+//	//}
+//
+//	return connect.NewResponse(&v1.DownloadResponse{}), nil
+//}
 
 func (h *Handler) Retry(ctx context.Context, c *connect.Request[v1.RetryRequest]) (*connect.Response[v1.RetryResponse], error) {
 	err := h.srv.Retry(uint(c.Msg.Id))

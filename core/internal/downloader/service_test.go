@@ -15,6 +15,12 @@ type downloadInfo struct {
 	isSuccess bool
 }
 
+type TestAssetFinalizer struct{}
+
+func (t *TestAssetFinalizer) Finalize(id uint, downloadPath string) error {
+	return nil
+}
+
 func TestServiceDownloads(t *testing.T) {
 	// 1. Initialize TestStore
 	store := NewTestStore()
@@ -32,7 +38,7 @@ func TestServiceDownloads(t *testing.T) {
 	}
 
 	// 4. Initialize Service
-	s, err := NewService(conf, store, cli)
+	s, err := NewService(conf, store, cli, &TestAssetFinalizer{})
 	if err != nil {
 		t.Fatalf("failed to create service: %v", err)
 	}
@@ -47,8 +53,7 @@ func TestServiceDownloads(t *testing.T) {
 		for i := range DownloadSize {
 			name := fmt.Sprintf("video_batch_%d_%d", batch, i)
 			link := fmt.Sprintf("http://example.com/video_%d_%d.mp4", batch, i)
-			path := fmt.Sprintf("/tmp/downloads/video_%d_%d.mp4", batch, i)
-			err := s.Add(name, link, path)
+			err := s.Add(1, name, link)
 			if err != nil {
 				t.Fatalf("failed to add download: %v", err)
 			}

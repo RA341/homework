@@ -2,10 +2,12 @@ package downloader
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 )
 
@@ -14,24 +16,35 @@ type DownloadClient interface {
 	progress(id string) (DownloadState, *DownloadProgress, error)
 }
 
-type Service struct {
-	store Store
-	conf  *Config
+type AssetFinalizer interface {
+	Finalize(id uint, downloadPath string) error
+}
 
-	cli DownloadClient
+type Service struct {
+	conf *Config
+
+	store Store
+	asset AssetFinalizer
+	cli   DownloadClient
 
 	workerLock    chan struct{}
 	workerRunning bool
 }
 
-func NewService(conf *Config, store Store, cli DownloadClient) (s *Service, err error) {
+func NewService(conf *Config, store Store, cli DownloadClient, asset AssetFinalizer) (s *Service, err error) {
 	s = &Service{
 		conf:       conf,
 		store:      store,
 		cli:        cli,
+		asset:      asset,
 		workerLock: make(chan struct{}, 1),
 	}
 
+	err = s.Init()
+	return s, err
+}
+
+func (s *Service) Init() error {
 	if s.conf.MaxDownloads == 0 {
 		s.conf.MaxDownloads = 5
 	}
@@ -39,20 +52,38 @@ func NewService(conf *Config, store Store, cli DownloadClient) (s *Service, err 
 		s.conf.CheckIntervalSecs = 5
 	}
 
+	abs, err := filepath.Abs(s.conf.DownloadsDir)
+	if err != nil {
+		return fmt.Errorf("could not load abs path for downloads dir: %w", err)
+	}
+	err = os.MkdirAll(abs, os.ModePerm)
+	if err != nil {
+		return fmt.Errorf("could not create downloads dir: %w", err)
+	}
+	s.conf.DownloadsDir = abs
+
 	s.launchWorker()
-	return s, nil
+
+	return nil
 }
 
-func (s *Service) Add(Name string, DownloadLink string, DownloadPath string) error {
-	download := Download{
-		Status: Queued,
-
-		Name:         Name,
-		DownloadLink: DownloadLink,
-		DownloadPath: DownloadPath,
+func (s *Service) Add(assetId uint, Name string, DownloadLink string) error {
+	newUUID, err := uuid.NewUUID()
+	if err != nil {
+		return err
 	}
 
-	err := s.store.AddDownload(download)
+	downloadFolder := filepath.Join(s.conf.DownloadsDir, newUUID.String())
+
+	download := Download{
+		AssetID:      assetId,
+		Status:       Queued,
+		Name:         Name,
+		DownloadLink: DownloadLink,
+		DownloadPath: downloadFolder,
+	}
+
+	err = s.store.AddDownload(&download)
 	if err != nil {
 		return err
 	}
@@ -142,25 +173,38 @@ func (s *Service) worker() {
 	}
 }
 
-func (s *Service) download(msg *Download) {
+func (s *Service) download(download *Download) {
 	var err error
 	defer func() {
 		if err != nil {
-			s.setErr(msg, err)
+			s.setErr(download, err)
 		}
 	}()
 
-	state, err := s.runDownload(msg)
+	state, err := s.runDownload(download)
 	if err != nil {
 		return
 	}
 
-	err = s.store.SetStatus(msg.ID, state)
+	if state == Complete {
+		err = s.asset.Finalize(download.AssetID, download.DownloadPath)
+		if err != nil {
+			return
+		}
+
+		err = os.RemoveAll(download.DownloadPath)
+		if err != nil {
+			log.Warn().
+				Err(err).
+				Str("folder", download.DownloadPath).
+				Msg("Could not remove download folder")
+		}
+	}
+
+	err = s.store.SetStatus(download.ID, state)
 	if err != nil {
 		return
 	}
-
-	// todo start asset scan
 }
 
 func (s *Service) runDownload(down *Download) (DownloadState, error) {

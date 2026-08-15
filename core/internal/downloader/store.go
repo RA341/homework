@@ -2,7 +2,7 @@ package downloader
 
 type Store interface {
 	ListQueued(limit int) ([]Download, error)
-	AddDownload(download Download) error
+	AddDownload(download *Download) error
 	List(query string, after string, before string, limit uint) ([]Download, error)
 	Get(id uint) (Download, error)
 

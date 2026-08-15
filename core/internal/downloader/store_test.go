@@ -41,7 +41,7 @@ func (s *TestStore) ListQueued(limit int) ([]Download, error) {
 	return result, nil
 }
 
-func (s *TestStore) AddDownload(download Download) error {
+func (s *TestStore) AddDownload(download *Download) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -59,7 +59,7 @@ func (s *TestStore) AddDownload(download Download) error {
 	}
 	download.UpdatedAt = time.Now()
 
-	s.downloads[download.ID] = download
+	s.downloads[download.ID] = *download
 	return nil
 }
 

@@ -11,12 +11,16 @@ type Config struct {
 	ProgressCheckThreshold int
 	CheckIntervalSecs      int
 	MaxDownloads           int
+	ServerUrl              string
 }
 
 const DefaultSocket = "/tmp/hw.sock"
 
 func NewConfig(wd string) *Config {
 	return &Config{
+		ServerUrl: pick.Pk[string]().
+			Env("HW_SERVER_URL").
+			GetOrDefault("http://localhost:8000"),
 		SocketPath: pick.Pk[string]().
 			Env("HW_SOCKET_PATH").
 			GetOrDefault(DefaultSocket),
