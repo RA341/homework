@@ -3,3 +3,6 @@ downloads
 .build
 config
 .instaloader
+browser_data
+shared
+downloader

@@ -1,0 +1,9 @@
+POST http://localhost:8000/download
+Content-Type: application/json
+
+{
+  "url": "https://spankbang.com/2p0u2/video/embrace+the+darkness+3",
+  "download_path": "/home/ra341/Dev/go/homework/downloader/downloader/downloads"
+}
+
+###

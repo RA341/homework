@@ -1,0 +1,21 @@
+# docker-compose.yml
+name: downloader-test
+# docker-compose.yml
+services:
+  browser:
+    image: ghcr.io/ra341/chromtrol:latest
+    container_name: cf_browser
+    security_opt:
+      # Prevents Chromium from crashing in Docker
+      - seccomp:unconfined
+    environment:
+      - PUID=1000
+      - PGID=1000
+#      - CHROME_CLI=--remote-debugging-port=9222 --remote-debugging-address=0.0.0.0
+    ports:
+      - "8998:8080" # control plane
+      - "3012:3000" # Web UI
+#      - "9222:9222"
+    volumes:
+      # This volume holds the browser profile and SQLite databases
+      - ./downloader/browser_data:/config
