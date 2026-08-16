@@ -2,6 +2,7 @@ package downloader
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"connectrpc.com/connect"
@@ -18,7 +19,6 @@ import (
 
 type Handler struct {
 	srv *Service
-	v1connect.UnimplementedDownloaderServiceHandler
 }
 
 func NewHandler(srv *Service) (string, http.Handler) {
@@ -41,6 +41,18 @@ func NewHandler(srv *Service) (string, http.Handler) {
 //	return connect.NewResponse(&v1.DownloadResponse{}), nil
 //}
 
+func (h *Handler) Edit(ctx context.Context, c *connect.Request[v1.EditRequest]) (*connect.Response[v1.EditResponse], error) {
+	err := h.srv.Edit(c.Msg.DownloadId, c.Msg.DownloadLink)
+	if err != nil {
+		return nil, err
+	}
+	return connect.NewResponse(&v1.EditResponse{}), nil
+}
+
+func (h *Handler) Download(ctx context.Context, c *connect.Request[v1.DownloadRequest]) (*connect.Response[v1.DownloadResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, fmt.Errorf("downloader.v1.DownloaderService.Download is not implemented"))
+}
+
 func (h *Handler) Retry(ctx context.Context, c *connect.Request[v1.RetryRequest]) (*connect.Response[v1.RetryResponse], error) {
 	err := h.srv.Retry(uint(c.Msg.Id))
 	if err != nil {
@@ -57,22 +69,32 @@ func (h *Handler) List(ctx context.Context, c *connect.Request[v1.ListRequest]) 
 	}
 
 	resp := v1.ListResponse{
-		Value1: &v1.Result_Download{
-			Results: list.Map(re, func(t Download) *v1.Download {
-				return &v1.Download{
-					Id:           uint64(t.ID),
-					CreatedAtSec: uint64(t.CreatedAt.Unix()),
-					UpdatedAtSec: uint64(t.UpdatedAt.Unix()),
-					Name:         t.Name,
-					DownloadLink: t.DownloadLink,
-					Status:       v1.DownloadState(t.Status),
-					Error:        t.Progress.Error,
-					DownloadPath: t.DownloadPath,
-				}
-			}),
-			Count: uint32(len(re)),
+		Result: &v1.DownloadResult{
+			Results: list.Map(re, toDownload),
+			Count:   uint32(len(re)),
 		},
 	}
 
 	return connect.NewResponse(&resp), nil
+}
+
+func toDownload(t Download) *v1.Download {
+	progress := &v1.DownloadProgress{
+		TimeLeftSecs:           uint64(t.Progress.TimeLeftSecs),
+		DownloadBytesPerSecond: uint64(t.Progress.DownloadBytesPerSecond),
+		Complete:               uint64(t.Progress.Complete),
+		Left:                   uint64(t.Progress.Left),
+		Error:                  t.Progress.Error,
+	}
+
+	return &v1.Download{
+		Id:           uint64(t.ID),
+		CreatedAtSec: uint64(t.CreatedAt.Unix()),
+		UpdatedAtSec: uint64(t.UpdatedAt.Unix()),
+		Name:         t.Name,
+		DownloadLink: t.DownloadLink,
+		Status:       v1.DownloadState(t.Status),
+		Progress:     progress,
+		DownloadPath: t.DownloadPath,
+	}
 }

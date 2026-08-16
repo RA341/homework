@@ -30,4 +30,11 @@ abstract final class DownloaderService {
     downloaderv1downloader.ListRequest.new,
     downloaderv1downloader.ListResponse.new,
   );
+
+  static const edit = connect.Spec(
+    '/$name/Edit',
+    connect.StreamType.unary,
+    downloaderv1downloader.EditRequest.new,
+    downloaderv1downloader.EditResponse.new,
+  );
 }

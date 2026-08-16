@@ -22,6 +22,113 @@ export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
 export 'downloader.pbenum.dart';
 
+class EditRequest extends $pb.GeneratedMessage {
+  factory EditRequest({
+    $fixnum.Int64? downloadId,
+    $core.String? downloadLink,
+  }) {
+    final result = create();
+    if (downloadId != null) result.downloadId = downloadId;
+    if (downloadLink != null) result.downloadLink = downloadLink;
+    return result;
+  }
+
+  EditRequest._();
+
+  factory EditRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory EditRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'EditRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'downloader.v1'),
+      createEmptyInstance: create)
+    ..aInt64(1, _omitFieldNames ? '' : 'downloadId', protoName: 'downloadId')
+    ..aOS(2, _omitFieldNames ? '' : 'downloadLink', protoName: 'downloadLink')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  EditRequest clone() => EditRequest()..mergeFromMessage(this);
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  EditRequest copyWith(void Function(EditRequest) updates) =>
+      super.copyWith((message) => updates(message as EditRequest))
+          as EditRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static EditRequest create() => EditRequest._();
+  @$core.override
+  EditRequest createEmptyInstance() => create();
+  static $pb.PbList<EditRequest> createRepeated() => $pb.PbList<EditRequest>();
+  @$core.pragma('dart2js:noInline')
+  static EditRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<EditRequest>(create);
+  static EditRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get downloadId => $_getI64(0);
+  @$pb.TagNumber(1)
+  set downloadId($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasDownloadId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearDownloadId() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get downloadLink => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set downloadLink($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasDownloadLink() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearDownloadLink() => $_clearField(2);
+}
+
+class EditResponse extends $pb.GeneratedMessage {
+  factory EditResponse() => create();
+
+  EditResponse._();
+
+  factory EditResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory EditResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'EditResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'downloader.v1'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  EditResponse clone() => EditResponse()..mergeFromMessage(this);
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  EditResponse copyWith(void Function(EditResponse) updates) =>
+      super.copyWith((message) => updates(message as EditResponse))
+          as EditResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static EditResponse create() => EditResponse._();
+  @$core.override
+  EditResponse createEmptyInstance() => create();
+  static $pb.PbList<EditResponse> createRepeated() =>
+      $pb.PbList<EditResponse>();
+  @$core.pragma('dart2js:noInline')
+  static EditResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<EditResponse>(create);
+  static EditResponse? _defaultInstance;
+}
+
 class RetryRequest extends $pb.GeneratedMessage {
   factory RetryRequest({
     $fixnum.Int64? id,
@@ -333,11 +440,11 @@ class ListRequest extends $pb.GeneratedMessage {
 
 class ListResponse extends $pb.GeneratedMessage {
   factory ListResponse({
-    Result_Download? value1,
+    DownloadResult? result,
   }) {
-    final result = create();
-    if (value1 != null) result.value1 = value1;
-    return result;
+    final result$ = create();
+    if (result != null) result$.result = result;
+    return result$;
   }
 
   ListResponse._();
@@ -353,8 +460,8 @@ class ListResponse extends $pb.GeneratedMessage {
       _omitMessageNames ? '' : 'ListResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'downloader.v1'),
       createEmptyInstance: create)
-    ..aOM<Result_Download>(1, _omitFieldNames ? '' : 'value1',
-        subBuilder: Result_Download.create)
+    ..aOM<DownloadResult>(1, _omitFieldNames ? '' : 'result',
+        subBuilder: DownloadResult.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -379,15 +486,15 @@ class ListResponse extends $pb.GeneratedMessage {
   static ListResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
-  Result_Download get value1 => $_getN(0);
+  DownloadResult get result => $_getN(0);
   @$pb.TagNumber(1)
-  set value1(Result_Download value) => $_setField(1, value);
+  set result(DownloadResult value) => $_setField(1, value);
   @$pb.TagNumber(1)
-  $core.bool hasValue1() => $_has(0);
+  $core.bool hasResult() => $_has(0);
   @$pb.TagNumber(1)
-  void clearValue1() => $_clearField(1);
+  void clearResult() => $_clearField(1);
   @$pb.TagNumber(1)
-  Result_Download ensureValue1() => $_ensure(0);
+  DownloadResult ensureResult() => $_ensure(0);
 }
 
 class Base_string extends $pb.GeneratedMessage {
@@ -487,7 +594,7 @@ class Download extends $pb.GeneratedMessage {
     $core.String? name,
     $core.String? downloadLink,
     DownloadState? status,
-    $core.String? error,
+    DownloadProgress? progress,
     $core.String? downloadPath,
     $fixnum.Int64? createdAtSec,
     $fixnum.Int64? updatedAtSec,
@@ -497,7 +604,7 @@ class Download extends $pb.GeneratedMessage {
     if (name != null) result.name = name;
     if (downloadLink != null) result.downloadLink = downloadLink;
     if (status != null) result.status = status;
-    if (error != null) result.error = error;
+    if (progress != null) result.progress = progress;
     if (downloadPath != null) result.downloadPath = downloadPath;
     if (createdAtSec != null) result.createdAtSec = createdAtSec;
     if (updatedAtSec != null) result.updatedAtSec = updatedAtSec;
@@ -525,7 +632,8 @@ class Download extends $pb.GeneratedMessage {
         defaultOrMaker: DownloadState.DOWNLOAD_STATE_QUEUED,
         valueOf: DownloadState.valueOf,
         enumValues: DownloadState.values)
-    ..aOS(5, _omitFieldNames ? '' : 'error')
+    ..aOM<DownloadProgress>(5, _omitFieldNames ? '' : 'progress',
+        subBuilder: DownloadProgress.create)
     ..aOS(6, _omitFieldNames ? '' : 'downloadPath')
     ..a<$fixnum.Int64>(
         7, _omitFieldNames ? '' : 'createdAtSec', $pb.PbFieldType.OU6,
@@ -591,13 +699,15 @@ class Download extends $pb.GeneratedMessage {
   void clearStatus() => $_clearField(4);
 
   @$pb.TagNumber(5)
-  $core.String get error => $_getSZ(4);
+  DownloadProgress get progress => $_getN(4);
   @$pb.TagNumber(5)
-  set error($core.String value) => $_setString(4, value);
+  set progress(DownloadProgress value) => $_setField(5, value);
   @$pb.TagNumber(5)
-  $core.bool hasError() => $_has(4);
+  $core.bool hasProgress() => $_has(4);
   @$pb.TagNumber(5)
-  void clearError() => $_clearField(5);
+  void clearProgress() => $_clearField(5);
+  @$pb.TagNumber(5)
+  DownloadProgress ensureProgress() => $_ensure(4);
 
   @$pb.TagNumber(6)
   $core.String get downloadPath => $_getSZ(5);
@@ -627,8 +737,120 @@ class Download extends $pb.GeneratedMessage {
   void clearUpdatedAtSec() => $_clearField(8);
 }
 
-class Result_Download extends $pb.GeneratedMessage {
-  factory Result_Download({
+class DownloadProgress extends $pb.GeneratedMessage {
+  factory DownloadProgress({
+    $fixnum.Int64? timeLeftSecs,
+    $fixnum.Int64? downloadBytesPerSecond,
+    $fixnum.Int64? complete,
+    $fixnum.Int64? left,
+    $core.String? error,
+  }) {
+    final result = create();
+    if (timeLeftSecs != null) result.timeLeftSecs = timeLeftSecs;
+    if (downloadBytesPerSecond != null)
+      result.downloadBytesPerSecond = downloadBytesPerSecond;
+    if (complete != null) result.complete = complete;
+    if (left != null) result.left = left;
+    if (error != null) result.error = error;
+    return result;
+  }
+
+  DownloadProgress._();
+
+  factory DownloadProgress.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory DownloadProgress.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'DownloadProgress',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'downloader.v1'),
+      createEmptyInstance: create)
+    ..a<$fixnum.Int64>(
+        1, _omitFieldNames ? '' : 'TimeLeftSecs', $pb.PbFieldType.OU6,
+        protoName: 'TimeLeftSecs', defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$fixnum.Int64>(
+        2, _omitFieldNames ? '' : 'DownloadBytesPerSecond', $pb.PbFieldType.OU6,
+        protoName: 'DownloadBytesPerSecond', defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$fixnum.Int64>(
+        3, _omitFieldNames ? '' : 'Complete', $pb.PbFieldType.OU6,
+        protoName: 'Complete', defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$fixnum.Int64>(4, _omitFieldNames ? '' : 'Left', $pb.PbFieldType.OU6,
+        protoName: 'Left', defaultOrMaker: $fixnum.Int64.ZERO)
+    ..aOS(5, _omitFieldNames ? '' : 'Error', protoName: 'Error')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  DownloadProgress clone() => DownloadProgress()..mergeFromMessage(this);
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  DownloadProgress copyWith(void Function(DownloadProgress) updates) =>
+      super.copyWith((message) => updates(message as DownloadProgress))
+          as DownloadProgress;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static DownloadProgress create() => DownloadProgress._();
+  @$core.override
+  DownloadProgress createEmptyInstance() => create();
+  static $pb.PbList<DownloadProgress> createRepeated() =>
+      $pb.PbList<DownloadProgress>();
+  @$core.pragma('dart2js:noInline')
+  static DownloadProgress getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<DownloadProgress>(create);
+  static DownloadProgress? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get timeLeftSecs => $_getI64(0);
+  @$pb.TagNumber(1)
+  set timeLeftSecs($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasTimeLeftSecs() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearTimeLeftSecs() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $fixnum.Int64 get downloadBytesPerSecond => $_getI64(1);
+  @$pb.TagNumber(2)
+  set downloadBytesPerSecond($fixnum.Int64 value) => $_setInt64(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasDownloadBytesPerSecond() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearDownloadBytesPerSecond() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $fixnum.Int64 get complete => $_getI64(2);
+  @$pb.TagNumber(3)
+  set complete($fixnum.Int64 value) => $_setInt64(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasComplete() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearComplete() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $fixnum.Int64 get left => $_getI64(3);
+  @$pb.TagNumber(4)
+  set left($fixnum.Int64 value) => $_setInt64(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasLeft() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearLeft() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get error => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set error($core.String value) => $_setString(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasError() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearError() => $_clearField(5);
+}
+
+class DownloadResult extends $pb.GeneratedMessage {
+  factory DownloadResult({
     $core.Iterable<Download>? results,
     $core.int? after,
     $core.int? before,
@@ -642,17 +864,17 @@ class Result_Download extends $pb.GeneratedMessage {
     return result;
   }
 
-  Result_Download._();
+  DownloadResult._();
 
-  factory Result_Download.fromBuffer($core.List<$core.int> data,
+  factory DownloadResult.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(data, registry);
-  factory Result_Download.fromJson($core.String json,
+  factory DownloadResult.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'Result_Download',
+      _omitMessageNames ? '' : 'DownloadResult',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'downloader.v1'),
       createEmptyInstance: create)
     ..pc<Download>(1, _omitFieldNames ? '' : 'results', $pb.PbFieldType.PM,
@@ -663,25 +885,25 @@ class Result_Download extends $pb.GeneratedMessage {
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Result_Download clone() => Result_Download()..mergeFromMessage(this);
+  DownloadResult clone() => DownloadResult()..mergeFromMessage(this);
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  Result_Download copyWith(void Function(Result_Download) updates) =>
-      super.copyWith((message) => updates(message as Result_Download))
-          as Result_Download;
+  DownloadResult copyWith(void Function(DownloadResult) updates) =>
+      super.copyWith((message) => updates(message as DownloadResult))
+          as DownloadResult;
 
   @$core.override
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
-  static Result_Download create() => Result_Download._();
+  static DownloadResult create() => DownloadResult._();
   @$core.override
-  Result_Download createEmptyInstance() => create();
-  static $pb.PbList<Result_Download> createRepeated() =>
-      $pb.PbList<Result_Download>();
+  DownloadResult createEmptyInstance() => create();
+  static $pb.PbList<DownloadResult> createRepeated() =>
+      $pb.PbList<DownloadResult>();
   @$core.pragma('dart2js:noInline')
-  static Result_Download getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<Result_Download>(create);
-  static Result_Download? _defaultInstance;
+  static DownloadResult getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<DownloadResult>(create);
+  static DownloadResult? _defaultInstance;
 
   @$pb.TagNumber(1)
   $pb.PbList<Download> get results => $_getList(0);
@@ -731,6 +953,10 @@ class DownloaderServiceApi {
           $pb.ClientContext? ctx, ListRequest request) =>
       _client.invoke<ListResponse>(
           ctx, 'DownloaderService', 'List', request, ListResponse());
+  $async.Future<EditResponse> edit(
+          $pb.ClientContext? ctx, EditRequest request) =>
+      _client.invoke<EditResponse>(
+          ctx, 'DownloaderService', 'Edit', request, EditResponse());
 }
 
 const $core.bool _omitFieldNames =

@@ -92,6 +92,10 @@ func (s *Service) Add(assetId uint, Name string, DownloadLink string) error {
 	return nil
 }
 
+func (s *Service) Edit(id int64, link string) error {
+	return s.store.EditLink(id, link)
+}
+
 func (s *Service) Retry(id uint) error {
 	err := s.store.SetStatus(id, Queued)
 	if err != nil {

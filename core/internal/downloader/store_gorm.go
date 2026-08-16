@@ -32,6 +32,7 @@ func (s *StoreGorm) List(query string, after string, before string, limit uint) 
 	var downloads []Download
 	// todo fix list
 	err := s.db.Limit(int(limit)).
+		Order("created_at DESC").
 		Find(&downloads).
 		Error
 
@@ -47,6 +48,15 @@ func (s *StoreGorm) ListQueued(limit int) ([]Download, error) {
 		Error
 
 	return downloads, err
+}
+
+func (s *StoreGorm) EditLink(id int64, link string) error {
+	err := s.db.
+		Model(&Download{}).
+		Where("id = ?", id).
+		UpdateColumn("download_link", link).
+		Error
+	return err
 }
 
 func (s *StoreGorm) SetDownloadErr(id uint, errStr string) error {

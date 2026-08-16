@@ -27,6 +27,8 @@ abstract class DownloaderServiceBase extends $pb.GeneratedService {
       $pb.ServerContext ctx, $0.DownloadRequest request);
   $async.Future<$0.ListResponse> list(
       $pb.ServerContext ctx, $0.ListRequest request);
+  $async.Future<$0.EditResponse> edit(
+      $pb.ServerContext ctx, $0.EditRequest request);
 
   $pb.GeneratedMessage createRequest($core.String methodName) {
     switch (methodName) {
@@ -36,6 +38,8 @@ abstract class DownloaderServiceBase extends $pb.GeneratedService {
         return $0.DownloadRequest();
       case 'List':
         return $0.ListRequest();
+      case 'Edit':
+        return $0.EditRequest();
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }
@@ -50,6 +54,8 @@ abstract class DownloaderServiceBase extends $pb.GeneratedService {
         return download(ctx, request as $0.DownloadRequest);
       case 'List':
         return list(ctx, request as $0.ListRequest);
+      case 'Edit':
+        return edit(ctx, request as $0.EditRequest);
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }

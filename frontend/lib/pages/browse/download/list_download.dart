@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:homework/common/api/endpoints/download_provider.dart';
@@ -75,7 +77,7 @@ class ListDownload extends HookConsumerWidget {
         Expanded(
           child: downloadList.when(
             data: (data) {
-              final result = data.value1;
+              final result = data.result;
               final downloads = result.results;
 
               if (downloads.isEmpty) {
@@ -156,7 +158,7 @@ class ListDownload extends HookConsumerWidget {
         // Pagination Controls
         if (downloadList.hasValue)
           downloadList.whenData((data) {
-                final result = data.value1;
+                final result = data.result;
                 final hasPrev = result.hasBefore() && result.before != 0;
                 final hasNext = result.hasAfter() && result.after != 0;
 
@@ -273,6 +275,15 @@ class _DownloadCard extends ConsumerWidget {
                   ),
                 ),
                 IconButton(
+                  icon: Icon(Icons.edit),
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => EditLinkDialog(download: download),
+                    );
+                  },
+                ),
+                IconButton(
                   onPressed: () async {
                     final resp = await runReq(
                       () => downloader.retry(RetryRequest(id: download.id)),
@@ -326,32 +337,158 @@ class _DownloadCard extends ConsumerWidget {
             ],
             if (download.status ==
                 DownloadState.DOWNLOAD_STATE_DOWNLOADING) ...[
-              const SizedBox(height: 12),
-              const LinearProgressIndicator(
-                minHeight: 4,
-                backgroundColor: Colors.grey,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-              ),
+              ProgressDisplay(progress: download.progress),
             ],
             if (download.status == DownloadState.DOWNLOAD_STATE_ERROR &&
-                download.error.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.red[50],
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: Colors.red.withAlpha(51)),
+                download.progress.error.isNotEmpty)
+              ...displayError(context),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<Widget> displayError(BuildContext context) {
+    return [
+      const SizedBox(height: 12),
+      Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.red[50],
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: Colors.red.withAlpha(51)),
+        ),
+        child: Text(
+          download.progress.error,
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: Colors.red[900]),
+        ),
+      ),
+    ];
+  }
+}
+
+String formatDuration(Duration d) {
+  final h = d.inHours;
+  final m = d.inMinutes.remainder(60);
+  final s = d.inSeconds.remainder(60);
+
+  final secs = '${s}s';
+  if (m == 0) {
+    return secs;
+  }
+
+  final minSecs = '${m}m $secs';
+  if (h == 0) {
+    return minSecs;
+  }
+
+  return '${h}h $minSecs';
+}
+
+String formatBytes(int bytes, [int decimals = 1]) {
+  if (bytes <= 0) return '0 B';
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  final i = (log(bytes) / log(1024)).floor();
+  final size = bytes / pow(1024, i);
+  return '${size.toStringAsFixed(i == 0 ? 0 : decimals)} ${units[i]}';
+}
+
+class ProgressDisplay extends StatelessWidget {
+  const ProgressDisplay({super.key, required this.progress});
+
+  final DownloadProgress progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final total = progress.complete.toInt() + progress.left.toInt();
+    final progressState = total > 0 ? progress.complete.toDouble() / total : 0.0;
+
+    final time = Duration(seconds: progress.timeLeftSecs.toInt());
+
+    return Column(
+      children: [
+        const SizedBox(height: 12),
+        Row(
+          spacing: 10,
+          mainAxisAlignment: .spaceBetween,
+          children: [
+            Text("Time: ${formatDuration(time)}"),
+            Text("Total: ${formatBytes(total)}"),
+          ],
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            LinearProgressIndicator(value: progressState),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('${formatBytes(progress.complete.toInt())} complete'),
+                Text('${formatBytes(progress.left.toInt())} left'),
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class EditLinkDialog extends HookConsumerWidget {
+  const EditLinkDialog({super.key, required this.download});
+
+  final Download download;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final downloadLinkController = useTextEditingController(
+      text: download.downloadLink,
+    );
+    final downloader = ref.watch(downloaderApiProvider);
+
+    return Dialog(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          spacing: 20,
+          mainAxisSize: .min,
+          children: [
+            Text("Edit link ${download.id}"),
+            TextField(controller: downloadLinkController),
+            Row(
+              spacing: 10,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  label: Text("Cancel"),
+                  icon: Icon(Icons.cancel),
                 ),
-                child: Text(
-                  download.error,
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodySmall?.copyWith(color: Colors.red[900]),
+                ElevatedButton.icon(
+                  onPressed: () async {
+                    await runReq(
+                      () => downloader.edit(
+                        EditRequest(
+                          downloadId: download.id,
+                          downloadLink: downloadLinkController.text,
+                        ),
+                      ),
+                    );
+                    if (!context.mounted) return;
+
+                    Navigator.of(context).pop();
+                  },
+                  label: Text("Save"),
+                  icon: Icon(Icons.save),
                 ),
-              ),
-            ],
+              ],
+            ),
           ],
         ),
       ),

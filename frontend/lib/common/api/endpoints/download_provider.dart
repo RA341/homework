@@ -53,7 +53,7 @@ class DownloadListProvider extends AsyncNotifier<ListResponse> {
     final currentData = state.value;
     if (currentData == null) return;
 
-    final resultDownload = currentData.value1;
+    final resultDownload = currentData.result;
     if (!resultDownload.hasAfter() || resultDownload.after == 0) {
       return; // No more pages
     }
@@ -72,12 +72,12 @@ class DownloadListProvider extends AsyncNotifier<ListResponse> {
       case Ok(:final value):
         if (append) {
           final combinedResults = [
-            ...currentData.value1.results,
-            ...value.value1.results,
+            ...currentData.result.results,
+            ...value.result.results,
           ];
           final combined = value.copyWith((r) {
-            r.ensureValue1().results.clear();
-            r.ensureValue1().results.addAll(combinedResults);
+            r.ensureResult().results.clear();
+            r.ensureResult().results.addAll(combinedResults);
           });
           state = AsyncValue.data(combined);
         } else {
@@ -92,7 +92,7 @@ class DownloadListProvider extends AsyncNotifier<ListResponse> {
     final currentData = state.value;
     if (currentData == null) return;
 
-    final resultDownload = currentData.value1;
+    final resultDownload = currentData.result;
     if (!resultDownload.hasBefore() || resultDownload.before == 0) {
       return; // No previous page
     }

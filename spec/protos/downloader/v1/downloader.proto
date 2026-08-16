@@ -9,7 +9,16 @@ service DownloaderService {
   rpc Retry(RetryRequest) returns (RetryResponse) {}
   rpc Download (DownloadRequest) returns (DownloadResponse);
   rpc List (ListRequest) returns (ListResponse);
+  rpc Edit(EditRequest) returns (EditResponse) {}
+
 }
+
+message EditRequest {
+  int64 downloadId = 1;
+  string downloadLink = 2;
+}
+
+message EditResponse {}
 
 message RetryRequest {
   uint64 id = 1;
@@ -35,7 +44,7 @@ message ListRequest {
 }
 
 message ListResponse {
-  Result_Download value1 = 1;
+  DownloadResult result = 1;
 }
 
 enum DownloadState {
@@ -60,11 +69,19 @@ message Download {
   string name = 2;
   string download_link = 3;
   DownloadState status = 4;
-  string error = 5;
+  DownloadProgress progress = 5;
   string download_path = 6;
 }
 
-message Result_Download {
+message DownloadProgress {
+  uint64 TimeLeftSecs = 1;
+  uint64 DownloadBytesPerSecond = 2;
+  uint64 Complete = 3;
+  uint64 Left = 4;
+  string Error = 5;
+}
+
+message DownloadResult {
   repeated Download results = 1;
   uint32 after = 2;
   uint32 before = 3;
