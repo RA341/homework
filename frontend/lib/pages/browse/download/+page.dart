@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:homework/common/theme/design_system.dart';
 import 'package:homework/pages/browse/+layout.dart';
 import 'package:homework/pages/browse/download/dialog_add_download.dart';
-import 'package:homework/pages/browse/download/list_download.dart';
+import 'package:homework/pages/browse/download/download.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class DownloadPage extends ConsumerWidget {
