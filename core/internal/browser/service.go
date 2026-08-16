@@ -7,13 +7,16 @@ type Service struct {
 
 func NewService(baseurl, vncUrl string) (*Service, error) {
 	cli := NewClient(baseurl)
-	s := &Service{cli: cli}
+	s := &Service{
+		cli:    cli,
+		vncUrl: vncUrl,
+	}
 	err := s.Init()
 
 	return s, err
 }
 
 func (s *Service) Init() error {
-	_, _, err := s.cli.Stop()
+	_, _, err := s.cli.Status()
 	return err
 }

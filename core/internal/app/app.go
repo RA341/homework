@@ -59,7 +59,7 @@ func (a *App) RegisterServices() {
 	downloadDb := downloader.NewStoreGorm(a.db)
 
 	apiUrl := "http://localhost:8998"
-	vncUrl := "http://localhost:3012"
+	vncUrl := "http://localhost:3012/"
 	a.browser, err = browser.NewService(apiUrl, vncUrl)
 	if err != nil {
 		log.Warn().Err(err).Msg("could not create chromtrol client")
