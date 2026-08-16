@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/ra341/homework/common/database"
+	"github.com/ra341/homework/internal/browser"
 	"github.com/ra341/homework/internal/downloader"
 	"github.com/ra341/homework/internal/media"
 	"github.com/ra341/homework/internal/media/asset"
@@ -22,11 +23,13 @@ func init() {
 }
 
 type App struct {
-	downloads      *downloader.Service
-	mediaService   *media.Service
-	contentService *content.Service
-	assetService   *asset.Service
-	db             *gorm.DB
+	db *gorm.DB
+
+	content   *content.Service
+	asset     *asset.Service
+	media     *media.Service
+	downloads *downloader.Service
+	browser   *browser.Service
 }
 
 func (a *App) RegisterServices() {
@@ -48,12 +51,19 @@ func (a *App) RegisterServices() {
 
 	assetStore := asset.NewStore(a.db)
 	assetFolder := "assets"
-	a.assetService = asset.NewService(assetStore, assetFolder)
+	a.asset = asset.NewService(assetStore, assetFolder)
 
 	contentStore := content.NewStore(a.db)
-	a.contentService = content.NewService(contentStore)
+	a.content = content.NewService(contentStore)
 
 	downloadDb := downloader.NewStoreGorm(a.db)
+
+	apiUrl := "http://localhost:8998"
+	vncUrl := "http://localhost:3012"
+	a.browser, err = browser.NewService(apiUrl, vncUrl)
+	if err != nil {
+		log.Warn().Err(err).Msg("could not create chromtrol client")
+	}
 
 	pyDownloader, err := downloader.NewPyClient(config.ServerUrl)
 	if err != nil {
@@ -62,14 +72,14 @@ func (a *App) RegisterServices() {
 		//log.Fatal().Err(err).Msg("could not create py downloader")
 	}
 
-	a.downloads, err = downloader.NewService(config, downloadDb, pyDownloader, a.assetService)
+	a.downloads, err = downloader.NewService(config, downloadDb, pyDownloader, a.asset)
 	if err != nil {
 		// todo handle gracefully
 		log.Fatal().Err(err).Msg("could not create downloads service")
 	}
 
 	const uploadFolder = "temp"
-	a.mediaService, err = media.NewService(a.contentService, a.assetService, a.downloads, uploadFolder)
+	a.media, err = media.NewService(a.content, a.asset, a.downloads, uploadFolder)
 	if err != nil {
 		log.Fatal().Err(err).Msg("could not create media service")
 	}
@@ -126,13 +136,15 @@ func (a *App) registerApiHandlers(r *http.ServeMux) {
 	rou := Rou{parentMux: r}
 
 	// normal http handlers need prefix stripping
-	rou.AddRouter(media.NewHandlerHttp(a.mediaService))
-	rou.AddRouter(asset.NewHandlerHttp(a.assetService))
+	rou.AddRouter(media.NewHandlerHttp(a.media))
+	rou.AddRouter(asset.NewHandlerHttp(a.asset))
+	rou.AddRouter(browser.NewHandlerHttp(a.browser))
 
 	// connect rpc should not strip the prefix
-	rou.AddHandler(media.NewHandler(a.mediaService))
+	rou.AddHandler(browser.NewHandler(a.browser))
+	rou.AddHandler(media.NewHandler(a.media))
 	rou.AddHandler(downloader.NewHandler(a.downloads))
-	rou.AddHandler(content.NewHandler(a.contentService))
+	rou.AddHandler(content.NewHandler(a.content))
 }
 
 func (a *App) registerUIHandler(r *http.ServeMux) {

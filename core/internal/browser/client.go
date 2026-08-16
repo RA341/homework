@@ -1,0 +1,67 @@
+package browser
+
+import (
+	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
+	"time"
+
+	"github.com/ra341/homework/common/fu"
+)
+
+type Response struct {
+	Status    string   `json:"status"`
+	Message   string   `json:"message,omitempty"`
+	Running   bool     `json:"running,omitempty"`
+	RawStatus string   `json:"raw_status,omitempty"`
+	Errors    []string `json:"errors,omitempty"`
+}
+
+type ChromtrolClient struct {
+	BaseURL string
+	HTTP    *http.Client
+}
+
+func NewClient(baseURL string) *ChromtrolClient {
+	return &ChromtrolClient{
+		BaseURL: baseURL,
+		HTTP:    &http.Client{Timeout: 3 * time.Second},
+	}
+}
+
+func (c *ChromtrolClient) Start() (*Response, int, error) {
+	return c.do(http.MethodPost, "/start")
+}
+
+func (c *ChromtrolClient) Stop() (*Response, int, error) {
+	return c.do(http.MethodPost, "/stop")
+}
+
+func (c *ChromtrolClient) Status() (*Response, int, error) {
+	return c.do(http.MethodGet, "/status")
+}
+
+func (c *ChromtrolClient) do(method, path string) (*Response, int, error) {
+	req, err := http.NewRequest(method, c.BaseURL+path, nil)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	resp, err := c.HTTP.Do(req)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer fu.CloseCloser(resp.Body)
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, resp.StatusCode, err
+	}
+
+	var r Response
+	if err := json.Unmarshal(body, &r); err != nil {
+		return nil, resp.StatusCode, fmt.Errorf("decode failed: %w (body: %s)", err, string(body))
+	}
+	return &r, resp.StatusCode, nil
+}

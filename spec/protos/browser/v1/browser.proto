@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package browser.v1;
+
+option go_package = "github.com/ra341/homework/generated/api/browser/v1";
+
+service BrowserService {
+  rpc Start(StartRequest) returns (StartResponse) {}
+  rpc Stop(StopRequest) returns (StopResponse) {}
+  rpc Status(StatusRequest) returns (StatusResponse) {}
+}
+
+message StartRequest {}
+
+message StartResponse {}
+
+message StopRequest {}
+
+message StopResponse {}
+
+message StatusRequest {}
+
+message StatusResponse {}
