@@ -114,6 +114,24 @@ class OpenBrowserDialog extends ConsumerWidget {
               },
               child: Text("Launch Browser Window"),
             ),
+            Text("4. Stop browser"),
+            ElevatedButton(
+              onPressed: () async {
+                final resp = await runReq(() => browser.stop(StopRequest()));
+              },
+              child: Text("Stop Browser"),
+            ),
+            Row(
+              mainAxisAlignment: .end,
+              children: [
+                ElevatedButton(
+                  onPressed: () async {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text("Close"),
+                ),
+              ],
+            ),
           ],
         ),
       ),
