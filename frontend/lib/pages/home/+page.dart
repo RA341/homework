@@ -119,8 +119,8 @@ class HomePage extends HookConsumerWidget {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => VideoPlayerScreen(
-                              title: item.title,
-                              videoUrl: videoUrl,
+                              initialItem: item,
+                              initialVideoUrl: videoUrl,
                             ),
                           ),
                         );
