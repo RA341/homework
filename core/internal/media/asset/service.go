@@ -13,14 +13,14 @@ import (
 )
 
 type Service struct {
-	Db Store
+	store Store
 
 	AssetFolder string
 }
 
 func NewService(store Store, AssetFolder string) *Service {
 	return &Service{
-		Db:          store,
+		store:       store,
 		AssetFolder: AssetFolder,
 	}
 }
@@ -47,10 +47,27 @@ func (s *Service) GetByContentId(contentIdStr string, assetRoleStr string) (*Ass
 		return nil, fmt.Errorf("invalid assetRole" + err.Error())
 	}
 
-	return s.Db.GetByContentAndRole(int(contentId), assetRole)
+	return s.store.GetByContentAndRole(int(contentId), assetRole)
 }
 
-func (s *Service) Create(id uint, c *CreateAsset) (Asset, error) {
+func (s *Service) Delete(assetId uint, deleteFile bool) error {
+	ass, err := s.store.GetById(assetId)
+	if err != nil {
+		return err
+	}
+
+	if deleteFile && ass.StoragePath != "" {
+		err = os.RemoveAll(ass.StoragePath)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = s.store.Delete(assetId)
+	return err
+}
+
+func (s *Service) Create(contentId uint, c *CreateAsset) (Asset, error) {
 	abs, err := filepath.Abs(c.Filepath)
 	if err != nil {
 		return Asset{}, err
@@ -62,11 +79,11 @@ func (s *Service) Create(id uint, c *CreateAsset) (Asset, error) {
 	}
 
 	c.Filepath = filepath.Join(abs, folderId.String())
-	return s.Db.Create(id, c.AssetType, c.AssetRole, c.Filepath)
+	return s.store.Create(contentId, c.AssetType, c.AssetRole, c.Filepath)
 }
 
 func (s *Service) Scan(assetId uint) error {
-	asset, err := s.Db.GetById(assetId)
+	asset, err := s.store.GetById(assetId)
 	if err != nil {
 		return err
 	}
@@ -101,7 +118,7 @@ func (s *Service) Finalize(assetId uint, downloadFolder string) error {
 
 	item := dir[0]
 
-	ass, err := s.Db.GetById(assetId)
+	ass, err := s.store.GetById(assetId)
 	if err != nil {
 		return err
 	}
@@ -128,7 +145,7 @@ func (s *Service) Finalize(assetId uint, downloadFolder string) error {
 	oldAssetPath := ass.StoragePath
 
 	ass.StoragePath = assetPath
-	err = s.Db.Save(ass)
+	err = s.store.Save(ass)
 	if err != nil {
 		return err
 	}

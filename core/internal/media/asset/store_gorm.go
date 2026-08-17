@@ -36,6 +36,11 @@ func (s *StoreGorm) GetById(id uint) (*Asset, error) {
 	return dest, err
 }
 
+func (s *StoreGorm) Delete(assetId uint) error {
+	err := s.db.Unscoped().Delete(&Asset{}, assetId).Error
+	return err
+}
+
 func (s *StoreGorm) GetByContentAndRole(contentId int, role Role) (*Asset, error) {
 	dest := Asset{}
 	err := s.db.

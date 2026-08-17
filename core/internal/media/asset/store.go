@@ -5,4 +5,5 @@ type Store interface {
 	GetById(id uint) (*Asset, error)
 	GetByContentAndRole(id int, role Role) (*Asset, error)
 	Save(ass *Asset) error
+	Delete(assetId uint) error
 }
