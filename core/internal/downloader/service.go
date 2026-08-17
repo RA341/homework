@@ -261,7 +261,7 @@ func (s *Service) runDownload(down *Download) (DownloadState, error) {
 				log.Warn().Err(err).Msg("Could not set download progress")
 			}
 
-			log.Debug().Any("data", progress).Msg("Download progress")
+			//log.Debug().Any("data", progress).Msg("Download progress")
 
 			if status == Complete || status == Error {
 				return status, nil
