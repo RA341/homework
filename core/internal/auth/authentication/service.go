@@ -11,6 +11,11 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+type Token struct {
+	Value  string
+	Expiry int64
+}
+
 type Service struct {
 	session   *session.Service
 	user      *users.Service
@@ -43,51 +48,61 @@ func (s *Service) Init() {
 	}
 }
 
-func (s *Service) Login(username, pass string) (*session.Session, string, string, error) {
+func (s *Service) Login(username, pass string) (Token, Token, error) {
 	userId, err := s.user.VerifyCredentials(username, pass)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed to verify credentials")
-		return nil, "", "", fmt.Errorf("invalid username/password")
+		return Token{}, Token{}, fmt.Errorf("invalid username/password")
 	}
 
 	sess, rawRefresh, err := s.session.Create(uint64(userId), 0)
 	if err != nil {
-		return nil, "", "", err
+		return Token{}, Token{}, err
 	}
 
-	jwtToken, err := s.generateJWT(uint64(userId), username)
+	jwtToken, err := s.generateJWT(uint64(userId))
 	if err != nil {
-		return nil, "", "", err
+		return Token{}, Token{}, err
 	}
 
-	return sess, jwtToken, rawRefresh, nil
+	return jwtToken, Token{
+		Value:  rawRefresh,
+		Expiry: sess.RefreshExpiry.Unix(),
+	}, nil
 }
 
-func (s *Service) Logout(sessionID uint) error {
-	return s.session.Delete(sessionID)
+func (s *Service) Logout(rawRefreshToken string) error {
+	return s.session.DeleteByToken(rawRefreshToken)
 }
 
-func (s *Service) Refresh(rawRefreshToken string) (*session.Session, string, string, error) {
+func (s *Service) Refresh(rawRefreshToken string) (Token, Token, error) {
 	sess, newRawRefresh, err := s.session.Refresh(rawRefreshToken, 0)
 	if err != nil {
-		return nil, "", "", err
+		return Token{}, Token{}, err
 	}
 
-	jwtToken, err := s.generateJWT(sess.UserID, sess.User.Username)
+	jwtToken, err := s.generateJWT(sess.UserID)
 	if err != nil {
-		return nil, "", "", err
+		return Token{}, Token{}, err
 	}
 
-	return sess, jwtToken, newRawRefresh, nil
+	return jwtToken, Token{
+		Value:  newRawRefresh,
+		Expiry: sess.RefreshExpiry.Unix(),
+	}, nil
 }
 
-func (s *Service) generateJWT(userID uint64, username string) (string, error) {
+func (s *Service) generateJWT(userID uint64) (Token, error) {
+	exp := time.Now().Add(15 * time.Minute).Unix()
 	claims := jwt.MapClaims{
-		"user_id":  userID,
-		"username": username,
-		"exp":      time.Now().Add(15 * time.Minute).Unix(),
-		"iat":      time.Now().Unix(),
+		"user_id": userID,
+		"exp":     exp,
+		"iat":     time.Now().Unix(),
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(s.jwtSecret)
+	tokenString, err := token.SignedString(s.jwtSecret)
+	if err != nil {
+		return Token{}, err
+	}
+	return Token{Value: tokenString, Expiry: exp}, nil
 }

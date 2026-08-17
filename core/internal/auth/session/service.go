@@ -59,6 +59,16 @@ func (s *Service) Delete(id uint) error {
 	return s.store.Delete(id)
 }
 
+// DeleteByToken deletes the session matching the raw refresh token.
+func (s *Service) DeleteByToken(rawRefreshToken string) error {
+	hashed := s.hashToken(rawRefreshToken)
+	session, err := s.store.GetByRefreshHashed(hashed)
+	if err != nil {
+		return err
+	}
+	return s.store.Delete(session.ID)
+}
+
 // CheckRefresh hashes the raw refresh token, retrieves the session,
 // and checks if it's expired.
 func (s *Service) CheckRefresh(rawRefreshToken string) (*Session, error) {

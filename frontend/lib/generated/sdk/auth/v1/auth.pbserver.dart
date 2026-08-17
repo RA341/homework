@@ -25,6 +25,8 @@ abstract class AuthServiceBase extends $pb.GeneratedService {
       $pb.ServerContext ctx, $0.LoginRequest request);
   $async.Future<$0.LogoutResponse> logout(
       $pb.ServerContext ctx, $0.LogoutRequest request);
+  $async.Future<$0.RefreshResponse> refresh(
+      $pb.ServerContext ctx, $0.RefreshRequest request);
 
   $pb.GeneratedMessage createRequest($core.String methodName) {
     switch (methodName) {
@@ -32,6 +34,8 @@ abstract class AuthServiceBase extends $pb.GeneratedService {
         return $0.LoginRequest();
       case 'Logout':
         return $0.LogoutRequest();
+      case 'Refresh':
+        return $0.RefreshRequest();
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }
@@ -44,6 +48,8 @@ abstract class AuthServiceBase extends $pb.GeneratedService {
         return login(ctx, request as $0.LoginRequest);
       case 'Logout':
         return logout(ctx, request as $0.LogoutRequest);
+      case 'Refresh':
+        return refresh(ctx, request as $0.RefreshRequest);
       default:
         throw $core.ArgumentError('Unknown method: $methodName');
     }

@@ -45,25 +45,29 @@ func TestAuthenticationService(t *testing.T) {
 	}
 
 	t.Run("Login success", func(t *testing.T) {
-		sess, jwtToken, rawRefresh, err := authService.Login(username, password)
+		sessionToken, refreshToken, err := authService.Login(username, password)
 		if err != nil {
 			t.Fatalf("login failed: %v", err)
 		}
 
-		if sess == nil {
-			t.Fatal("expected session to be non-nil")
-		}
-
-		if jwtToken == "" {
+		if sessionToken.Value == "" {
 			t.Error("expected non-empty JWT token")
 		}
 
-		if rawRefresh == "" {
+		if sessionToken.Expiry <= 0 {
+			t.Error("expected positive JWT expiry timestamp")
+		}
+
+		if refreshToken.Value == "" {
 			t.Error("expected non-empty raw refresh token")
 		}
 
+		if refreshToken.Expiry <= 0 {
+			t.Error("expected positive refresh token expiry timestamp")
+		}
+
 		// Verify JWT token claims
-		token, err := jwt.Parse(jwtToken, func(tok *jwt.Token) (interface{}, error) {
+		token, err := jwt.Parse(sessionToken.Value, func(tok *jwt.Token) (interface{}, error) {
 			return secret, nil
 		})
 		if err != nil {
@@ -81,38 +85,42 @@ func TestAuthenticationService(t *testing.T) {
 	})
 
 	t.Run("Login invalid credentials", func(t *testing.T) {
-		_, _, _, err := authService.Login(username, "wrong-password")
+		_, _, err := authService.Login(username, "wrong-password")
 		if err == nil {
 			t.Error("expected error for invalid password, got nil")
 		}
 	})
 
 	t.Run("Refresh success", func(t *testing.T) {
-		_, _, rawRefresh, err := authService.Login(username, password)
+		_, refreshToken, err := authService.Login(username, password)
 		if err != nil {
 			t.Fatalf("login failed: %v", err)
 		}
 
 		// Refresh token
-		sess, newJWT, newRawRefresh, err := authService.Refresh(rawRefresh)
+		newSessionToken, newRefreshToken, err := authService.Refresh(refreshToken.Value)
 		if err != nil {
 			t.Fatalf("refresh failed: %v", err)
 		}
 
-		if sess == nil {
-			t.Fatal("expected session to be non-nil")
-		}
-
-		if newJWT == "" {
+		if newSessionToken.Value == "" {
 			t.Error("expected non-empty new JWT token")
 		}
 
-		if newRawRefresh == "" {
+		if newSessionToken.Expiry <= 0 {
+			t.Error("expected positive new JWT expiry timestamp")
+		}
+
+		if newRefreshToken.Value == "" {
 			t.Error("expected non-empty new raw refresh token")
 		}
 
+		if newRefreshToken.Expiry <= 0 {
+			t.Error("expected positive new refresh token expiry timestamp")
+		}
+
 		// Verify new JWT token claims
-		token, err := jwt.Parse(newJWT, func(tok *jwt.Token) (interface{}, error) {
+		token, err := jwt.Parse(newSessionToken.Value, func(tok *jwt.Token) (interface{}, error) {
 			return secret, nil
 		})
 		if err != nil {
@@ -130,18 +138,18 @@ func TestAuthenticationService(t *testing.T) {
 	})
 
 	t.Run("Logout", func(t *testing.T) {
-		sess, _, rawRefresh, err := authService.Login(username, password)
+		_, refreshToken, err := authService.Login(username, password)
 		if err != nil {
 			t.Fatalf("login failed: %v", err)
 		}
 
-		err = authService.Logout(sess.ID)
+		err = authService.Logout(refreshToken.Value)
 		if err != nil {
 			t.Fatalf("logout failed: %v", err)
 		}
 
 		// Trying to refresh should fail now
-		_, _, _, err = authService.Refresh(rawRefresh)
+		_, _, err = authService.Refresh(refreshToken.Value)
 		if err == nil {
 			t.Error("expected error refreshing after logout, got nil")
 		}

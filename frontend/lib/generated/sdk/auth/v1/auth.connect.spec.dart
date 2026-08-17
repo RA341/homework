@@ -23,4 +23,11 @@ abstract final class AuthService {
     authv1auth.LogoutRequest.new,
     authv1auth.LogoutResponse.new,
   );
+
+  static const refresh = connect.Spec(
+    '/$name/Refresh',
+    connect.StreamType.unary,
+    authv1auth.RefreshRequest.new,
+    authv1auth.RefreshResponse.new,
+  );
 }
