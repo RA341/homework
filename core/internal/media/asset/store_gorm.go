@@ -27,6 +27,23 @@ func (s *StoreGorm) Save(ass *Asset) error {
 	return s.db.Updates(ass).Error
 }
 
+func (s *StoreGorm) ListNonEmptyAssets(after uint, limit int) ([]Asset, error) {
+	var assets []Asset
+
+	query := s.db.Where("COALESCE(storage_path, '') != ''")
+	if after != 0 {
+		query = query.Where("id > ?", after)
+	}
+
+	err := query.
+		Order("id").
+		Limit(limit).
+		Find(&assets).
+		Error
+
+	return assets, err
+}
+
 func (s *StoreGorm) GetById(id uint) (*Asset, error) {
 	dest := &Asset{}
 	err := s.db.

@@ -13,6 +13,16 @@ type TestStore struct {
 	nextID    uint
 }
 
+func (s *TestStore) SetProgress(id uint, status *DownloadProgress) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s *TestStore) EditLink(id int64, link string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 func NewTestStore() *TestStore {
 	return &TestStore{
 		downloads: make(map[uint]Download),

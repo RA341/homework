@@ -48,7 +48,10 @@ func (a *App) RegisterServices() {
 
 	assetStore := asset.NewStore(a.db)
 	assetFolder := "assets"
-	a.asset = asset.NewService(assetStore, assetFolder)
+	a.asset, err = asset.NewService(assetStore, assetFolder)
+	if err != nil {
+		log.Fatal().Msg("error initializing asset service")
+	}
 
 	contentStore := content.NewStore(a.db)
 	a.content = content.NewService(contentStore)

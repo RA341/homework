@@ -6,9 +6,11 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"sync"
 
 	"github.com/google/uuid"
 	"github.com/ra341/homework/common/fu"
+	"github.com/ra341/homework/common/sem"
 	"github.com/rs/zerolog/log"
 )
 
@@ -16,13 +18,20 @@ type Service struct {
 	store Store
 
 	AssetFolder string
+
+	Sem              sem.Sem
+	IsScannerRunning bool
 }
 
-func NewService(store Store, AssetFolder string) *Service {
-	return &Service{
+func NewService(store Store, AssetFolder string) (*Service, error) {
+	s := &Service{
 		store:       store,
 		AssetFolder: AssetFolder,
+		Sem:         sem.New(1),
 	}
+
+	err := s.Init()
+	return s, err
 }
 
 func (s *Service) Init() error {
@@ -32,6 +41,8 @@ func (s *Service) Init() error {
 	}
 
 	s.AssetFolder = abs
+	// todo put in scheduled task
+	//s.StartScan()
 
 	return nil
 }
@@ -82,22 +93,94 @@ func (s *Service) Create(contentId uint, c *CreateAsset) (Asset, error) {
 	return s.store.Create(contentId, c.AssetType, c.AssetRole, c.Filepath)
 }
 
-func (s *Service) Scan(assetId uint) error {
-	asset, err := s.store.GetById(assetId)
+func (s *Service) StartScan() {
+	ok := s.Sem.TryAcquire()
+	if ok {
+		go s.worker()
+	} else {
+		log.Debug().Msg("scanner already running")
+	}
+}
+
+func (s *Service) worker() {
+	s.IsScannerRunning = true
+
+	defer func() {
+		log.Debug().Msg("asset scan finished")
+		s.Sem.Release()
+		s.IsScannerRunning = false
+	}()
+
+	log.Debug().Msg("asset scanner started")
+
+	limit := 10
+	scanSem := sem.New(limit)
+	wg := sync.WaitGroup{}
+
+	var lastId uint = 0
+	for {
+		assets, err := s.store.ListNonEmptyAssets(lastId, limit)
+		if err != nil {
+			log.Err(err).Msg("scan failed")
+			return
+		}
+
+		assetCount := len(assets)
+		if assetCount == 0 {
+			log.Warn().Msg("no additional assets found, waiting for existing scans to finish")
+			wg.Wait()
+			return
+		}
+
+		for _, ass := range assets {
+			scanSem.Acquire()
+			wg.Go(func() {
+				defer scanSem.Release()
+
+				err = s.scanAsset(&ass)
+				if err != nil {
+					log.Warn().Err(err).Msg("asset scan failed")
+				}
+			})
+		}
+
+		// assets should always
+		if assetCount == 0 {
+			log.Err(err).Msg("0 assets found, THIS SHOULD NEVER HAPPEN, PLEASE OPEN A ISSUE")
+			return
+		}
+		lastId = assets[assetCount-1].ID
+	}
+}
+
+func (s *Service) scanAsset(ass *Asset) error {
+	file, err := os.Stat(ass.StoragePath)
 	if err != nil {
 		return err
 	}
 
-	dir, err := os.ReadDir(asset.StoragePath)
-	if err != nil {
-		return err
+	fileModified := file.ModTime().After(ass.UpdatedAt)
+	if ass.FileMetadata.IsScanned || fileModified {
+		log.Debug().
+			Str("path", filepath.Dir(ass.StoragePath)).
+			Msg("asset scanned, no changes to file")
+		return nil
 	}
 
-	if len(dir) == 0 {
-		return fmt.Errorf("asset has no associated files")
-	}
+	ass.FileMetadata.IsScanned = true
+	ass.FileMetadata.Size = uint(file.Size())
 
-	return nil
+	// todo
+	//ass.fm.Duration
+	//ass.fm.Height
+	//ass.fm.Width
+
+	err = s.store.Save(ass)
+	log.Debug().
+		Str("path", filepath.Dir(ass.StoragePath)).
+		Msg("scanned asset")
+
+	return err
 }
 
 func (s *Service) Finalize(assetId uint, downloadFolder string) error {

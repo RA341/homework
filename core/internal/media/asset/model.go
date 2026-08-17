@@ -15,16 +15,17 @@ type Asset struct {
 	Role      Role             `gorm:"index:idx_asset"`
 	Type      Type
 
-	StoragePath string
-	fm          FileMetadata `gorm:"embedded;embeddedPrefix:metadata_"`
+	StoragePath  string       `gorm:"null"`
+	FileMetadata FileMetadata `gorm:"embedded;embeddedPrefix:metadata_"`
 }
 
 type FileMetadata struct {
-	MimeType string
-	Width    uint
-	Height   uint
-	Duration time.Duration
-	Size     uint
+	MimeType  string
+	Width     uint
+	Height    uint
+	Duration  time.Duration
+	Size      uint
+	IsScanned bool `gorm:"default:false"`
 }
 
 //go:generate enumer -type=Type -json -text -output gen_enum_type.go

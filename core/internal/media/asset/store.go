@@ -6,4 +6,5 @@ type Store interface {
 	GetByContentAndRole(id int, role Role) (*Asset, error)
 	Save(ass *Asset) error
 	Delete(assetId uint) error
+	ListNonEmptyAssets(after uint, limit int) ([]Asset, error)
 }

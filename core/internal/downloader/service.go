@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/ra341/homework/common/sem"
 	"github.com/rs/zerolog/log"
 )
 
@@ -27,7 +28,7 @@ type Service struct {
 	asset AssetFinalizer
 	cli   DownloadClient
 
-	workerLock    chan struct{}
+	workerLock    sem.Sem
 	workerRunning bool
 }
 
@@ -37,7 +38,7 @@ func NewService(conf *Config, store Store, cli DownloadClient, asset AssetFinali
 		store:      store,
 		cli:        cli,
 		asset:      asset,
-		workerLock: make(chan struct{}, 1),
+		workerLock: sem.New(1),
 	}
 
 	err = s.Init()
@@ -119,23 +120,23 @@ func (s *Service) Retry(id uint) error {
 }
 
 func (s *Service) launchWorker() {
-	select {
-	case s.workerLock <- struct{}{}:
-		log.Info().Msg("launched worker")
+	ok := s.workerLock.TryAcquire()
+	if ok {
+		log.Info().Msg("launched download worker")
 		go s.worker()
-	default:
-		log.Info().Msg("worker is already running")
+	} else {
+		log.Info().Msg("download worker is already running")
 	}
 }
 
 func (s *Service) worker() {
 	s.workerRunning = true
 	defer func() {
-		<-s.workerLock
+		s.workerLock.Release()
 		s.workerRunning = false
 	}()
 
-	sem := make(chan struct{}, s.conf.MaxDownloads)
+	downloadSem := sem.New(s.conf.MaxDownloads)
 	wg := sync.WaitGroup{}
 
 	strikes := 0
@@ -169,8 +170,7 @@ func (s *Service) worker() {
 		strikes = 0
 
 		for _, d := range queued {
-			sem <- struct{}{}
-
+			downloadSem.Acquire()
 			err = s.store.SetStatus(d.ID, Downloading)
 			if err != nil {
 				log.Warn().Err(err).Any("download", d).Msg("Could not set status to downloading, skipping...")
@@ -178,10 +178,7 @@ func (s *Service) worker() {
 			}
 
 			wg.Go(func() {
-				defer func() {
-					<-sem
-				}()
-
+				defer downloadSem.Release()
 				s.download(&d)
 			})
 		}
