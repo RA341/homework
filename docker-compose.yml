@@ -1,13 +1,14 @@
 name: hw-dev
 services:
-  downloader:
-    build:
-      dockerfile: Dockerfile.downloader
-      context: .
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./.build/dev/downloads:/.build/dev/downloads
+  #  downloader:
+  #    build:
+  #      dockerfile: Dockerfile.downloader
+  #      context: .
+  #    ports:
+  #      - "8000:8000"
+  #    volumes:
+
+  #      - ./.build/dev/downloads:/.build/dev/downloads
 
   browser:
     image: ghcr.io/ra341/chromtrol:latest
