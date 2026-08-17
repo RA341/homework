@@ -18,20 +18,14 @@ func (s *StoreGorm) Create(session *Session) error {
 
 func (s *StoreGorm) GetByID(id uint) (*Session, error) {
 	dest := &Session{}
-	err := s.db.First(dest, id).Error
-	if err != nil {
-		return nil, err
-	}
-	return dest, nil
+	err := s.db.Preload("User").First(dest, id).Error
+	return dest, err
 }
 
 func (s *StoreGorm) GetByRefreshHashed(hashed string) (*Session, error) {
 	dest := &Session{}
-	err := s.db.Where("refresh_hashed = ?", hashed).First(dest).Error
-	if err != nil {
-		return nil, err
-	}
-	return dest, nil
+	err := s.db.Preload("User").Where("refresh_hashed = ?", hashed).First(dest).Error
+	return dest, err
 }
 
 func (s *StoreGorm) Update(session *Session) error {

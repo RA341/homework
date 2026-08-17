@@ -112,4 +112,31 @@ func TestStoreGorm(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("GetByUsername", func(t *testing.T) {
+		user := &User{
+			Username:       "david",
+			HashedPassword: "davidhash",
+		}
+
+		err := store.Create(user)
+		if err != nil {
+			t.Fatalf("failed to create user: %v", err)
+		}
+
+		foundUser, err := store.GetByUsername("david")
+		if err != nil {
+			t.Fatalf("failed to get user by username: %v", err)
+		}
+
+		if foundUser.ID != user.ID {
+			t.Errorf("expected ID %d, got %d", user.ID, foundUser.ID)
+		}
+
+		// Try to find a non-existent user
+		_, err = store.GetByUsername("nonexistent")
+		if err == nil {
+			t.Error("expected error when getting nonexistent user, got nil")
+		}
+	})
 }

@@ -5,4 +5,5 @@ type Store interface {
 	Create(user *User) error
 	Delete(id uint) error
 	Edit(user *User) error
+	GetByUsername(username string) (*User, error)
 }

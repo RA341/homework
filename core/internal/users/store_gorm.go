@@ -29,3 +29,12 @@ func (s *StoreGorm) Delete(id uint) error {
 func (s *StoreGorm) Edit(user *User) error {
 	return s.db.Save(user).Error
 }
+
+func (s *StoreGorm) GetByUsername(username string) (*User, error) {
+	dest := &User{}
+	err := s.db.Where("username = ?", username).First(dest).Error
+	if err != nil {
+		return nil, err
+	}
+	return dest, nil
+}
