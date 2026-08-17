@@ -38,9 +38,6 @@ func (a *App) RegisterServices() {
 		log.Fatal().Err(err).Msg("could not get working directory")
 	}
 
-	config := downloader.NewConfig(dir)
-	log.Debug().Any("val", config).Msg("config")
-
 	dataPath := filepath.Join(dir, "data")
 	err = os.MkdirAll(dataPath, 0755)
 	if err != nil {
@@ -56,14 +53,15 @@ func (a *App) RegisterServices() {
 	contentStore := content.NewStore(a.db)
 	a.content = content.NewService(contentStore)
 
-	downloadDb := downloader.NewStoreGorm(a.db)
-
 	apiUrl := "http://localhost:8998"
 	vncUrl := "http://localhost:3012/"
 	a.browser, err = browser.NewService(apiUrl, vncUrl)
 	if err != nil {
 		log.Warn().Err(err).Msg("could not create chromtrol client")
 	}
+
+	config := downloader.NewConfig(dir)
+	log.Debug().Any("val", config).Msg("config")
 
 	pyDownloader, err := downloader.NewPyClient(config.ServerUrl)
 	if err != nil {
@@ -72,6 +70,7 @@ func (a *App) RegisterServices() {
 		//log.Fatal().Err(err).Msg("could not create py downloader")
 	}
 
+	downloadDb := downloader.NewStoreGorm(a.db)
 	a.downloads, err = downloader.NewService(config, downloadDb, pyDownloader, a.asset)
 	if err != nil {
 		// todo handle gracefully
