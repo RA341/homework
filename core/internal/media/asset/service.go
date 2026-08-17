@@ -234,7 +234,7 @@ func (s *Service) Finalize(assetId uint, downloadFolder string) error {
 	}
 
 	if oldAssetPath != "" {
-		err = os.RemoveAll(finalFolder)
+		err = os.RemoveAll(oldAssetPath)
 		if err != nil {
 			log.Warn().Err(err).Msg("could not remove old asset folder")
 		}
