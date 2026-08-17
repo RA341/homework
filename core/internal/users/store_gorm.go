@@ -1,0 +1,31 @@
+package users
+
+import (
+	"gorm.io/gorm"
+)
+
+type StoreGorm struct {
+	db *gorm.DB
+}
+
+func NewStore(db *gorm.DB) Store {
+	return &StoreGorm{db: db}
+}
+
+func (s *StoreGorm) List() ([]User, error) {
+	var list []User
+	err := s.db.Find(&list).Error
+	return list, err
+}
+
+func (s *StoreGorm) Create(user *User) error {
+	return s.db.Create(user).Error
+}
+
+func (s *StoreGorm) Delete(id uint) error {
+	return s.db.Delete(&User{}, id).Error
+}
+
+func (s *StoreGorm) Edit(user *User) error {
+	return s.db.Save(user).Error
+}
