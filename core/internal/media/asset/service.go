@@ -110,8 +110,8 @@ func (s *Service) Finalize(assetId uint, downloadFolder string) error {
 	if err != nil {
 		return err
 	}
-
 	finalFolder := filepath.Join(s.AssetFolder, assetFolderId.String())
+
 	err = os.MkdirAll(finalFolder, 0750)
 	if err != nil {
 		return err
@@ -125,9 +125,22 @@ func (s *Service) Finalize(assetId uint, downloadFolder string) error {
 		return err
 	}
 
+	oldAssetPath := ass.StoragePath
+
 	ass.StoragePath = assetPath
 	err = s.Db.Save(ass)
-	return err
+	if err != nil {
+		return err
+	}
+
+	if oldAssetPath != "" {
+		err = os.RemoveAll(finalFolder)
+		if err != nil {
+			log.Warn().Err(err).Msg("could not remove old asset folder")
+		}
+	}
+
+	return nil
 }
 
 func (s *Service) move(downloadPath string, assetPath string) error {
