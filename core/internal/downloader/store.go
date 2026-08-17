@@ -8,6 +8,6 @@ type Store interface {
 
 	SetDownloadErr(id uint, err string) error
 	SetStatus(id uint, state DownloadState) error
-	setProgress(id uint, status *DownloadProgress) error
+	SetProgress(id uint, status *DownloadProgress) error
 	EditLink(id int64, link string) error
 }

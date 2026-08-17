@@ -76,7 +76,7 @@ func (s *StoreGorm) AddDownload(download *Download) error {
 	return s.db.Create(&download).Error
 }
 
-func (s *StoreGorm) setProgress(id uint, status *DownloadProgress) error {
+func (s *StoreGorm) SetProgress(id uint, status *DownloadProgress) error {
 	return s.db.Model(&Download{}).
 		Where("id = ?", id).
 		Updates(

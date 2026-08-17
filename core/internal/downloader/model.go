@@ -22,7 +22,7 @@ type Download struct {
 	gorm.Model
 
 	AssetID uint
-	Asset   asset.Asset `gorm:"foreignKey:AssetID; not null"`
+	Asset   asset.Asset `gorm:"foreignKey:AssetID;constraint:OnDelete:CASCADE;not null"`
 
 	Name         string
 	DownloadLink string

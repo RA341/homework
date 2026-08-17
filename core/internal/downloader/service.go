@@ -102,6 +102,17 @@ func (s *Service) Retry(id uint) error {
 		return err
 	}
 
+	err = s.store.SetProgress(id, &DownloadProgress{
+		TimeLeftSecs:           0,
+		DownloadBytesPerSecond: 0,
+		Complete:               0,
+		Left:                   0,
+		Error:                  "",
+	})
+	if err != nil {
+		log.Warn().Err(err).Msg("Could not clear old progress while retrying")
+	}
+
 	s.launchWorker()
 
 	return nil
@@ -248,7 +259,7 @@ func (s *Service) runDownload(down *Download) (DownloadState, error) {
 
 			strikes = 0
 
-			err = s.store.setProgress(down.ID, progress)
+			err = s.store.SetProgress(down.ID, progress)
 			if err != nil {
 				log.Warn().Err(err).Msg("Could not set download progress")
 			}
