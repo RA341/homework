@@ -18,6 +18,19 @@ func (s *StoreGorm) List() ([]User, error) {
 	return list, err
 }
 
+func (s *StoreGorm) GetById(id uint) (*User, error) {
+	user := &User{}
+	err := s.db.Find(user, id).Error
+
+	return user, err
+}
+
+func (s *StoreGorm) Count() (int, error) {
+	var c int64
+	err := s.db.Model(&User{}).Count(&c).Error
+	return int(c), err
+}
+
 func (s *StoreGorm) Create(user *User) error {
 	return s.db.Create(user).Error
 }

@@ -1,8 +1,10 @@
 package users
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -10,10 +12,40 @@ type Service struct {
 	Store
 }
 
-func NewService(store Store) *Service {
-	return &Service{
+func NewService(store Store) (*Service, error) {
+	s := &Service{
 		Store: store,
 	}
+	err := s.Init()
+
+	return s, err
+}
+
+func (s *Service) Init() error {
+	return s.ensureDefaultUser()
+}
+
+func (s *Service) ensureDefaultUser() error {
+	count, err := s.Store.Count()
+	if err != nil {
+		return err
+	}
+
+	if count != 0 {
+		log.Debug().Int("count", count).Msg("users exist")
+		return nil
+	}
+
+	defaultUser := "admin"
+	defaultPassword := "hwisnice"
+
+	err = s.Create(defaultUser, defaultPassword)
+	if err != nil {
+		return err
+	}
+	log.Info().Msg("created default user")
+
+	return err
 }
 
 func (s *Service) Create(username, password string) error {
@@ -56,4 +88,19 @@ func (s *Service) VerifyCredentials(user string, pass string) (uint, error) {
 	}
 
 	return u.ID, nil
+}
+
+type contextKey struct{}
+
+var userKey = contextKey{}
+
+// SetUserIdCtx returns a new context with the given user ID.
+func SetUserIdCtx(ctx context.Context, userID uint64) context.Context {
+	return context.WithValue(ctx, userKey, userID)
+}
+
+// GetUserIDCtx retrieves the user ID from the context.
+func GetUserIDCtx(ctx context.Context) (uint64, bool) {
+	userID, ok := ctx.Value(userKey).(uint64)
+	return userID, ok
 }
