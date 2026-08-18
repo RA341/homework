@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:homework/common/api/asset/asset.provider.dart';
+import 'package:homework/common/api/authtoken.provider.dart';
+import 'package:homework/common/theme/design_system.dart';
+import 'package:homework/generated/sdk/content/v1/content.pb.dart';
+import 'package:homework/pages/home/content_browser_provider.dart';
+import 'package:homework/pages/home/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
-import 'package:homework/common/theme/design_system.dart';
-import 'package:homework/generated/sdk/content/v1/content.pb.dart';
-import 'package:homework/pages/home/utils.dart';
-import 'package:homework/common/api/asset/asset.provider.dart';
-import 'package:homework/pages/home/content_browser_provider.dart';
 
 class VideoPlayerScreen extends ConsumerStatefulWidget {
   final Content initialItem;
@@ -60,17 +61,27 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
   }
 
   void _playVideo(Content item) {
-    final videoUrl = ref.read(assetServiceProvider).load(
-          contentId: item.id.toInt(),
-          assetRole: 'Main',
-        );
+    final videoUrl = ref
+        .read(assetServiceProvider)
+        .load(contentId: item.id.toInt(), assetRole: 'Main');
+
+    final tokens = ref.read(authTokenProvider);
+
     setState(() {
       currentItem = item;
       currentVideoUrl = videoUrl;
       hasError = false;
       errorMessage = null;
     });
-    player.open(Media(videoUrl));
+    player.open(
+      Media(
+        videoUrl,
+        httpHeaders: {
+          sessionHeader: tokens.value?.session ?? "",
+          refreshHeader: tokens.value?.refresh ?? "",
+        },
+      ),
+    );
   }
 
   @override
@@ -88,7 +99,10 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
         elevation: 0,
         scrolledUnderElevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: AppColors.onSurface),
+          icon: const Icon(
+            Icons.arrow_back_rounded,
+            color: AppColors.onSurface,
+          ),
           onPressed: () => Navigator.of(context).pop(),
         ),
       ),
@@ -201,8 +215,9 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
   }
 
   Widget _buildPlayer(BuildContext context, bool isDesktopLayout) {
-    final borderRadius =
-        isDesktopLayout ? AppShapes.radiusLg : BorderRadius.zero;
+    final borderRadius = isDesktopLayout
+        ? AppShapes.radiusLg
+        : BorderRadius.zero;
     return AspectRatio(
       aspectRatio: 16 / 9,
       child: ClipRRect(
@@ -261,9 +276,7 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
                   ),
                 )
               else
-                Video(
-                  controller: controller,
-                ),
+                Video(controller: controller),
             ],
           ),
         ),
@@ -306,9 +319,7 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
               decoration: BoxDecoration(
                 color: AppColors.level1,
                 borderRadius: AppShapes.radiusSm,
-                border: Border.all(
-                  color: const Color(0xFF2C2928),
-                ),
+                border: Border.all(color: const Color(0xFF2C2928)),
               ),
               child: Text(
                 'ID: ${currentItem.id}',
@@ -337,10 +348,7 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
           decoration: BoxDecoration(
             color: AppColors.level1,
             borderRadius: AppShapes.radiusDefault,
-            border: Border.all(
-              color: const Color(0xFF2C2928),
-              width: 1.0,
-            ),
+            border: Border.all(color: const Color(0xFF2C2928), width: 1.0),
           ),
           child: Text(
             currentItem.description.isNotEmpty
@@ -378,10 +386,7 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
         final item = videoRecommendations[index];
         return Padding(
           padding: const EdgeInsets.only(bottom: AppSpacing.base * 1.5),
-          child: RecommendationTile(
-            item: item,
-            onTap: () => _playVideo(item),
-          ),
+          child: RecommendationTile(item: item, onTap: () => _playVideo(item)),
         );
       },
     );
@@ -410,10 +415,7 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
         final item = videoRecommendations[index];
         return Padding(
           padding: const EdgeInsets.only(bottom: AppSpacing.base * 1.5),
-          child: RecommendationTile(
-            item: item,
-            onTap: () => _playVideo(item),
-          ),
+          child: RecommendationTile(item: item, onTap: () => _playVideo(item)),
         );
       },
     );
@@ -540,9 +542,8 @@ class _RecommendationTileState extends State<RecommendationTile> {
                                 child: Text(
                                   '#${widget.item.id}',
                                   style: AppTypography.labelMd.copyWith(
-                                    color: AppColors.onSurfaceVariant.withValues(
-                                      alpha: 0.5,
-                                    ),
+                                    color: AppColors.onSurfaceVariant
+                                        .withValues(alpha: 0.5),
                                     fontSize: 9,
                                   ),
                                 ),

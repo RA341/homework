@@ -9,7 +9,7 @@ final assetServiceProvider = Provider<AssetService>((ref) {
 class AssetService {
   final String basePath;
 
-  static const assetBase = "/assets";
+  static const assetBase = "/protected/assets";
 
   AssetService({required this.basePath});
 

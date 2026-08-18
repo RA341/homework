@@ -38,9 +38,13 @@ final authTokenProvider =
   AuthTokenNotifier.new,
 );
 
+const sessionHeader = 'session';
+const refreshHeader = 'refresh';
+
 class AuthTokenNotifier extends AsyncNotifier<AuthTokens> {
   static const _sessionKey = 'auth_session';
   static const _refreshKey = 'auth_refresh';
+
 
   @override
   FutureOr<AuthTokens> build() {

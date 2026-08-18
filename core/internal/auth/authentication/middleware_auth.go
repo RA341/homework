@@ -18,6 +18,7 @@ func NewAuthMiddleware(srv *Service) func(http.Handler) http.Handler {
 					next.ServeHTTP(w, r.WithContext(ctx))
 					return
 				}
+				log.Debug().Err(err).Msg("could not verfiy session")
 			}
 
 			// If session token is missing, invalid or expired, check refresh token

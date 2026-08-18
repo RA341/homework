@@ -10,7 +10,7 @@ final browserApiProvider = Provider<BrowserServiceClient>((ref) {
 
 final browserVncLinkProvider = Provider<Uri>((ref) {
   final transport = ref.watch(basePathProvider);
-  final l = "$transport/browser/vnc";
+  final l = "$transport/protected/browser/vnc";
 
   return Uri.parse(l);
 });

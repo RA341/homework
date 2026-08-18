@@ -23,10 +23,10 @@ final protectedTransportProvider = Provider<protocol.Transport>((ref) {
       <I extends Object, O extends Object>(next) {
         return (req) {
           if (session != null && session.isNotEmpty) {
-            req.headers['session'] = session;
+            req.headers[sessionHeader] = session;
           }
           if (refresh != null && refresh.isNotEmpty) {
-            req.headers['refresh'] = refresh;
+            req.headers[refreshHeader] = refresh;
           }
           return next(req);
         };
