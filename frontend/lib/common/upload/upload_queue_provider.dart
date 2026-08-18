@@ -3,10 +3,10 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:homework/common/api/basepath_provider.dart';
-import 'package:homework/common/api/endpoints/upload_provider.dart';
+import 'package:homework/common/api/upload/upload.provider.dart';
 import 'package:homework/common/result/result.dart';
 import 'package:homework/common/upload/job.dart';
-import 'package:homework/common/api/endpoints/upload_dto.dart';
+import 'package:homework/common/api/upload/upload.provider.dto.dart';
 
 final uploadQueueProvider =
     NotifierProvider<UploadQueueNotifier, List<UploadJob>>(

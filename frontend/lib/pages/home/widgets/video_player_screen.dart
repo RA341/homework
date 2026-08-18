@@ -5,7 +5,7 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:homework/common/theme/design_system.dart';
 import 'package:homework/generated/sdk/content/v1/content.pb.dart';
 import 'package:homework/pages/home/utils.dart';
-import 'package:homework/common/api/endpoints/asset_provider.dart';
+import 'package:homework/common/api/asset/asset.provider.dart';
 import 'package:homework/pages/home/content_browser_provider.dart';
 
 class VideoPlayerScreen extends ConsumerStatefulWidget {

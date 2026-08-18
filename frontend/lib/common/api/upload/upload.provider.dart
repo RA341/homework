@@ -6,7 +6,7 @@ import 'package:homework/common/api/basepath_provider.dart';
 import 'package:homework/common/api/runner.dart';
 import 'package:homework/common/result/result.dart';
 import 'package:homework/common/http/http_client_progress.dart';
-import 'package:homework/common/api/endpoints/upload_dto.dart';
+import 'package:homework/common/api/upload/upload.provider.dto.dart';
 import 'package:http/http.dart' as http;
 
 final uploadServiceProvider = Provider<UploadService>((ref) {

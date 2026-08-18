@@ -9,7 +9,7 @@ import 'package:homework/generated/sdk/downloader/v1/downloader.connect.client.d
 import 'package:homework/generated/sdk/downloader/v1/downloader.pb.dart';
 
 final downloaderApiProvider = Provider<DownloaderServiceClient>((ref) {
-  final transport = ref.watch(transportProvider);
+  final transport = ref.watch(protectedTransportProvider);
   return DownloaderServiceClient(transport);
 });
 

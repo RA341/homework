@@ -3,6 +3,6 @@ import 'package:homework/common/api/transport_provider.dart';
 import 'package:homework/generated/sdk/content/v1/content.connect.client.dart';
 
 final contentApiProvider = Provider<ContentServiceClient>((ref) {
-  final transport = ref.watch(transportProvider);
+  final transport = ref.watch(protectedTransportProvider);
   return ContentServiceClient(transport);
 });

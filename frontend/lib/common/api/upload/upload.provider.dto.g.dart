@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'upload_dto.dart';
+part of 'upload.provider.dto.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator

@@ -4,6 +4,6 @@ import 'package:homework/common/api/transport_provider.dart';
 import 'package:homework/generated/sdk/media/v1/media.connect.client.dart';
 
 final mediaApiProvider = Provider<MediaServiceClient>((ref) {
-  final transport = ref.watch(transportProvider);
+  final transport = ref.watch(protectedTransportProvider);
   return MediaServiceClient(transport);
 });

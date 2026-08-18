@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:homework/common/api/endpoints/media_provider.dart';
+import 'package:homework/common/api/media/media.provider.dart';
 import 'package:homework/common/api/runner.dart';
 import 'package:homework/common/result/result.dart';
 import 'package:homework/common/theme/design_system.dart';

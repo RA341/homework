@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:homework/common/api/endpoints/browser_provider.dart';
+import 'package:homework/common/api/browser/browser.provider.dart';
 import 'package:homework/common/api/runner.dart';
 import 'package:homework/common/result/result.dart';
 import 'package:homework/common/theme/design_system.dart';

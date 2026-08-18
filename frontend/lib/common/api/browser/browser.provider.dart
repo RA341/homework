@@ -4,7 +4,7 @@ import 'package:homework/common/api/transport_provider.dart';
 import 'package:homework/generated/sdk/browser/v1/browser.connect.client.dart';
 
 final browserApiProvider = Provider<BrowserServiceClient>((ref) {
-  final transport = ref.watch(transportProvider);
+  final transport = ref.watch(protectedTransportProvider);
   return BrowserServiceClient(transport);
 });
 

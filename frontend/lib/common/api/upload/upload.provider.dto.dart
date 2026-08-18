@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'upload_dto.freezed.dart';
-part 'upload_dto.g.dart';
+part 'upload.provider.dto.freezed.dart';
+part 'upload.provider.dto.g.dart';
 
 @freezed
 abstract class UploadDto with _$UploadDto {

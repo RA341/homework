@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:homework/common/api/endpoints/download_provider.dart';
+import 'package:homework/common/api/download/download.provider.dart';
 import 'package:homework/common/api/runner.dart';
 import 'package:homework/common/result/result.dart';
 import 'package:homework/generated/sdk/downloader/v1/downloader.pb.dart';

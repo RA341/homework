@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:homework/common/api/endpoints/content_provider.dart';
+import 'package:homework/common/api/content/content.provider.dart';
 import 'package:homework/generated/sdk/content/v1/content.pb.dart';
 
 final contentBrowserProvider = NotifierProvider<
