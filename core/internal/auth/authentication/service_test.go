@@ -25,7 +25,7 @@ func TestAuthenticationService(t *testing.T) {
 
 	// Setup users service
 	usersStore := users.NewStore(db)
-	usersService := users.NewService(usersStore)
+	usersService, _ := users.NewService(usersStore)
 
 	// Setup session service
 	sessionStore := session.NewStore(db)
@@ -43,6 +43,11 @@ func TestAuthenticationService(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create test user: %v", err)
 	}
+	dbUser, err := usersService.GetByUsername(username)
+	if err != nil {
+		t.Fatalf("failed to retrieve test user: %v", err)
+	}
+	userID := uint64(dbUser.ID)
 
 	t.Run("Login success", func(t *testing.T) {
 		sessionToken, refreshToken, err := authService.Login(username, password)
@@ -79,8 +84,9 @@ func TestAuthenticationService(t *testing.T) {
 			t.Fatal("invalid token claims")
 		}
 
-		if claims["username"] != username {
-			t.Errorf("expected username %s in JWT claims, got %s", username, claims["username"])
+		userIDVal, ok := claims["user_id"].(float64)
+		if !ok || uint64(userIDVal) != userID {
+			t.Errorf("expected user_id %d in JWT claims, got %v", userID, claims["user_id"])
 		}
 	})
 
@@ -132,8 +138,9 @@ func TestAuthenticationService(t *testing.T) {
 			t.Fatal("invalid new token claims")
 		}
 
-		if claims["username"] != username {
-			t.Errorf("expected username %s in JWT claims, got %s", username, claims["username"])
+		userIDVal, ok := claims["user_id"].(float64)
+		if !ok || uint64(userIDVal) != userID {
+			t.Errorf("expected user_id %d in JWT claims, got %v", userID, claims["user_id"])
 		}
 	})
 

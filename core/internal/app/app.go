@@ -4,14 +4,17 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strings"
+	"time"
 
 	"github.com/ra341/homework/common/database"
+	"github.com/ra341/homework/internal/auth/authentication"
+	"github.com/ra341/homework/internal/auth/session"
 	"github.com/ra341/homework/internal/browser"
 	"github.com/ra341/homework/internal/downloader"
 	"github.com/ra341/homework/internal/media"
 	"github.com/ra341/homework/internal/media/asset"
 	"github.com/ra341/homework/internal/media/content"
+	"github.com/ra341/homework/internal/users"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -30,6 +33,9 @@ type App struct {
 	media     *media.Service
 	downloads *downloader.Service
 	browser   *browser.Service
+	Auth      *authentication.Service
+	Session   *session.Service
+	User      *users.Service
 }
 
 func (a *App) RegisterServices() {
@@ -86,10 +92,18 @@ func (a *App) RegisterServices() {
 		log.Fatal().Err(err).Msg("could not create media service")
 	}
 
-	//_, err = downloadService.Download("https://www.youtube.com/watch?v=fVNgE-HaKxo")
-	//if err != nil {
-	//	log.Fatal().Err(err).Msg("could not download video")
-	//}
+	sessionDb := session.NewStore(a.db)
+	sessionExpiry := time.Hour * 24 * 7
+	a.Session = session.NewService(sessionDb, sessionExpiry)
+
+	userStore := users.NewStore(a.db)
+	a.User, err = users.NewService(userStore)
+	if err != nil {
+		log.Warn().Err(err).Msg("could not init user service")
+	}
+
+	jwtSecret := "test-secret-change-me"
+	a.Auth = authentication.NewService(jwtSecret, a.Session, a.User)
 }
 
 func (a *App) InitDB(dataPath string) {
@@ -103,6 +117,8 @@ func (a *App) InitDB(dataPath string) {
 		&asset.Asset{},
 		&content.Content{},
 		&downloader.Download{},
+		&users.User{},
+		&session.Session{},
 	}
 
 	err = db.AutoMigrate(models...)
@@ -130,12 +146,34 @@ func (a *App) RegisterHandlers(r *http.ServeMux) {
 	ro.AddRouter(uiPrefix, uiMux)
 }
 
+func (a *App) registerUIHandler(r *http.ServeMux) {
+	// todo
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("No ui set fuck off"))
+	})
+}
+
 func (a *App) registerApiHandlers(r *http.ServeMux) {
-	r.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
+	rou := Rou{parentMux: r}
+
+	const publicPrefix = "/public"
+	publicMux := http.NewServeMux()
+	a.addPublicHandlers(publicMux)
+	rou.AddRouter(publicPrefix, publicMux)
+
+	const protectedPrefix = "/protected"
+	protectedMux := http.NewServeMux()
+	a.addProtectedHandlers(protectedMux)
+	authM := authentication.NewAuthMiddleware(a.Auth)
+	rou.AddRouter(protectedPrefix, authM(protectedMux))
+}
+
+func (a *App) addProtectedHandlers(mux *http.ServeMux) {
+	rou := Rou{parentMux: mux}
+
+	mux.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("pong"))
 	})
-
-	rou := Rou{parentMux: r}
 
 	// normal http handlers need prefix stripping
 	rou.AddRouter(media.NewHandlerHttp(a.media))
@@ -143,16 +181,20 @@ func (a *App) registerApiHandlers(r *http.ServeMux) {
 	rou.AddRouter(browser.NewHandlerHttp(a.browser))
 
 	// connect rpc should not strip the prefix
+	rou.AddHandler(users.NewHandler(a.User))
 	rou.AddHandler(browser.NewHandler(a.browser))
 	rou.AddHandler(media.NewHandler(a.media))
 	rou.AddHandler(downloader.NewHandler(a.downloads))
 	rou.AddHandler(content.NewHandler(a.content))
 }
 
-func (a *App) registerUIHandler(r *http.ServeMux) {
-	// todo
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte("No ui set fuck off"))
+func (a *App) addPublicHandlers(mux *http.ServeMux) {
+	rou := Rou{parentMux: mux}
+
+	rou.AddHandler(authentication.NewHandler(a.Auth))
+
+	mux.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("pong"))
 	})
 }
 
@@ -168,41 +210,4 @@ func loggerMiddleware(enable bool) func(http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 		})
 	}
-}
-
-type Rou struct {
-	parentMux *http.ServeMux
-}
-
-// AddRouter registers a childMux under path on parentMux, stripping the prefix.
-func (r *Rou) AddRouter(path string, childMux http.Handler) {
-	pattern := path
-	if pattern == "" {
-		pattern = "/"
-	}
-	if pattern != "/" && !strings.HasSuffix(pattern, "/") {
-		pattern = pattern + "/"
-	}
-
-	prefix := strings.TrimSuffix(path, "/")
-
-	var handler = childMux
-	if prefix != "" && prefix != "/" {
-		handler = http.StripPrefix(prefix, childMux)
-	}
-
-	r.parentMux.Handle(pattern, handler)
-}
-
-// AddHandler registers a handler under path on parentMux without stripping the prefix.
-func (r *Rou) AddHandler(path string, handler http.Handler) {
-	pattern := path
-	if pattern == "" {
-		pattern = "/"
-	}
-	if pattern != "/" && !strings.HasSuffix(pattern, "/") {
-		pattern = pattern + "/"
-	}
-
-	r.parentMux.Handle(pattern, handler)
 }
