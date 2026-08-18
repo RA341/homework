@@ -4,14 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:homework/common/api/basepath_provider.dart';
+import 'package:homework/common/api/users/users.provider.dart';
 import 'package:homework/common/navigation/+layout.dart';
+import 'package:homework/common/theme/design_system.dart';
 import 'package:homework/pages/browse/download/+page.dart';
 import 'package:homework/pages/browse/upload/+page.dart';
 import 'package:homework/pages/home/+page.dart';
+import 'package:homework/pages/auth/login/+page.dart';
 import 'package:homework/pages/login/url/+page.dart';
 import 'package:homework/pages/settings/+page.dart';
 
 part '+route.g.dart';
+part 'pages/auth/login/+route.dart';
 part 'pages/browse/+route.dart';
 part 'pages/home/+route.dart';
 part 'pages/login/url/+route.dart';
@@ -34,23 +38,47 @@ class NavItem {
 
 final routerProvider = Provider<GoRouter>((ref) {
   final isVerified = ref.watch(isUrlVerifiedProvider);
+  final userState = ref.watch(userStoreProvider);
 
   return GoRouter(
     initialLocation: '/home',
     redirect: (context, state) {
-      final isGoingToLogin = state.uri.path == '/login/url';
+      final path = state.uri.path;
+      final isGoingToLoginUrl = path == '/login/url';
+      final isGoingToAuthLogin = path == '/auth/login';
+      final isGoingToLoading = path == '/auth/loading';
 
+      // 1. Connection URL verification check
       if (!isVerified) {
-        if (!isGoingToLogin) {
+        if (!isGoingToLoginUrl) {
           return '/login/url';
         }
-      } else {
-        if (isGoingToLogin) {
+        return null;
+      }
+
+      // 2. Authentication Loading / Checking check
+      if (userState.isLoading) {
+        if (!isGoingToLoading && !isGoingToLoginUrl) {
+          return '/auth/loading';
+        }
+        return null;
+      }
+
+      // 3. User Authentication check
+      final isAuthed = userState.value?.isAuthed ?? false;
+      if (isAuthed) {
+        // Authenticated users should not go to login or loading pages
+        if (isGoingToAuthLogin || isGoingToLoginUrl || isGoingToLoading) {
           return '/home';
+        }
+      } else {
+        // Unauthenticated users must be sent to login page
+        if (!isGoingToAuthLogin && !isGoingToLoginUrl && !isGoingToLoading) {
+          return '/auth/login';
         }
       }
 
-      if (state.uri.path == '/') {
+      if (path == '/') {
         return '/home';
       }
       return null;
@@ -101,5 +129,20 @@ class AppShellRouteData extends ShellRouteData {
   @override
   Widget builder(BuildContext context, GoRouterState state, Widget navigator) {
     return RootLayout(child: navigator);
+  }
+}
+
+@TypedGoRoute<AuthLoadingRoute>(path: '/auth/loading')
+class AuthLoadingRoute extends GoRouteData with $AuthLoadingRoute {
+  const AuthLoadingRoute();
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) {
+    return const Scaffold(
+      backgroundColor: AppColors.level0,
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
   }
 }
