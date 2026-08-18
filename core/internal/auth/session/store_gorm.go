@@ -13,7 +13,33 @@ func NewStore(db *gorm.DB) Store {
 }
 
 func (s *StoreGorm) Create(session *Session) error {
-	return s.db.Create(session).Error
+	return s.db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(session).Error; err != nil {
+			return err
+		}
+
+		var activeIDs []uint
+		const sessionLimit = 5
+		if err := tx.Model(&Session{}).
+			Where("user_id = ?", session.UserID).
+			Order("id desc").
+			Limit(sessionLimit).
+			Pluck("id", &activeIDs).Error; err != nil {
+			return err
+		}
+
+		if len(activeIDs) > 0 {
+			err := tx.
+				Where("user_id = ? AND id NOT IN ?", session.UserID, activeIDs).
+				Delete(&Session{}).
+				Error
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 }
 
 func (s *StoreGorm) GetByID(id uint) (*Session, error) {
