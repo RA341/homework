@@ -31,6 +31,7 @@ func (s *StoreGorm) Create(session *Session) error {
 		if len(activeIDs) > 0 {
 			err := tx.
 				Where("user_id = ? AND id NOT IN ?", session.UserID, activeIDs).
+				Unscoped().
 				Delete(&Session{}).
 				Error
 			if err != nil {
