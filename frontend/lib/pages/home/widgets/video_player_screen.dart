@@ -1,95 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:homework/common/services/asset/asset.provider.dart';
-import 'package:homework/common/api/token.provider.dart';
 import 'package:homework/components/theme/design_system.dart';
 import 'package:homework/generated/sdk/content/v1/content.pb.dart';
 import 'package:homework/pages/home/content_browser_provider.dart';
+import 'package:homework/pages/home/provider.video.dart';
 import 'package:homework/pages/home/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 
-class VideoPlayerScreen extends ConsumerStatefulWidget {
+class VideoLayout extends HookConsumerWidget {
   final Content initialItem;
   final String initialVideoUrl;
 
-  const VideoPlayerScreen({
+  const VideoLayout({
     super.key,
     required this.initialItem,
     required this.initialVideoUrl,
   });
 
   @override
-  ConsumerState<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentItem = useState(initialItem);
 
-class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
-  late final Player player;
-  late final VideoController controller;
-  bool hasError = false;
-  String? errorMessage;
-
-  late Content currentItem;
-  late String currentVideoUrl;
-
-  @override
-  void initState() {
-    super.initState();
-    currentItem = widget.initialItem;
-    currentVideoUrl = widget.initialVideoUrl;
-    player = Player();
-    controller = VideoController(player);
-
-    // Listen to errors
-    player.stream.error.listen((error) {
-      if (mounted) {
-        setState(() {
-          hasError = true;
-          errorMessage = error.toString();
-        });
-      }
-    });
-
-    // Open media
-    player.open(Media(currentVideoUrl));
-  }
-
-  @override
-  void dispose() {
-    player.dispose();
-    super.dispose();
-  }
-
-  void _playVideo(Content item) {
-    final videoUrl = ref
-        .read(assetServiceProvider)
-        .load(contentId: item.id.toInt(), assetRole: 'Main');
-
-    final tokens = ref.read(authTokenProvider);
-
-    setState(() {
-      currentItem = item;
-      currentVideoUrl = videoUrl;
-      hasError = false;
-      errorMessage = null;
-    });
-    player.open(
-      Media(
-        videoUrl,
-        httpHeaders: {
-          sessionHeader: tokens.value?.session ?? "",
-          refreshHeader: tokens.value?.refresh ?? "",
-        },
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
     final browserState = ref.watch(contentBrowserProvider);
     final videoRecommendations = browserState.items.where((item) {
       return item.type.toLowerCase().contains('video') &&
-          item.id != currentItem.id;
+          item.id != currentItem.value.id;
     }).toList();
 
     return Scaffold(
@@ -124,9 +62,12 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const SizedBox(height: AppSpacing.base * 2),
-                          _buildPlayer(context, isDesktopLayout),
+                          VideoPlayerView(
+                            isDesktopLayout: isDesktopLayout,
+                            currentItem: currentItem.value,
+                          ),
                           const SizedBox(height: AppSpacing.base * 3),
-                          _buildVideoDetails(context),
+                          _buildVideoDetails(context, currentItem.value),
                         ],
                       ),
                     ),
@@ -162,6 +103,7 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
                           child: _buildRecommendationsList(
                             context,
                             videoRecommendations,
+                            (item) => currentItem.value = item,
                           ),
                         ),
                       ],
@@ -174,7 +116,10 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _buildPlayer(context, isDesktopLayout),
+                  VideoPlayerView(
+                    isDesktopLayout: isDesktopLayout,
+                    currentItem: currentItem.value,
+                  ),
                   Expanded(
                     child: SingleChildScrollView(
                       padding: const EdgeInsets.symmetric(
@@ -184,7 +129,7 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          _buildVideoDetails(context),
+                          _buildVideoDetails(context, currentItem.value),
                           const SizedBox(height: AppSpacing.base * 4),
                           const Divider(color: Color(0xFF2C2928), height: 1),
                           const SizedBox(height: AppSpacing.base * 3),
@@ -200,6 +145,7 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
                           _buildRecommendationsListMobile(
                             context,
                             videoRecommendations,
+                            (item) => currentItem.value = item,
                           ),
                         ],
                       ),
@@ -214,77 +160,7 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
     );
   }
 
-  Widget _buildPlayer(BuildContext context, bool isDesktopLayout) {
-    final borderRadius = isDesktopLayout
-        ? AppShapes.radiusLg
-        : BorderRadius.zero;
-    return AspectRatio(
-      aspectRatio: 16 / 9,
-      child: ClipRRect(
-        borderRadius: borderRadius,
-        child: Container(
-          color: Colors.black,
-          child: Stack(
-            children: [
-              if (hasError)
-                Center(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.all(AppSpacing.gutter),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(
-                            Icons.error_outline_rounded,
-                            color: AppColors.error,
-                            size: 40,
-                          ),
-                          const SizedBox(height: AppSpacing.base * 1.5),
-                          Text(
-                            'Failed to load video',
-                            style: AppTypography.bodySm.copyWith(
-                              color: AppColors.error,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            errorMessage ?? 'An unknown error occurred.',
-                            style: AppTypography.labelMd.copyWith(
-                              color: AppColors.onSurfaceVariant.withValues(
-                                alpha: 0.6,
-                              ),
-                              fontWeight: FontWeight.normal,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: AppSpacing.base * 2.5),
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              setState(() {
-                                hasError = false;
-                                errorMessage = null;
-                              });
-                              player.open(Media(currentVideoUrl));
-                            },
-                            icon: const Icon(Icons.replay_rounded, size: 16),
-                            label: const Text('Try Again'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-              else
-                Video(controller: controller),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVideoDetails(BuildContext context) {
+  Widget _buildVideoDetails(BuildContext context, Content currentItem) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -311,22 +187,6 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
               formatDate(currentItem.createdAt),
               style: AppTypography.bodySm.copyWith(
                 color: AppColors.onSurfaceVariant.withValues(alpha: 0.8),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.base * 2),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: AppColors.level1,
-                borderRadius: AppShapes.radiusSm,
-                border: Border.all(color: const Color(0xFF2C2928)),
-              ),
-              child: Text(
-                'ID: ${currentItem.id}',
-                style: AppTypography.labelMd.copyWith(
-                  color: AppColors.onSurfaceVariant,
-                  fontSize: 10,
-                ),
               ),
             ),
           ],
@@ -367,6 +227,7 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
   Widget _buildRecommendationsList(
     BuildContext context,
     List<Content> videoRecommendations,
+    void Function(Content) playVideo,
   ) {
     if (videoRecommendations.isEmpty) {
       return const Padding(
@@ -386,7 +247,7 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
         final item = videoRecommendations[index];
         return Padding(
           padding: const EdgeInsets.only(bottom: AppSpacing.base * 1.5),
-          child: RecommendationTile(item: item, onTap: () => _playVideo(item)),
+          child: RecommendationTile(item: item, onTap: () => playVideo(item)),
         );
       },
     );
@@ -395,6 +256,7 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
   Widget _buildRecommendationsListMobile(
     BuildContext context,
     List<Content> videoRecommendations,
+    void Function(Content) playVideo,
   ) {
     if (videoRecommendations.isEmpty) {
       return const Padding(
@@ -415,9 +277,122 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
         final item = videoRecommendations[index];
         return Padding(
           padding: const EdgeInsets.only(bottom: AppSpacing.base * 1.5),
-          child: RecommendationTile(item: item, onTap: () => _playVideo(item)),
+          child: RecommendationTile(item: item, onTap: () => playVideo(item)),
         );
       },
+    );
+  }
+}
+
+class VideoPlayerView extends HookConsumerWidget {
+  final bool isDesktopLayout;
+  final Content currentItem;
+
+  const VideoPlayerView({
+    super.key,
+    required this.isDesktopLayout,
+    required this.currentItem,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final player = ref.watch(videoPlayerProvider);
+    final controller = useMemoized(() => VideoController(player), [player]);
+
+    final errorMessage = useState<String?>(null);
+    final hasError = errorMessage.value != null;
+    final currentVideoUrl = useState<String?>(null);
+
+    // Listen to player errors
+    useEffect(() {
+      final subscription = player.stream.error.listen((error) {
+        errorMessage.value = error.toString();
+      });
+      return subscription.cancel;
+    }, [player]);
+
+    // React to currentItem changes to load asset URL and play
+    useEffect(() {
+      errorMessage.value = null;
+
+      final videoUrl = ref
+          .read(assetServiceProvider)
+          .load(contentId: currentItem.id.toInt(), assetRole: 'Main');
+
+      currentVideoUrl.value = videoUrl;
+      player.open(Media(videoUrl));
+
+      return null;
+    }, [player, currentItem]);
+
+    // Try again handler
+    final onTryAgain = useCallback(() {
+      if (currentVideoUrl.value != null) {
+        errorMessage.value = null;
+        player.open(Media(currentVideoUrl.value!));
+      }
+    }, [player, currentVideoUrl.value]);
+
+    final borderRadius = isDesktopLayout
+        ? AppShapes.radiusLg
+        : BorderRadius.zero;
+    return AspectRatio(
+      aspectRatio: 16 / 9,
+      child: ClipRRect(
+        borderRadius: borderRadius,
+        child: Container(
+          color: Colors.black,
+          child: Stack(
+            children: [
+              if (hasError)
+                Center(
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.gutter),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(
+                            Icons.error_outline_rounded,
+                            color: AppColors.error,
+                            size: 40,
+                          ),
+                          const SizedBox(height: AppSpacing.base * 1.5),
+                          Text(
+                            'Failed to load video',
+                            style: AppTypography.bodySm.copyWith(
+                              color: AppColors.error,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            errorMessage.value ?? 'An unknown error occurred.',
+                            style: AppTypography.labelMd.copyWith(
+                              color: AppColors.onSurfaceVariant.withValues(
+                                alpha: 0.6,
+                              ),
+                              fontWeight: FontWeight.normal,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: AppSpacing.base * 2.5),
+                          ElevatedButton.icon(
+                            onPressed: onTryAgain,
+                            icon: const Icon(Icons.replay_rounded, size: 16),
+                            label: const Text('Try Again'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
+              else
+                Video(controller: controller),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

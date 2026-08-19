@@ -99,7 +99,6 @@ class DownloadListProvider extends AsyncNotifier<ListResponse> {
     );
 
     state = const AsyncValue.loading();
-
     final da = await runReq(() => loadDownloads(params: prevParams));
     switch (da) {
       case Ok(:final value):
@@ -127,6 +126,21 @@ class DownloadListProvider extends AsyncNotifier<ListResponse> {
         state = AsyncValue.error(error, StackTrace.fromString(""));
     }
   }
+
+  Future<void> silentRefresh() async {
+    if (state.isLoading) return;
+
+    final da = await runReq(() => loadDownloads());
+    switch (da) {
+      case Ok(:final value):
+        state = AsyncValue.data(value);
+      case Error(:final error):
+        if (!state.hasValue) {
+          state = AsyncValue.error(error, StackTrace.fromString(""));
+        }
+    }
+  }
+
 
   Future<void> search(String? query) async {
     final ListParams searchParams = (

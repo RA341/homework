@@ -32,10 +32,10 @@ class _OpenBrowserDialogState extends ConsumerState<OpenBrowserDialog> {
   }
 
   void _fireAndForgetStop() async {
-    _browserStarted = false;
-    try {
-      await ref.read(browserApiProvider).stop(StopRequest());
-    } catch (_) {}
+    // _browserStarted = false;
+    // try {
+    //   await ref.read(browserApiProvider).stop(StopRequest());
+    // } catch (_) {}
   }
 
   Future<void> _startBrowser() async {

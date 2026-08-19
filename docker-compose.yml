@@ -1,14 +1,18 @@
 name: hw-dev
 services:
-  #  downloader:
-  #    build:
-  #      dockerfile: Dockerfile.downloader
-  #      context: .
-  #    ports:
-  #      - "8000:8000"
-  #    volumes:
-
-  #      - ./.build/dev/downloads:/.build/dev/downloads
+  downloader:
+    build:
+      dockerfile: Dockerfile.downloader
+      context: .
+    ports:
+      - "8000:8000"
+    environment:
+      DOWNLOADER_BROWSER_DATA: "/browser"
+      DOWNLOADER_DOWNLOAD_DIR: "/downloads"
+      LOG_LEVEL: DEBUG
+    volumes:
+      - ./.build/dev/browser:/browser
+      - ./.build/dev/downloads:/downloads
 
   browser:
     image: ghcr.io/ra341/chromtrol:latest
@@ -26,4 +30,4 @@ services:
     #      - "9222:9222"
     volumes:
       # This volume holds the browser profile and SQLite databases
-      - ./downloader/downloader/browser_data:/config
+      - ./.build/dev/browser:/config
