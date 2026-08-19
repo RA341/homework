@@ -1,4 +1,5 @@
 import asyncio
+import os
 from typing import AsyncGenerator
 
 import yt_dlp
@@ -8,6 +9,13 @@ from pydantic import BaseModel
 class VideoItem(BaseModel):
     url: str
     download_path: str
+
+BROWSER_DATA = "DOWNLOADER_BROWSER_DATA"
+browserPath = "./downloader/browser_data"
+envVal = os.getenv(BROWSER_DATA)
+if envVal is not None:
+    browserPath = envVal
+
 
 async def download(video: VideoItem) -> AsyncGenerator[dict, None]:
     queue: asyncio.Queue = asyncio.Queue()
@@ -25,7 +33,11 @@ async def download(video: VideoItem) -> AsyncGenerator[dict, None]:
                 "progress_hooks": [progress_hook],
                 "paths": {"home": video.download_path},
                 "verbose": True,
-                "cookiesfrombrowser": ("chromium", "./downloader/browser_data/.config/chromium"),
+                # "impersonate": "chrome",  # or 'chrome-120', 'safari', etc.
+                "cookiesfrombrowser": (
+                    "chromium",
+                    f"{browserPath}/.config/chromium",
+                ),
             }
 
             with yt_dlp.YoutubeDL(base_opts) as ydl:
@@ -51,7 +63,7 @@ class ProgressLogger:
         if msg.startswith('[debug] '):
             pass
         else:
-            print(msg)
+            # print(msg)
             self.info(msg)
 
     def info(self, msg):

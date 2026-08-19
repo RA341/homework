@@ -178,7 +178,6 @@ func (a *App) addProtectedHandlers(mux *http.ServeMux) {
 	// normal http handlers need prefix stripping
 	rou.AddRouter(media.NewHandlerHttp(a.media))
 	rou.AddRouter(asset.NewHandlerHttp(a.asset))
-	rou.AddRouter(browser.NewHandlerHttp(a.browser))
 
 	// connect rpc should not strip the prefix
 	rou.AddHandler(users.NewHandler(a.User))
@@ -192,6 +191,7 @@ func (a *App) addPublicHandlers(mux *http.ServeMux) {
 	rou := Rou{parentMux: mux}
 
 	rou.AddHandler(authentication.NewHandler(a.Auth))
+	rou.AddRouter(browser.NewHandlerHttp(a.browser))
 
 	mux.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("pong"))

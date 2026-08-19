@@ -1,19 +1,19 @@
 package downloader
 
 import (
+	"crypto/sha1"
 	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/ra341/homework/common/sem"
 	"github.com/rs/zerolog/log"
 )
 
 type DownloadClient interface {
-	download(video string, downloadPath string) (downloadId string, err error)
+	download(video string) (downloadId string, err error)
 	progress(id string) (DownloadState, *DownloadProgress, error)
 }
 
@@ -68,20 +68,12 @@ func (s *Service) Init() error {
 	return nil
 }
 
-func (s *Service) Add(assetId uint, Name string, DownloadLink string) error {
-	newUUID, err := uuid.NewUUID()
-	if err != nil {
-		return err
-	}
-
-	downloadFolder := filepath.Join(s.conf.DownloadsDir, newUUID.String())
-
+func (s *Service) Add(assetId uint, Name string, DownloadLink string) (err error) {
 	download := Download{
 		AssetID:      assetId,
 		Status:       Queued,
 		Name:         Name,
 		DownloadLink: DownloadLink,
-		DownloadPath: downloadFolder,
 	}
 
 	err = s.store.AddDownload(&download)
@@ -193,6 +185,16 @@ func (s *Service) download(download *Download) {
 		}
 	}()
 
+	sum := sha1.Sum([]byte(download.DownloadLink))
+	downloadId := fmt.Sprintf("%x", sum)
+
+	downloadFolder := filepath.Join(s.conf.DownloadsDir, downloadId)
+	downloadFolder, err = filepath.Abs(downloadFolder)
+	if err != nil {
+		return
+	}
+	download.DownloadPath = downloadFolder
+
 	state, err := s.runDownload(download)
 	if err != nil {
 		return
@@ -220,12 +222,7 @@ func (s *Service) download(download *Download) {
 }
 
 func (s *Service) runDownload(down *Download) (DownloadState, error) {
-	absPath, err := filepath.Abs(down.DownloadPath)
-	if err != nil {
-		return 0, err
-	}
-
-	downloadId, err := s.cli.download(down.DownloadLink, absPath)
+	downloadId, err := s.cli.download(down.DownloadLink)
 	if err != nil {
 		return 0, err
 	}

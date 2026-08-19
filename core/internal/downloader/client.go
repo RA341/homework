@@ -56,12 +56,11 @@ func (s *PythonDownloader) ping() error {
 	return nil
 }
 
-func (s *PythonDownloader) download(video string, downloadPath string) (downloadId string, err error) {
+func (s *PythonDownloader) download(video string) (downloadId string, err error) {
 	endpoint := s.formatUrl("/download")
 
 	body := map[string]string{
-		"url":           video,
-		"download_path": downloadPath,
+		"url": video,
 	}
 
 	// todo context

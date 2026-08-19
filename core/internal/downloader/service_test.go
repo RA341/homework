@@ -99,7 +99,7 @@ type TestDownloader struct {
 	downloads map[string]downloadInfo
 }
 
-func (t *TestDownloader) download(video string, downloadPath string) (downloadId string, err error) {
+func (t *TestDownloader) download(video string) (downloadId string, err error) {
 	<-time.After(500 * time.Millisecond)
 	id := strconv.Itoa(rand.Intn(1000000000))
 

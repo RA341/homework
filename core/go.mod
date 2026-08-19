@@ -1,6 +1,6 @@
 module github.com/ra341/homework
 
-go 1.26
+go 1.27
 
 require (
 	connectrpc.com/connect v1.20.0
