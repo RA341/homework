@@ -1,6 +1,5 @@
 part of 'package:homework/+route.dart';
 
-@TypedGoRoute<LoginUrlRoute>(path: '/login/url')
 class LoginUrlRoute extends GoRouteData with $LoginUrlRoute {
   const LoginUrlRoute();
 

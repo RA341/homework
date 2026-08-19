@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:homework/+route.dart';
+import 'package:homework/components/navigation/nav.items.dart';
 import 'package:homework/components/theme/design_system.dart';
 
 class SidebarNavigation extends ConsumerWidget {
@@ -11,8 +12,8 @@ class SidebarNavigation extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final location = GoRouterState.of(context).uri.path;
     final activeIndex = navItems.indexWhere((item) =>
-        location == item.path ||
-        (item.path != '/' && location.startsWith(item.path)));
+        location == item.route.path ||
+        (item.route.path != '/' && location.startsWith(item.route.path)));
     final theme = Theme.of(context);
 
     return Container(
@@ -76,7 +77,7 @@ class SidebarNavigation extends ConsumerWidget {
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: InkWell(
                     onTap: () {
-                      context.go(item.path);
+                      item.route.go(context);
                     },
                     borderRadius: AppShapes.radiusDefault,
                     child: AnimatedContainer(

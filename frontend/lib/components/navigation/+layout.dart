@@ -2,24 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:homework/+route.dart';
-import 'package:homework/components/navigation/nav_desktop.dart';
-import 'package:homework/components/navigation/nav_mobile.dart';
+import 'package:homework/components/navigation/layout.desktop.dart';
+import 'package:homework/components/navigation/nav.items.dart';
+import 'package:homework/components/navigation/layout.mobile.dart';
 import 'package:homework/components/theme/design_system.dart';
 
 class RootLayout extends ConsumerWidget {
   final Widget child;
 
-  const RootLayout({
-    super.key,
-    required this.child,
-  });
+  const RootLayout({super.key, required this.child});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final location = GoRouterState.of(context).uri.path;
-    final activeIndex = navItems.indexWhere((item) =>
-        location == item.path ||
-        (item.path != '/' && location.startsWith(item.path)));
+    final activeIndex = navItems.indexWhere(
+      (item) =>
+          location == item.route.path ||
+          (item.route.path != '/' && location.startsWith(item.route.path)),
+    );
 
     final activeItem = activeIndex != -1 ? navItems[activeIndex] : navItems[0];
 
@@ -47,9 +47,7 @@ class RootLayout extends ConsumerWidget {
                       ),
                       centerTitle: !isDesktop,
                     ),
-                    Expanded(
-                      child: child,
-                    ),
+                    Expanded(child: child),
                   ],
                 ),
               ),

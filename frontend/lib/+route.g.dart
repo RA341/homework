@@ -7,11 +7,72 @@ part of '+route.dart';
 // **************************************************************************
 
 List<RouteBase> get $appRoutes => [
+  $authShellRouteData,
   $appShellRouteData,
   $authLoadingRoute,
-  $authLoginRoute,
-  $loginUrlRoute,
 ];
+
+RouteBase get $authShellRouteData => ShellRouteData.$route(
+  factory: $AuthShellRouteDataExtension._fromState,
+  routes: [
+    GoRouteData.$route(
+      path: '/auth/url',
+      hasOverriddenOnExit: false,
+      factory: $LoginUrlRoute._fromState,
+    ),
+    GoRouteData.$route(
+      path: '/auth/login',
+      hasOverriddenOnExit: false,
+      factory: $AuthLoginRoute._fromState,
+    ),
+  ],
+);
+
+extension $AuthShellRouteDataExtension on AuthShellRouteData {
+  static AuthShellRouteData _fromState(GoRouterState state) =>
+      const AuthShellRouteData();
+}
+
+mixin $LoginUrlRoute on GoRouteData {
+  static LoginUrlRoute _fromState(GoRouterState state) => const LoginUrlRoute();
+
+  @override
+  String get location => GoRouteData.$location('/auth/url');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $AuthLoginRoute on GoRouteData {
+  static AuthLoginRoute _fromState(GoRouterState state) =>
+      const AuthLoginRoute();
+
+  @override
+  String get location => GoRouteData.$location('/auth/login');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
 
 RouteBase get $appShellRouteData => ShellRouteData.$route(
   factory: $AppShellRouteDataExtension._fromState,
@@ -237,59 +298,6 @@ mixin $AuthLoadingRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/auth/loading');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-RouteBase get $authLoginRoute => GoRouteData.$route(
-  path: '/auth/login',
-  hasOverriddenOnExit: false,
-  factory: $AuthLoginRoute._fromState,
-);
-
-mixin $AuthLoginRoute on GoRouteData {
-  static AuthLoginRoute _fromState(GoRouterState state) =>
-      const AuthLoginRoute();
-
-  @override
-  String get location => GoRouteData.$location('/auth/login');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-RouteBase get $loginUrlRoute => GoRouteData.$route(
-  path: '/login/url',
-  hasOverriddenOnExit: false,
-  factory: $LoginUrlRoute._fromState,
-);
-
-mixin $LoginUrlRoute on GoRouteData {
-  static LoginUrlRoute _fromState(GoRouterState state) => const LoginUrlRoute();
-
-  @override
-  String get location => GoRouteData.$location('/login/url');
 
   @override
   void go(BuildContext context) => context.go(location);

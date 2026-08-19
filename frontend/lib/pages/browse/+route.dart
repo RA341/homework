@@ -6,8 +6,8 @@ class BrowseRoute extends GoRouteData with $BrowseRoute {
   @override
   FutureOr<String?> redirect(BuildContext context, GoRouterState state) {
     final path = state.uri.path;
-    if (path == '/browse' || path == '/browse/') {
-      return '/browse/download';
+    if (path == AppRoutes.browse.path || path == '${AppRoutes.browse.path}/') {
+      return AppRoutes.download.path;
     }
     return null;
   }

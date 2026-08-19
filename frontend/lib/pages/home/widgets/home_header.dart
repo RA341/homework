@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:homework/+route.dart';
 import 'package:homework/components/theme/design_system.dart';
 
 class HomeHeader extends StatelessWidget {
@@ -52,7 +52,7 @@ class HomeHeader extends StatelessWidget {
         ),
         ElevatedButton.icon(
           onPressed: () {
-            context.go('/browse');
+            AppRoutes.browse.go(context);
           },
           icon: const Icon(Icons.cloud_upload_outlined, size: 18),
           label: const Text('Add Asset'),

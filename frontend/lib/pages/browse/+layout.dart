@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:homework/+route.dart';
 import 'package:homework/components/theme/design_system.dart';
 
 class BrowseLayout extends StatelessWidget {
@@ -35,7 +36,7 @@ class BrowseLayout extends StatelessWidget {
                 title: 'Download',
                 icon: Icons.search_rounded,
                 index: 0,
-                path: '/browse/download',
+                route: AppRoutes.download,
               ),
               const SizedBox(width: AppSpacing.base * 4),
               _buildTab(
@@ -43,7 +44,7 @@ class BrowseLayout extends StatelessWidget {
                 title: 'Upload',
                 icon: Icons.cloud_upload_outlined,
                 index: 1,
-                path: '/browse/upload',
+                route: AppRoutes.upload,
               ),
             ],
           ),
@@ -59,14 +60,14 @@ class BrowseLayout extends StatelessWidget {
     required String title,
     required IconData icon,
     required int index,
-    required String path,
+    required GoRouteData route,
   }) {
     final isActive = activeTab == index;
 
     return InkWell(
       onTap: () {
         if (!isActive) {
-          context.go(path);
+          route.go(context);
         }
       },
       child: Container(
