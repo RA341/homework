@@ -12,7 +12,10 @@ import 'package:homework/pages/browse/download/+page.dart';
 import 'package:homework/pages/browse/upload/+page.dart';
 import 'package:homework/pages/home/+page.dart';
 import 'package:homework/pages/login/url/+page.dart';
-import 'package:homework/pages/settings/+page.dart';
+import 'package:homework/pages/settings/+layout.dart';
+import 'package:homework/pages/settings/general/+page.dart';
+import 'package:homework/pages/settings/downloads/+page.dart';
+import 'package:homework/pages/settings/browser/+page.dart';
 
 part '+route.g.dart';
 part 'pages/auth/login/+route.dart';
@@ -20,6 +23,9 @@ part 'pages/browse/+route.dart';
 part 'pages/home/+route.dart';
 part 'pages/login/url/+route.dart';
 part 'pages/settings/+route.dart';
+part 'pages/settings/general/+route.dart';
+part 'pages/settings/downloads/+route.dart';
+part 'pages/settings/browser/+route.dart';
 
 class NavItem {
   final String label;
@@ -103,7 +109,7 @@ final navItems = <NavItem>[
     label: 'Settings',
     icon: Icons.settings_outlined,
     activeIcon: Icons.settings_rounded,
-    path: '/settings',
+    path: '/settings/general',
   ),
 ];
 
@@ -118,9 +124,28 @@ final navItems = <NavItem>[
         TypedGoRoute<UploadRoute>(path: 'upload'),
       ],
     ),
-    TypedGoRoute<SettingsRoute>(path: '/settings'),
+    TypedStatefulShellRoute<SettingsRoute>(
+      branches: <TypedStatefulShellBranch<StatefulShellBranchData>>[
+        TypedStatefulShellBranch<SettingsGeneralBranch>(
+          routes: <TypedRoute<RouteData>>[
+            TypedGoRoute<SettingsGeneralRoute>(path: '/settings/general'),
+          ],
+        ),
+        TypedStatefulShellBranch<SettingsDownloadsBranch>(
+          routes: <TypedRoute<RouteData>>[
+            TypedGoRoute<SettingsDownloadsRoute>(path: '/settings/downloads'),
+          ],
+        ),
+        TypedStatefulShellBranch<SettingsBrowserBranch>(
+          routes: <TypedRoute<RouteData>>[
+            TypedGoRoute<SettingsBrowserRoute>(path: '/settings/browser'),
+          ],
+        ),
+      ],
+    ),
   ],
 )
+
 class AppShellRouteData extends ShellRouteData {
   const AppShellRouteData();
 

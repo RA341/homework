@@ -38,10 +38,37 @@ RouteBase get $appShellRouteData => ShellRouteData.$route(
         ),
       ],
     ),
-    GoRouteData.$route(
-      path: '/settings',
-      hasOverriddenOnExit: false,
-      factory: $SettingsRoute._fromState,
+    StatefulShellRouteData.$route(
+      factory: $SettingsRouteExtension._fromState,
+      branches: [
+        StatefulShellBranchData.$branch(
+          routes: [
+            GoRouteData.$route(
+              path: '/settings/general',
+              hasOverriddenOnExit: false,
+              factory: $SettingsGeneralRoute._fromState,
+            ),
+          ],
+        ),
+        StatefulShellBranchData.$branch(
+          routes: [
+            GoRouteData.$route(
+              path: '/settings/downloads',
+              hasOverriddenOnExit: false,
+              factory: $SettingsDownloadsRoute._fromState,
+            ),
+          ],
+        ),
+        StatefulShellBranchData.$branch(
+          routes: [
+            GoRouteData.$route(
+              path: '/settings/browser',
+              hasOverriddenOnExit: false,
+              factory: $SettingsBrowserRoute._fromState,
+            ),
+          ],
+        ),
+      ],
     ),
   ],
 );
@@ -131,11 +158,58 @@ mixin $UploadRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-mixin $SettingsRoute on GoRouteData {
+extension $SettingsRouteExtension on SettingsRoute {
   static SettingsRoute _fromState(GoRouterState state) => const SettingsRoute();
+}
+
+mixin $SettingsGeneralRoute on GoRouteData {
+  static SettingsGeneralRoute _fromState(GoRouterState state) =>
+      const SettingsGeneralRoute();
 
   @override
-  String get location => GoRouteData.$location('/settings');
+  String get location => GoRouteData.$location('/settings/general');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $SettingsDownloadsRoute on GoRouteData {
+  static SettingsDownloadsRoute _fromState(GoRouterState state) =>
+      const SettingsDownloadsRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/downloads');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $SettingsBrowserRoute on GoRouteData {
+  static SettingsBrowserRoute _fromState(GoRouterState state) =>
+      const SettingsBrowserRoute();
+
+  @override
+  String get location => GoRouteData.$location('/settings/browser');
 
   @override
   void go(BuildContext context) => context.go(location);

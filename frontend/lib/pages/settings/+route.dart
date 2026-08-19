@@ -1,8 +1,14 @@
 part of 'package:homework/+route.dart';
 
-class SettingsRoute extends GoRouteData with $SettingsRoute {
+class SettingsRoute extends StatefulShellRouteData {
   const SettingsRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => const SettingsPage();
+  Widget builder(
+    BuildContext context,
+    GoRouterState state,
+    StatefulNavigationShell navigationShell,
+  ) {
+    return SettingsLayout(navigationShell: navigationShell);
+  }
 }
