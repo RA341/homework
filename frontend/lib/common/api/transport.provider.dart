@@ -1,10 +1,10 @@
-import 'package:connectrpc/connect.dart' as connect;
 import 'package:connectrpc/http2.dart';
 import 'package:connectrpc/protobuf.dart';
 import 'package:connectrpc/protocol/grpc.dart' as protocol;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:homework/common/api/authtoken.provider.dart';
-import 'package:homework/common/api/basepath_provider.dart';
+import 'package:homework/common/api/token.provider.dart';
+import 'package:homework/common/api/basepath.provider.dart';
+import 'package:homework/common/api/transport.interceptors.dart';
 
 final protectedTransportProvider = Provider<protocol.Transport>((ref) {
   var basePath = ref.watch(basePathProvider);
@@ -20,17 +20,9 @@ final protectedTransportProvider = Provider<protocol.Transport>((ref) {
     httpClient: createHttpClient(),
     statusParser: const StatusParser(),
     interceptors: [
-      <I extends Object, O extends Object>(next) {
-        return (req) {
-          if (session != null && session.isNotEmpty) {
-            req.headers[sessionHeader] = session;
-          }
-          if (refresh != null && refresh.isNotEmpty) {
-            req.headers[refreshHeader] = refresh;
-          }
-          return next(req);
-        };
-      }
+      timeoutInterceptor(requestTimeout),
+      requestHeaderInterceptor(session, refresh),
+      tokenRefreshInterceptor(ref),
     ],
   );
 });
@@ -44,5 +36,8 @@ final publicTransportProvider = Provider<protocol.Transport>((ref) {
     codec: const JsonCodec(),
     httpClient: createHttpClient(),
     statusParser: const StatusParser(),
+    interceptors: [
+      timeoutInterceptor(requestTimeout),
+    ],
   );
 });

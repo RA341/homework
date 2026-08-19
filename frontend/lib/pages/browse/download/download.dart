@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:homework/common/api/download/download.provider.dart';
+import 'package:homework/common/services/download/download.provider.list.dart';
 import 'package:homework/pages/browse/download/download_card.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 

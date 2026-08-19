@@ -1,9 +1,9 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:homework/common/theme/design_system.dart';
-import 'package:homework/common/api/upload/upload.provider.dto.dart';
-import 'package:homework/common/upload/upload_queue_provider.dart';
+import 'package:homework/common/services/upload/upload.provider.dto.dart';
+import 'package:homework/components/theme/design_system.dart';
+import 'package:homework/common/services/upload/upload_queue_provider.dart';
 import 'package:homework/pages/browse/+layout.dart';
 
 class UploadPage extends ConsumerStatefulWidget {

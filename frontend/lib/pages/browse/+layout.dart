@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:homework/common/theme/design_system.dart';
+import 'package:homework/components/theme/design_system.dart';
 
 class BrowseLayout extends StatelessWidget {
   final int activeTab;

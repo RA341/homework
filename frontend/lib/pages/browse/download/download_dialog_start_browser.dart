@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:homework/common/api/browser/browser.provider.dart';
+import 'package:homework/common/services/browser/browser.provider.dart';
 import 'package:homework/common/api/runner.dart';
-import 'package:homework/common/result/result.dart';
-import 'package:homework/common/theme/design_system.dart';
+import 'package:homework/common/utils/result.dart';
+import 'package:homework/components/theme/design_system.dart';
 import 'package:homework/components/copy_text.dart';
 import 'package:homework/generated/sdk/browser/v1/browser.pb.dart';
 import 'package:url_launcher/url_launcher.dart';

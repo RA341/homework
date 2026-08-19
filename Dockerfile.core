@@ -1,4 +1,4 @@
-FROM ghcr.io/ra341/dfw:latest AS ui
+FROM ras334/dfw:latest AS ui
 
 WORKDIR /build
 

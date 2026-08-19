@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UploadDto {
 
- String get title; String get desc; String get fileName; String get assetType; String get assetRole; String get contentType; String get filePath;
+ String get title; String get desc;@JsonKey(name: 'filename') String get fileName; String get assetType; String get assetRole; String get contentType; String get filePath;
 /// Create a copy of UploadDto
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -48,7 +48,7 @@ abstract mixin class $UploadDtoCopyWith<$Res>  {
   factory $UploadDtoCopyWith(UploadDto value, $Res Function(UploadDto) _then) = _$UploadDtoCopyWithImpl;
 @useResult
 $Res call({
- String title, String desc, String fileName, String assetType, String assetRole, String contentType, String filePath
+ String title, String desc,@JsonKey(name: 'filename') String fileName, String assetType, String assetRole, String contentType, String filePath
 });
 
 
@@ -159,7 +159,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String title,  String desc,  String fileName,  String assetType,  String assetRole,  String contentType,  String filePath)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String title,  String desc, @JsonKey(name: 'filename')  String fileName,  String assetType,  String assetRole,  String contentType,  String filePath)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UploadDto() when $default != null:
 return $default(_that.title,_that.desc,_that.fileName,_that.assetType,_that.assetRole,_that.contentType,_that.filePath);case _:
@@ -180,7 +180,7 @@ return $default(_that.title,_that.desc,_that.fileName,_that.assetType,_that.asse
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String title,  String desc,  String fileName,  String assetType,  String assetRole,  String contentType,  String filePath)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String title,  String desc, @JsonKey(name: 'filename')  String fileName,  String assetType,  String assetRole,  String contentType,  String filePath)  $default,) {final _that = this;
 switch (_that) {
 case _UploadDto():
 return $default(_that.title,_that.desc,_that.fileName,_that.assetType,_that.assetRole,_that.contentType,_that.filePath);case _:
@@ -200,7 +200,7 @@ return $default(_that.title,_that.desc,_that.fileName,_that.assetType,_that.asse
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String title,  String desc,  String fileName,  String assetType,  String assetRole,  String contentType,  String filePath)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String title,  String desc, @JsonKey(name: 'filename')  String fileName,  String assetType,  String assetRole,  String contentType,  String filePath)?  $default,) {final _that = this;
 switch (_that) {
 case _UploadDto() when $default != null:
 return $default(_that.title,_that.desc,_that.fileName,_that.assetType,_that.assetRole,_that.contentType,_that.filePath);case _:
@@ -215,12 +215,12 @@ return $default(_that.title,_that.desc,_that.fileName,_that.assetType,_that.asse
 @JsonSerializable()
 
 class _UploadDto implements UploadDto {
-  const _UploadDto({required this.title, required this.desc, required this.fileName, required this.assetType, required this.assetRole, required this.contentType, required this.filePath});
+  const _UploadDto({required this.title, required this.desc, @JsonKey(name: 'filename') required this.fileName, required this.assetType, required this.assetRole, required this.contentType, required this.filePath});
   factory _UploadDto.fromJson(Map<String, dynamic> json) => _$UploadDtoFromJson(json);
 
 @override final  String title;
 @override final  String desc;
-@override final  String fileName;
+@override@JsonKey(name: 'filename') final  String fileName;
 @override final  String assetType;
 @override final  String assetRole;
 @override final  String contentType;
@@ -259,7 +259,7 @@ abstract mixin class _$UploadDtoCopyWith<$Res> implements $UploadDtoCopyWith<$Re
   factory _$UploadDtoCopyWith(_UploadDto value, $Res Function(_UploadDto) _then) = __$UploadDtoCopyWithImpl;
 @override @useResult
 $Res call({
- String title, String desc, String fileName, String assetType, String assetRole, String contentType, String filePath
+ String title, String desc,@JsonKey(name: 'filename') String fileName, String assetType, String assetRole, String contentType, String filePath
 });
 
 

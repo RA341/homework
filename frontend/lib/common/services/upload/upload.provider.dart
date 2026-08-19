@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:homework/common/api/basepath_provider.dart';
+import 'package:homework/common/api/basepath.provider.dart';
+import 'package:homework/common/api/http_client_progress.dart';
 import 'package:homework/common/api/runner.dart';
-import 'package:homework/common/result/result.dart';
-import 'package:homework/common/http/http_client_progress.dart';
-import 'package:homework/common/api/upload/upload.provider.dto.dart';
+import 'package:homework/common/utils/result.dart';
+import 'package:homework/common/services/upload/upload.provider.dto.dart';
 import 'package:http/http.dart' as http;
 
 final uploadServiceProvider = Provider<UploadService>((ref) {

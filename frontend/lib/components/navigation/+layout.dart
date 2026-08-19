@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:homework/+route.dart';
-import 'package:homework/common/navigation/nav_desktop.dart';
-import 'package:homework/common/navigation/nav_mobile.dart';
-import 'package:homework/common/theme/design_system.dart';
+import 'package:homework/components/navigation/nav_desktop.dart';
+import 'package:homework/components/navigation/nav_mobile.dart';
+import 'package:homework/components/theme/design_system.dart';
 
 class RootLayout extends ConsumerWidget {
   final Widget child;

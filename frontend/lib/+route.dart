@@ -3,14 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:homework/common/api/basepath_provider.dart';
-import 'package:homework/common/api/users/users.provider.dart';
-import 'package:homework/common/navigation/+layout.dart';
-import 'package:homework/common/theme/design_system.dart';
+import 'package:homework/common/api/basepath.provider.dart';
+import 'package:homework/common/services/users/users.provider.dart';
+import 'package:homework/components/navigation/+layout.dart';
+import 'package:homework/components/theme/design_system.dart';
+import 'package:homework/pages/auth/login/+page.dart';
 import 'package:homework/pages/browse/download/+page.dart';
 import 'package:homework/pages/browse/upload/+page.dart';
 import 'package:homework/pages/home/+page.dart';
-import 'package:homework/pages/auth/login/+page.dart';
 import 'package:homework/pages/login/url/+page.dart';
 import 'package:homework/pages/settings/+page.dart';
 
@@ -34,7 +34,6 @@ class NavItem {
     required this.path,
   });
 }
-
 
 final routerProvider = Provider<GoRouter>((ref) {
   final isVerified = ref.watch(isUrlVerifiedProvider);
@@ -86,7 +85,6 @@ final routerProvider = Provider<GoRouter>((ref) {
     routes: $appRoutes,
   );
 });
-
 
 final navItems = <NavItem>[
   const NavItem(
@@ -140,9 +138,7 @@ class AuthLoadingRoute extends GoRouteData with $AuthLoadingRoute {
   Widget build(BuildContext context, GoRouterState state) {
     return const Scaffold(
       backgroundColor: AppColors.level0,
-      body: Center(
-        child: CircularProgressIndicator(),
-      ),
+      body: Center(child: CircularProgressIndicator()),
     );
   }
 }

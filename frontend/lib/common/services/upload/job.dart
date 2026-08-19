@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:homework/common/api/upload/upload.provider.dto.dart';
+import 'package:homework/common/services/upload/upload.provider.dto.dart';
 
 part 'job.freezed.dart';
 part 'job.g.dart';

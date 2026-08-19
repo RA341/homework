@@ -1,5 +1,5 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:homework/common/result/result.dart';
+import 'package:homework/common/utils/result.dart';
 
 Future<ErrorResult<T>> runReq<T>(Future<T> Function() runner,) async {
   try {

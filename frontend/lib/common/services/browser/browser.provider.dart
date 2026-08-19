@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:homework/common/api/basepath_provider.dart';
-import 'package:homework/common/api/transport_provider.dart';
+import 'package:homework/common/api/basepath.provider.dart';
+import 'package:homework/common/api/transport.provider.dart';
 import 'package:homework/generated/sdk/browser/v1/browser.connect.client.dart';
 
 final browserApiProvider = Provider<BrowserServiceClient>((ref) {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:homework/common/api/basepath_provider.dart';
-import 'package:homework/common/result/result.dart';
-import 'package:homework/common/theme/design_system.dart';
+import 'package:homework/common/api/basepath.provider.dart';
+import 'package:homework/common/utils/result.dart';
+import 'package:homework/components/theme/design_system.dart';
 
 class LoginUrlPage extends ConsumerStatefulWidget {
   const LoginUrlPage({super.key});

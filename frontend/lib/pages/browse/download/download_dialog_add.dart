@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:homework/common/api/media/media.provider.dart';
 import 'package:homework/common/api/runner.dart';
-import 'package:homework/common/result/result.dart';
-import 'package:homework/common/theme/design_system.dart';
+import 'package:homework/common/utils/result.dart';
+import 'package:homework/common/services/media/media.provider.dart';
+import 'package:homework/components/theme/design_system.dart';
 import 'package:homework/generated/sdk/media/v1/media.pb.dart';
 import 'package:homework/pages/browse/download/enums.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';

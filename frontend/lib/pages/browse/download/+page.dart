@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:homework/common/theme/design_system.dart';
+import 'package:homework/components/theme/design_system.dart';
 import 'package:homework/pages/browse/+layout.dart';
 import 'package:homework/pages/browse/download/download_dialog_add.dart';
 import 'package:homework/pages/browse/download/download.dart';

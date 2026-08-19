@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:homework/common/theme/design_system.dart';
+import 'package:homework/components/theme/design_system.dart';
 
 class EmptyState extends StatelessWidget {
   final bool showClearButton;

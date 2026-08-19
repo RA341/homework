@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:homework/common/api/basepath_provider.dart';
+import 'package:homework/common/api/basepath.provider.dart';
 
 class AuthTokens {
   final String? session;

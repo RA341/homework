@@ -9,7 +9,7 @@ part of 'upload.provider.dto.dart';
 _UploadDto _$UploadDtoFromJson(Map<String, dynamic> json) => _UploadDto(
   title: json['title'] as String,
   desc: json['desc'] as String,
-  fileName: json['fileName'] as String,
+  fileName: json['filename'] as String,
   assetType: json['assetType'] as String,
   assetRole: json['assetRole'] as String,
   contentType: json['contentType'] as String,
@@ -20,7 +20,7 @@ Map<String, dynamic> _$UploadDtoToJson(_UploadDto instance) =>
     <String, dynamic>{
       'title': instance.title,
       'desc': instance.desc,
-      'fileName': instance.fileName,
+      'filename': instance.fileName,
       'assetType': instance.assetType,
       'assetRole': instance.assetRole,
       'contentType': instance.contentType,

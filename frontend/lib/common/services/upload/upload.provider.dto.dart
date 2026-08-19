@@ -8,7 +8,7 @@ abstract class UploadDto with _$UploadDto {
   const factory UploadDto({
     required String title,
     required String desc,
-    required String fileName,
+    @JsonKey(name: 'filename') required String fileName,
     required String assetType,
     required String assetRole,
     required String contentType,

@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:homework/common/api/basepath_provider.dart';
-import 'package:homework/common/api/upload/upload.provider.dart';
-import 'package:homework/common/result/result.dart';
-import 'package:homework/common/upload/job.dart';
-import 'package:homework/common/api/upload/upload.provider.dto.dart';
+import 'package:homework/common/api/basepath.provider.dart';
+import 'package:homework/common/services/upload/upload.provider.dart';
+import 'package:homework/common/utils/result.dart';
+import 'package:homework/common/services/upload/job.dart';
+import 'package:homework/common/services/upload/upload.provider.dto.dart';
 
 final uploadQueueProvider =
     NotifierProvider<UploadQueueNotifier, List<UploadJob>>(

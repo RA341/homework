@@ -7,6 +7,9 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const SessionHeader = "session"
+const RefreshHeader = "refresh"
+
 func NewAuthMiddleware(srv *Service) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -50,6 +53,3 @@ func NewAuthMiddleware(srv *Service) func(http.Handler) http.Handler {
 		})
 	}
 }
-
-const SessionHeader = "session"
-const RefreshHeader = "refresh"

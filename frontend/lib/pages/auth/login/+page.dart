@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:homework/common/api/auth/auth.provider.dart';
-import 'package:homework/common/api/authtoken.provider.dart';
-import 'package:homework/common/api/users/users.provider.dart';
-import 'package:homework/common/theme/design_system.dart';
+import 'package:homework/common/api/token.provider.dart';
+import 'package:homework/common/services/auth/auth.provider.dart';
+import 'package:homework/common/services/users/users.provider.dart';
+import 'package:homework/components/theme/design_system.dart';
 import 'package:homework/generated/sdk/auth/v1/auth.pb.dart';
 
 class AuthLoginPage extends ConsumerStatefulWidget {
@@ -51,10 +51,9 @@ class _AuthLoginPageState extends ConsumerState<AuthLoginPage> {
       final refreshToken = response.hasRefresh() ? response.refresh.value : '';
 
       // Update the tokens in our async state notifier
-      await ref.read(authTokenProvider.notifier).updateTokens(
-        session: sessionToken,
-        refresh: refreshToken,
-      );
+      await ref
+          .read(authTokenProvider.notifier)
+          .updateTokens(session: sessionToken, refresh: refreshToken);
 
       // Refresh the user store to fetch current user data and set isAuthed to true
       await ref.read(userStoreProvider.notifier).refreshUser();
@@ -97,10 +96,7 @@ class _AuthLoginPageState extends ConsumerState<AuthLoginPage> {
             decoration: BoxDecoration(
               color: AppColors.level1,
               borderRadius: AppShapes.radiusLg,
-              border: Border.all(
-                color: const Color(0xFF2C2928),
-                width: 1.0,
-              ),
+              border: Border.all(color: const Color(0xFF2C2928), width: 1.0),
             ),
             child: Form(
               key: _formKey,

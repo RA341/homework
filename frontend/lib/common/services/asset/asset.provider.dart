@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:homework/common/api/basepath_provider.dart';
+import 'package:homework/common/api/basepath.provider.dart';
 
 final assetServiceProvider = Provider<AssetService>((ref) {
   final basePath = ref.watch(basePathProvider);
