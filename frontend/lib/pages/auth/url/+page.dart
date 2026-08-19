@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:homework/common/api/basepath.provider.dart';
+import 'package:homework/common/api/basepath.provider.notifier.dart';
 import 'package:homework/common/api/runner.dart';
 import 'package:homework/common/utils/result.dart';
 import 'package:homework/components/theme/design_system.dart';

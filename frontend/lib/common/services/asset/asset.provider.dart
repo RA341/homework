@@ -2,14 +2,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:homework/common/api/basepath.provider.dart';
 
 final assetServiceProvider = Provider<AssetService>((ref) {
-  final basePath = ref.watch(basePathProvider);
+  final basePath = ref.watch(protectedPathProvider);
   return AssetService(basePath: basePath);
 });
 
 class AssetService {
   final String basePath;
 
-  static const assetBase = "/protected/assets";
+  static const assetBase = "/assets";
 
   AssetService({required this.basePath});
 

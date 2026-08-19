@@ -10,7 +10,7 @@ import 'package:homework/common/services/upload/upload.provider.dto.dart';
 import 'package:http/http.dart' as http;
 
 final uploadServiceProvider = Provider<UploadService>((ref) {
-  final basePath = ref.watch(basePathProvider);
+  final basePath = ref.watch(protectedPathProvider);
   return UploadService(basePath: basePath);
 });
 

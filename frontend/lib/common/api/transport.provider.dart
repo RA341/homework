@@ -7,8 +7,7 @@ import 'package:homework/common/api/basepath.provider.dart';
 import 'package:homework/common/api/transport.interceptors.dart';
 
 final protectedTransportProvider = Provider<protocol.Transport>((ref) {
-  var basePath = ref.watch(basePathProvider);
-  basePath = "$basePath/protected";
+  var basePath = ref.watch(protectedPathProvider);
 
   final authState = ref.watch(authTokenProvider);
   final session = authState.value?.session;
@@ -28,8 +27,7 @@ final protectedTransportProvider = Provider<protocol.Transport>((ref) {
 });
 
 final publicTransportProvider = Provider<protocol.Transport>((ref) {
-  var basePath = ref.watch(basePathProvider);
-  basePath = "$basePath/public";
+  var basePath = ref.watch(publicPathProvider);
 
   return protocol.Transport(
     baseUrl: basePath,

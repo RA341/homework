@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:homework/+route.dart';
-import 'package:homework/common/api/basepath.provider.dart';
+import 'package:homework/common/api/basepath.provider.verfied.dart';
 import 'package:homework/common/services/users/users.provider.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
