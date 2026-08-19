@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:homework/common/api/basepath.provider.dart';
+import 'package:homework/common/api/token.provider.dart';
 import 'package:homework/common/utils/result.dart';
 import 'package:homework/components/theme/design_system.dart';
 
@@ -17,7 +18,7 @@ class _SettingsGeneralPageState extends ConsumerState<SettingsGeneralPage> {
   @override
   void initState() {
     super.initState();
-    final currentPath = ref.read(basePathProvider);
+    final currentPath = ref.read(basePathNotifierProvider);
     _controller = TextEditingController(text: currentPath);
   }
 
@@ -29,8 +30,6 @@ class _SettingsGeneralPageState extends ConsumerState<SettingsGeneralPage> {
 
   @override
   Widget build(BuildContext context) {
-    final currentPath = ref.watch(basePathProvider);
-
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSpacing.gutter),
       child: Column(
@@ -90,7 +89,7 @@ class _SettingsGeneralPageState extends ConsumerState<SettingsGeneralPage> {
                               );
                             }
 
-                            final result = await ref.read(basePathProvider.notifier).setBasePath(text);
+                            final result = await ref.read(basePathNotifierProvider.notifier).setBasePath(text);
                             if (context.mounted) {
                               switch (result) {
                                 case Ok(:final value):
@@ -127,37 +126,81 @@ class _SettingsGeneralPageState extends ConsumerState<SettingsGeneralPage> {
           ),
           const SizedBox(height: AppSpacing.base * 4),
           Card(
-            color: AppColors.level1.withValues(alpha: 0.5),
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.gutter),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
-                    Icons.info_outline,
-                    color: AppColors.secondary,
-                  ),
-                  const SizedBox(width: AppSpacing.base * 2),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Active Backend URL',
-                          style: AppTypography.bodySm.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.onSurface,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.base),
-                        SelectableText(
-                          currentPath,
-                          style: AppTypography.labelMd.copyWith(
-                            color: AppColors.primary,
-                            fontFamily: 'monospace',
-                          ),
-                        ),
-                      ],
+                  Text(
+                    'Local Data',
+                    style: AppTypography.bodyMd.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.onSurface,
                     ),
+                  ),
+                  const SizedBox(height: AppSpacing.base * 2),
+                  Text(
+                    'Clear all cached local data, including the API base path and your authentication token.',
+                    style: AppTypography.bodySm.copyWith(
+                      color: AppColors.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.base * 4),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.error,
+                            foregroundColor: AppColors.onError,
+                          ),
+                          onPressed: () async {
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                backgroundColor: AppColors.level2,
+                                title: const Text('Clear Local Data'),
+                                content: const Text(
+                                  'Are you sure you want to clear all local data? '
+                                  'This will reset your API base path and remove your authentication token.',
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(false),
+                                    child: const Text('Cancel'),
+                                  ),
+                                  TextButton(
+                                    style: TextButton.styleFrom(
+                                      foregroundColor: AppColors.error,
+                                    ),
+                                    onPressed: () => Navigator.of(context).pop(true),
+                                    child: const Text('Clear'),
+                                  ),
+                                ],
+                              ),
+                            );
+
+                            if (confirm == true && context.mounted) {
+                              await ref.read(basePathNotifierProvider.notifier).clear();
+                              await ref.read(authTokenProvider.notifier).clear();
+                              _controller.text = ref.read(basePathNotifierProvider);
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Local data cleared successfully'),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                              }
+                            }
+                          },
+                          child: const Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            child: Text('Clear Local Data'),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),

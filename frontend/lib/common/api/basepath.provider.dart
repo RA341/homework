@@ -2,17 +2,18 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:homework/common/prefs/prefs.dart';
 import 'package:homework/common/utils/result.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
-final basePathProvider = NotifierProvider<BasePathNotifier, String>(
+final basePathProvider = Provider<String>((ref) {
+  final base = ref.watch(basePathNotifierProvider);
+  return "$base/api";
+});
+
+final basePathNotifierProvider = NotifierProvider<BasePathNotifier, String>(
   BasePathNotifier.new,
 );
-
-final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
-  throw UnimplementedError('sharedPreferencesProvider was not overridden');
-});
 
 final isUrlVerifiedProvider = StateProvider<bool>((ref) {
   final prefs = ref.watch(sharedPreferencesProvider);
@@ -23,12 +24,8 @@ class BasePathNotifier extends Notifier<String> {
   @override
   String build() {
     final prefs = ref.watch(sharedPreferencesProvider);
-    final storedPath = prefs.getString('basepath') ?? 'http://localhost:9911';
-    if (!storedPath.startsWith('http://') &&
-        !storedPath.startsWith('https://')) {
-      return 'http://$storedPath/api';
-    }
-    return "$storedPath/api";
+    final storedPath = prefs.getString('basepath') ?? '';
+    return storedPath;
   }
 
   List<String> generateCandidates(String input) {
@@ -102,8 +99,12 @@ class BasePathNotifier extends Notifier<String> {
   }
 
   Future<bool> _pingUrl(String url) async {
+    const pingEndpoint = "api/public/ping";
+
     try {
-      final pingUrl = url.endsWith('/') ? '${url}api/ping' : '$url/api/ping';
+      final pingUrl = url.endsWith('/')
+          ? '$url$pingEndpoint'
+          : '$url/$pingEndpoint';
 
       final uri = Uri.parse(pingUrl);
       final response = await http.get(uri).timeout(const Duration(seconds: 5));
@@ -168,5 +169,13 @@ class BasePathNotifier extends Notifier<String> {
     state = successfulPath;
     ref.read(isUrlVerifiedProvider.notifier).state = true;
     return Ok(successfulPath);
+  }
+
+  Future<void> clear() async {
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.remove('basepath');
+    await prefs.remove('url_verified');
+    ref.read(isUrlVerifiedProvider.notifier).state = false;
+    state = '';
   }
 }

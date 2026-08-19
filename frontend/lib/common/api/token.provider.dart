@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:homework/common/api/basepath.provider.dart';
+import 'package:homework/common/prefs/prefs.dart';
 
 class AuthTokens {
   final String? session;
@@ -74,5 +75,9 @@ class AuthTokenNotifier extends AsyncNotifier<AuthTokens> {
     await prefs.remove(_sessionKey);
     await prefs.remove(_refreshKey);
     state = const AsyncValue.data(AuthTokens());
+  }
+
+  Future<void> clear() async {
+    await clearTokens();
   }
 }

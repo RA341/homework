@@ -97,7 +97,7 @@ class _AuthLoginPageState extends ConsumerState<AuthLoginPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Please sign in to access your dashboard.',
+            'Please sign in to access your homework.',
             style: AppTypography.bodySm.copyWith(
               color: AppColors.onSurfaceVariant,
             ),
@@ -114,9 +114,7 @@ class _AuthLoginPageState extends ConsumerState<AuthLoginPage> {
               ),
               child: Text(
                 _errorMessage!,
-                style: AppTypography.bodySm.copyWith(
-                  color: AppColors.error,
-                ),
+                style: AppTypography.bodySm.copyWith(color: AppColors.error),
               ),
             ),
             const SizedBox(height: 16),

@@ -43,7 +43,7 @@ class AuthLayout extends StatelessWidget {
                     child: const Icon(
                       Icons.hub_outlined,
                       color: AppColors.primary,
-                      size: 48,
+                      size: 32,
                     ),
                   ),
                 ),
