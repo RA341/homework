@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:homework/common/api/basepath.provider.dart';
 import 'package:homework/common/prefs/prefs.dart';
+import 'package:homework/common/utils/strings.dart';
 
 class AuthTokens {
   final String? session;
@@ -10,10 +10,7 @@ class AuthTokens {
 
   const AuthTokens({this.session, this.refresh});
 
-  AuthTokens copyWith({
-    String? session,
-    String? refresh,
-  }) {
+  AuthTokens copyWith({String? session, String? refresh}) {
     return AuthTokens(
       session: session ?? this.session,
       refresh: refresh ?? this.refresh,
@@ -34,8 +31,7 @@ class AuthTokens {
   int get hashCode => session.hashCode ^ refresh.hashCode;
 }
 
-final authTokenProvider =
-    AsyncNotifierProvider<AuthTokenNotifier, AuthTokens>(
+final authTokenProvider = AsyncNotifierProvider<AuthTokenNotifier, AuthTokens>(
   AuthTokenNotifier.new,
 );
 
@@ -45,7 +41,6 @@ const refreshHeader = 'refresh';
 class AuthTokenNotifier extends AsyncNotifier<AuthTokens> {
   static const _sessionKey = 'auth_session';
   static const _refreshKey = 'auth_refresh';
-
 
   @override
   FutureOr<AuthTokens> build() {
@@ -60,24 +55,41 @@ class AuthTokenNotifier extends AsyncNotifier<AuthTokens> {
     final current = state.value ?? const AuthTokens();
     final updated = current.copyWith(session: session, refresh: refresh);
 
-    if (session != null) {
-      await prefs.setString(_sessionKey, session);
+    if (isNotNullOrEmpty(session)) {
+      await prefs.setString(_sessionKey, session!);
     }
-    if (refresh != null) {
-      await prefs.setString(_refreshKey, refresh);
+
+    if (isNotNullOrEmpty(refresh)) {
+      await prefs.setString(_refreshKey, refresh!);
     }
 
     state = AsyncValue.data(updated);
   }
 
-  Future<void> clearTokens() async {
+  Future<void> clear() async {
     final prefs = ref.read(sharedPreferencesProvider);
     await prefs.remove(_sessionKey);
     await prefs.remove(_refreshKey);
     state = const AsyncValue.data(AuthTokens());
   }
 
-  Future<void> clear() async {
-    await clearTokens();
+  Future<void> clearRefresh() async {
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.remove(_refreshKey);
+
+    final current = state.value;
+    state = AsyncValue.data(
+      AuthTokens(session: current?.session, refresh: null),
+    );
+  }
+
+  Future<void> clearSession() async {
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.remove(_sessionKey);
+
+    final current = state.value;
+    state = AsyncValue.data(
+      AuthTokens(session: null, refresh: current?.refresh),
+    );
   }
 }

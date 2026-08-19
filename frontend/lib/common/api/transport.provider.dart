@@ -2,16 +2,11 @@ import 'package:connectrpc/http2.dart';
 import 'package:connectrpc/protobuf.dart';
 import 'package:connectrpc/protocol/grpc.dart' as protocol;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:homework/common/api/token.provider.dart';
 import 'package:homework/common/api/basepath.provider.dart';
 import 'package:homework/common/api/transport.interceptors.dart';
 
 final protectedTransportProvider = Provider<protocol.Transport>((ref) {
   var basePath = ref.watch(protectedPathProvider);
-
-  final authState = ref.watch(authTokenProvider);
-  final session = authState.value?.session;
-  final refresh = authState.value?.refresh;
 
   return protocol.Transport(
     baseUrl: basePath,
@@ -20,8 +15,10 @@ final protectedTransportProvider = Provider<protocol.Transport>((ref) {
     statusParser: const StatusParser(),
     interceptors: [
       timeoutInterceptor(requestTimeout),
-      requestHeaderInterceptor(session, refresh),
-      tokenRefreshInterceptor(ref),
+      retryInterceptor(maxAttempts: 2),
+      requestHeaderInterceptor(ref),
+      refreshInterceptor(ref),
+      unauthorizedInterceptor(),
     ],
   );
 });

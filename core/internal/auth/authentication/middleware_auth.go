@@ -21,12 +21,13 @@ func NewAuthMiddleware(srv *Service) func(http.Handler) http.Handler {
 					next.ServeHTTP(w, r.WithContext(ctx))
 					return
 				}
-				log.Debug().Err(err).Msg("could not verfiy session")
+				//log.Debug().Err(err).Msg("could not verify session")
 			}
 
 			// If session token is missing, invalid or expired, check refresh token
 			refreshToken := r.Header.Get(RefreshHeader)
 			if refreshToken == "" {
+				//log.Debug().Msg("no refresh token provided")
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
@@ -40,6 +41,7 @@ func NewAuthMiddleware(srv *Service) func(http.Handler) http.Handler {
 			// Set new tokens in response headers
 			w.Header().Set(SessionHeader, newSessionToken.Value)
 			w.Header().Set(RefreshHeader, newRefreshToken.Value)
+			log.Debug().Msg("session refreshed")
 
 			refresh, err := srv.verifyRefresh(newSessionToken.Value)
 			if err != nil {

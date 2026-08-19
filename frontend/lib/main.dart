@@ -6,6 +6,8 @@ import 'package:homework/components/theme/design_system.dart';
 import 'package:media_kit/media_kit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:homework/common/api/transport.interceptors.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   MediaKit.ensureInitialized();
@@ -16,6 +18,13 @@ void main() async {
       overrides: [
         sharedPreferencesProvider.overrideWithValue(prefs),
       ],
+      retry: (retryCount, error) {
+        if (error is AuthRefreshException) {
+
+          return null;
+        }
+        return ProviderContainer.defaultRetry(retryCount, error);
+      },
       child: const App(),
     ),
   );
