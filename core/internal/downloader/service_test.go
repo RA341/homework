@@ -70,9 +70,7 @@ func TestServiceDownloads(t *testing.T) {
 	// Make sure worker had some time to pick up/start if needed
 	<-time.After(500 * time.Millisecond)
 
-	for s.workerRunning {
-		<-time.After(100 * time.Millisecond)
-	}
+	s.downloadWorker.wait()
 
 	t.Log("Worker stopped. Verifying download statuses...")
 

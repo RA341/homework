@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/ra341/homework/common/database"
+	"github.com/ra341/homework/common/router"
 	"github.com/ra341/homework/internal/auth/authentication"
 	"github.com/ra341/homework/internal/auth/session"
 	"github.com/ra341/homework/internal/browser"
@@ -130,7 +131,7 @@ func (a *App) InitDB(dataPath string) {
 }
 
 func (a *App) RegisterHandlers(r *http.ServeMux) {
-	ro := Rou{parentMux: r}
+	ro := router.Router{ParentMux: r}
 
 	const ApiPrefix = "/api"
 	apiMux := http.NewServeMux()
@@ -154,7 +155,7 @@ func (a *App) registerUIHandler(r *http.ServeMux) {
 }
 
 func (a *App) registerApiHandlers(r *http.ServeMux) {
-	rou := Rou{parentMux: r}
+	rou := router.Router{ParentMux: r}
 
 	const publicPrefix = "/public"
 	publicMux := http.NewServeMux()
@@ -169,7 +170,7 @@ func (a *App) registerApiHandlers(r *http.ServeMux) {
 }
 
 func (a *App) addProtectedHandlers(mux *http.ServeMux) {
-	rou := Rou{parentMux: mux}
+	rou := router.Router{ParentMux: mux}
 
 	mux.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte("pong"))
@@ -188,7 +189,7 @@ func (a *App) addProtectedHandlers(mux *http.ServeMux) {
 }
 
 func (a *App) addPublicHandlers(mux *http.ServeMux) {
-	rou := Rou{parentMux: mux}
+	rou := router.Router{ParentMux: mux}
 
 	rou.AddHandler(authentication.NewHandler(a.Auth))
 	rou.AddRouter(browser.NewHandlerHttp(a.browser))

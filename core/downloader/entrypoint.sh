@@ -8,25 +8,25 @@ GROUP_ID=${PGID:-1000}
 echo "Starting with PUID: $USER_ID and PGID: $GROUP_ID"
 
 # Create group if it doesn't exist
-if ! getent group depot >/dev/null; then
-    groupadd -g "$GROUP_ID" depot
+if ! getent group hwuser >/dev/null; then
+    groupadd -g "$GROUP_ID" hwuser
 fi
 
 # Create user if it doesn't exist
-if ! getent passwd depot >/dev/null; then
-    useradd -u "$USER_ID" -g "$GROUP_ID" -m -s /bin/bash depot
+if ! getent passwd hwuser >/dev/null; then
+    useradd -u "$USER_ID" -g "$GROUP_ID" -m -s /bin/bash hwuser
 fi
 
-# Ensure /app and /app/config are owned by the depot user
+# Ensure /app and /app/config are owned by the hwuser user
 # This is necessary for sqlite and downloads to work correctly
-mkdir -p /app/config
-chown -R depot:depot /app/config
+mkdir -p /app
+chown -R hwuser:hwuser /app
 
 # If running as root (default Docker behavior), drop privileges using gosu
 if [ "$(id -u)" = '0' ]; then
-    echo "Dropping privileges to depot user..."
-    exec gosu depot uv run uvicorn main:app --host 0.0.0.0 --port 8000
+    echo "Dropping privileges to hwuser user..."
+    exec gosu hwuser hwdownloader
 fi
 
 # Otherwise just run directly (e.g. if --user was passed to docker run) sd
-exec uv run uvicorn main:app --host 0.0.0.0 --port 8000
+exec hwdownloader

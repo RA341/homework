@@ -5,10 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sync"
 	"time"
 
-	"github.com/ra341/homework/common/sem"
 	"github.com/rs/zerolog/log"
 )
 
@@ -28,20 +26,19 @@ type Service struct {
 	asset AssetFinalizer
 	cli   DownloadClient
 
-	workerLock    sem.Sem
-	workerRunning bool
+	downloadWorker *DownloadWorker
 }
 
 func NewService(conf *Config, store Store, cli DownloadClient, asset AssetFinalizer) (s *Service, err error) {
 	s = &Service{
-		conf:       conf,
-		store:      store,
-		cli:        cli,
-		asset:      asset,
-		workerLock: sem.New(1),
+		conf:  conf,
+		store: store,
+		cli:   cli,
+		asset: asset,
 	}
 
 	err = s.Init()
+
 	return s, err
 }
 
@@ -62,6 +59,13 @@ func (s *Service) Init() error {
 		return fmt.Errorf("could not create downloads dir: %w", err)
 	}
 	s.conf.DownloadsDir = abs
+
+	s.downloadWorker = NewDownloadWorker(
+		s.conf.MaxDownloads,
+		s.conf.MaxDownloads, // todo add new config exitThreshold
+		s.store,
+		s,
+	)
 
 	s.launchWorker()
 
@@ -112,69 +116,7 @@ func (s *Service) Retry(id uint) error {
 }
 
 func (s *Service) launchWorker() {
-	ok := s.workerLock.TryAcquire()
-	if ok {
-		log.Info().Msg("launched download worker")
-		go s.worker()
-	} else {
-		log.Info().Msg("download worker is already running")
-	}
-}
-
-func (s *Service) worker() {
-	s.workerRunning = true
-	defer func() {
-		s.workerLock.Release()
-		s.workerRunning = false
-	}()
-
-	downloadSem := sem.New(s.conf.MaxDownloads)
-	wg := sync.WaitGroup{}
-
-	strikes := 0
-	const exitThreshold = 2
-
-	for {
-		if strikes >= exitThreshold {
-			log.Info().Int("strikes", strikes).Msg("no additional queued items found, exiting worker")
-			return
-		}
-
-		queued, err := s.store.ListQueued(s.conf.MaxDownloads)
-		if err != nil {
-			log.Warn().Err(err).Msg("Could not load downloading items")
-			return
-		}
-
-		l := len(queued)
-		if l == 0 {
-			log.Info().
-				Int("strikes", strikes+1).
-				Msg("waiting for existing downloads to complete")
-			wg.Wait()
-
-			strikes++
-			<-time.After(time.Second)
-			continue
-		}
-
-		log.Debug().Int("Count", l).Msg("Found queued items")
-		strikes = 0
-
-		for _, d := range queued {
-			downloadSem.Acquire()
-			err = s.store.SetStatus(d.ID, Downloading)
-			if err != nil {
-				log.Warn().Err(err).Any("download", d).Msg("Could not set status to downloading, skipping...")
-				continue
-			}
-
-			wg.Go(func() {
-				defer downloadSem.Release()
-				s.download(&d)
-			})
-		}
-	}
+	s.downloadWorker.Start()
 }
 
 func (s *Service) download(download *Download) {
@@ -195,7 +137,7 @@ func (s *Service) download(download *Download) {
 	}
 	download.DownloadPath = downloadFolder
 
-	state, err := s.runDownload(download)
+	state, err := s.monitorDownload(download)
 	if err != nil {
 		return
 	}
@@ -221,7 +163,7 @@ func (s *Service) download(download *Download) {
 	}
 }
 
-func (s *Service) runDownload(down *Download) (DownloadState, error) {
+func (s *Service) monitorDownload(down *Download) (DownloadState, error) {
 	downloadId, err := s.cli.download(down.DownloadLink)
 	if err != nil {
 		return 0, err
@@ -274,3 +216,69 @@ func (s *Service) setErr(msg *Download, err error) {
 			Msg("Could not set error status for download")
 	}
 }
+
+//func (s *Service) launchWorker() {
+//	ok := s.workerLock.TryAcquire()
+//	if ok {
+//		log.Info().Msg("launched download worker")
+//		go s.worker()
+//	} else {
+//		log.Info().Msg("download worker is already running")
+//	}
+//}
+
+//func (s *Service) worker() {
+//	s.workerRunning = true
+//	defer func() {
+//		s.workerLock.Release()
+//		s.workerRunning = false
+//	}()
+//
+//	downloadSem := sem.New(s.conf.MaxDownloads)
+//	wg := sync.WaitGroup{}
+//
+//	strikes := 0
+//	const exitThreshold = 2
+//
+//	for {
+//		if strikes >= exitThreshold {
+//			log.Info().Int("strikes", strikes).Msg("no additional queued items found, exiting worker")
+//			return
+//		}
+//
+//		queued, err := s.store.ListQueued(s.conf.MaxDownloads)
+//		if err != nil {
+//			log.Warn().Err(err).Msg("Could not load downloading items")
+//			return
+//		}
+//
+//		l := len(queued)
+//		if l == 0 {
+//			log.Info().
+//				Int("strikes", strikes+1).
+//				Msg("waiting for existing downloads to complete")
+//			wg.Wait()
+//
+//			strikes++
+//			<-time.After(time.Second)
+//			continue
+//		}
+//
+//		log.Debug().Int("Count", l).Msg("Found queued items")
+//		strikes = 0
+//
+//		for _, d := range queued {
+//			downloadSem.Acquire()
+//			err = s.store.SetStatus(d.ID, Downloading)
+//			if err != nil {
+//				log.Warn().Err(err).Any("download", d).Msg("Could not set status to downloading, skipping...")
+//				continue
+//			}
+//
+//			wg.Go(func() {
+//				defer downloadSem.Release()
+//				s.download(&d)
+//			})
+//		}
+//	}
+//}
