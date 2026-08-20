@@ -6,7 +6,9 @@
 downloader/.venv
 downloader/downloader
 # flutter stuff
-
+**/.idea
+.gitignore
+**/docker-compose.yml
 # Miscellaneous
 frontend/*.class
 frontend/*.log

@@ -17,10 +17,11 @@ type Token struct {
 }
 
 type Service struct {
-	session   *session.Service
-	user      *users.Service
-	jwtSecret []byte
-	Issuer    string
+	session       *session.Service
+	user          *users.Service
+	jwtSecret     []byte
+	Issuer        string
+	sessionExpiry time.Duration
 }
 
 func NewService(jwtSecret string, session *session.Service, user *users.Service) *Service {
@@ -28,6 +29,8 @@ func NewService(jwtSecret string, session *session.Service, user *users.Service)
 		session:   session,
 		user:      user,
 		jwtSecret: []byte(jwtSecret),
+		// todo load from config
+		sessionExpiry: time.Hour * 2,
 	}
 	s.Init()
 
@@ -101,17 +104,15 @@ type UserClaims struct {
 }
 
 func (s *Service) generateJWT(userID uint64) (Token, error) {
-	expiry := 15 * time.Minute
-	exp := time.Now().Add(expiry).Unix()
 	now := time.Now()
+	exp := now.Add(s.sessionExpiry)
+	expUnix := exp.Unix()
 
 	claims := UserClaims{
-		UserID: userID,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(now.Add(expiry)),
-			IssuedAt:  jwt.NewNumericDate(now),
-			Issuer:    s.Issuer,
-		},
+		UserID:    userID,
+		ExpiresAt: jwt.NewNumericDate(exp),
+		IssuedAt:  jwt.NewNumericDate(now),
+		Issuer:    s.Issuer,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -119,7 +120,7 @@ func (s *Service) generateJWT(userID uint64) (Token, error) {
 	if err != nil {
 		return Token{}, err
 	}
-	return Token{Value: tokenString, Expiry: exp}, nil
+	return Token{Value: tokenString, Expiry: expUnix}, nil
 }
 
 func (s *Service) verifyRefresh(sessionToken string) (uint, error) {
