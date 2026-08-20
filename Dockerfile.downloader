@@ -36,9 +36,9 @@ RUN deno --version
 RUN ffmpeg -version
 RUN ffprobe -version
 
-WORKDIR /app
-
 COPY --from=builder /app/hwdownloader /usr/bin/hwdownloader
+
+WORKDIR /app
 
 COPY --from=scipt-exec /build/entrypoint.sh entrypoint.sh
 
