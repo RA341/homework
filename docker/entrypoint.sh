@@ -5,6 +5,8 @@ set -e
 USER_ID=${PUID:-1000}
 GROUP_ID=${PGID:-1000}
 
+BINARY="${1:?Error: binary name required}"
+
 echo "Starting with PUID: $USER_ID and PGID: $GROUP_ID"
 
 # Create group if it doesn't exist
@@ -25,8 +27,8 @@ chown -R hwuser:hwuser /app
 # If running as root (default Docker behavior), drop privileges using gosu
 if [ "$(id -u)" = '0' ]; then
     echo "Dropping privileges to hwuser user..."
-    exec gosu hwuser hwdownloader
+    exec gosu hwuser "$BINARY"
 fi
 
 # Otherwise just run directly (e.g. if --user was passed to docker run) sd
-exec hwdownloader
+exec "$BINARY"

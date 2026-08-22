@@ -2,7 +2,7 @@ name: hw-dev
 services:
   downloader:
     build:
-      dockerfile: Dockerfile.downloader
+      dockerfile: Dockerfile.lite.downloader
       context: .
     ports:
       - "8000:8000"

@@ -1,0 +1,11 @@
+FROM ras334/dfw:latest AS ui
+
+WORKDIR /build
+
+COPY frontend/pubspec.lock frontend/pubspec.yaml ./
+
+RUN flutter pub get
+
+COPY frontend .
+
+RUN flutter build web --wasm
