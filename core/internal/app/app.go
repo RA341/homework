@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -27,19 +28,42 @@ func init() {
 }
 
 type App struct {
-	db *gorm.DB
+	ctx  context.Context
+	ui   http.Handler
+	port int
 
+	db        *gorm.DB
 	content   *content.Service
 	asset     *asset.Service
 	media     *media.Service
 	downloads *downloader.Service
 	browser   *browser.Service
-	Auth      *authentication.Service
-	Session   *session.Service
-	User      *users.Service
+	user      *users.Service
+	auth      *authentication.Service
+	session   *session.Service
 }
 
-func (a *App) RegisterServices() {
+func (a *App) Run(opts ...Option) {
+	a.port = 9911
+	a.ctx = context.Background()
+
+	for _, opt := range opts {
+		opt(a)
+	}
+
+	mux := http.NewServeMux()
+	a.addServices()
+	a.addHandlers(mux)
+
+	//mux.Handle("/", server.base.UIHandler)
+	//allowedOrigins := []string{"https://beacon.pro.radn.dev"}
+	//finalMux := api.WithCors(mux, allowedOrigins)
+
+	log.Info().Int("port", a.port).Msg("Starting homework server...")
+	router.RunServer(a.ctx, a.port, mux)
+}
+
+func (a *App) addServices() {
 	dir, err := os.Getwd()
 	if err != nil {
 		log.Fatal().Err(err).Msg("could not get working directory")
@@ -51,7 +75,7 @@ func (a *App) RegisterServices() {
 		log.Fatal().Err(err).Str("path", dataPath).Msg("could make data dir")
 	}
 
-	a.InitDB(dataPath)
+	a.initDB(dataPath)
 
 	assetStore := asset.NewStore(a.db)
 	assetFolder := "assets"
@@ -95,19 +119,19 @@ func (a *App) RegisterServices() {
 
 	sessionDb := session.NewStore(a.db)
 	sessionExpiry := time.Hour * 24 * 7
-	a.Session = session.NewService(sessionDb, sessionExpiry)
+	a.session = session.NewService(sessionDb, sessionExpiry)
 
 	userStore := users.NewStore(a.db)
-	a.User, err = users.NewService(userStore)
+	a.user, err = users.NewService(userStore)
 	if err != nil {
 		log.Warn().Err(err).Msg("could not init user service")
 	}
 
 	jwtSecret := "test-secret-change-me"
-	a.Auth = authentication.NewService(jwtSecret, a.Session, a.User)
+	a.auth = authentication.NewService(jwtSecret, a.session, a.user)
 }
 
-func (a *App) InitDB(dataPath string) {
+func (a *App) initDB(dataPath string) {
 	dbPath := filepath.Join(dataPath, "hw.db")
 	db, err := database.InitDB(dbPath)
 	if err != nil {
@@ -130,31 +154,33 @@ func (a *App) InitDB(dataPath string) {
 	a.db = db
 }
 
-func (a *App) RegisterHandlers(r *http.ServeMux) {
+func (a *App) addHandlers(r *http.ServeMux) {
 	ro := router.Router{ParentMux: r}
 
 	const ApiPrefix = "/api"
 	apiMux := http.NewServeMux()
-	a.registerApiHandlers(apiMux)
+	a.addApiHandlers(apiMux)
 
 	logger := loggerMiddleware(false)
 
 	ro.AddRouter(ApiPrefix, logger(apiMux))
 
-	const uiPrefix = "/"
-	uiMux := http.NewServeMux()
-	a.registerUIHandler(uiMux)
-	ro.AddRouter(uiPrefix, uiMux)
+	a.addUIHandler(r)
+
 }
 
-func (a *App) registerUIHandler(r *http.ServeMux) {
-	// todo
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte("No ui set fuck off"))
-	})
+func (a *App) addUIHandler(r *http.ServeMux) {
+	if a.ui == nil {
+		r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			_, _ = w.Write([]byte("No ui set fuck off"))
+		})
+		return
+	}
+
+	r.Handle("/", a.ui)
 }
 
-func (a *App) registerApiHandlers(r *http.ServeMux) {
+func (a *App) addApiHandlers(r *http.ServeMux) {
 	rou := router.Router{ParentMux: r}
 
 	const publicPrefix = "/public"
@@ -165,7 +191,7 @@ func (a *App) registerApiHandlers(r *http.ServeMux) {
 	const protectedPrefix = "/protected"
 	protectedMux := http.NewServeMux()
 	a.addProtectedHandlers(protectedMux)
-	authM := authentication.NewAuthMiddleware(a.Auth)
+	authM := authentication.NewAuthMiddleware(a.auth)
 	rou.AddRouter(protectedPrefix, authM(protectedMux))
 }
 
@@ -181,7 +207,7 @@ func (a *App) addProtectedHandlers(mux *http.ServeMux) {
 	rou.AddRouter(asset.NewHandlerHttp(a.asset))
 
 	// connect rpc should not strip the prefix
-	rou.AddHandler(users.NewHandler(a.User))
+	rou.AddHandler(users.NewHandler(a.user))
 	rou.AddHandler(browser.NewHandler(a.browser))
 	rou.AddHandler(media.NewHandler(a.media))
 	rou.AddHandler(downloader.NewHandler(a.downloads))
@@ -191,7 +217,7 @@ func (a *App) addProtectedHandlers(mux *http.ServeMux) {
 func (a *App) addPublicHandlers(mux *http.ServeMux) {
 	rou := router.Router{ParentMux: mux}
 
-	rou.AddHandler(authentication.NewHandler(a.Auth))
+	rou.AddHandler(authentication.NewHandler(a.auth))
 	rou.AddRouter(browser.NewHandlerHttp(a.browser))
 
 	mux.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {

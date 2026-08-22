@@ -3,20 +3,21 @@ package router
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/rs/zerolog/log"
 )
 
-func RunServer(ctx context.Context, port string, mux *http.ServeMux) {
+func RunServer(ctx context.Context, port int, mux *http.ServeMux) {
 	protocols := &http.Protocols{}
 	protocols.SetUnencryptedHTTP2(true)
 	protocols.SetHTTP2(true)
 	protocols.SetHTTP1(true)
 
 	srv := &http.Server{
-		Addr:      port,
+		Addr:      fmt.Sprintf(":%d", port),
 		Protocols: protocols,
 		Handler:   mux,
 	}
