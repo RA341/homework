@@ -1,24 +1,15 @@
-variable "TAG" {
-  default = ""
-}
-
-variable "TAGS" {
-  default = "latest"
-}
-
-variable "REGISTRY" {
+variable "REPO_NAME" {
   default = "homework"
 }
 
-function "tags" {
-  params = [name]
-  result = [for tag in split(",", TAG != "" ? TAG : TAGS) : "${REGISTRY}/${name}:${trimspace(tag)}"]
+target "docker-metadata-action" {
+  tags = ["${REPO_NAME}:latest"]
 }
 
 group "default" {
   cache-from = ["type=gha"]
   cache-to   = ["type=gha,mode=max"]
-  targets = ["lite-core", "lite-downloader", "omni"]
+  targets    = ["lite-core", "lite-downloader", "omni"]
 }
 
 group "base" {
@@ -56,26 +47,29 @@ target "base-gomod" {
 # --- Product Targets ---
 
 target "lite-core" {
+  inherits   = ["docker-metadata-action"]
   context    = "."
   dockerfile = "docker/Dockerfile.lite.core"
   contexts = {
     "base-gomod"    = "target:base-gomod"
     "base-frontend" = "target:base-frontend"
   }
-  inherits = ["meta-core"]
+  tags = [for t in target.docker-metadata-action.tags : replace(t, REPO_NAME, "${REPO_NAME}-lite-core")]
 }
 
 target "lite-downloader" {
+  inherits   = ["docker-metadata-action"]
   context    = "."
   dockerfile = "docker/Dockerfile.lite.downloader"
   contexts = {
     "base-gomod" = "target:base-gomod"
     "base-yt"    = "target:base-yt"
   }
-  inherits = ["meta-downloader"]
+  tags = [for t in target.docker-metadata-action.tags : replace(t, REPO_NAME, "${REPO_NAME}-lite-downloader")]
 }
 
 target "omni" {
+  inherits   = ["docker-metadata-action"]
   context    = "."
   dockerfile = "docker/Dockerfile.omni"
   contexts = {
@@ -83,5 +77,5 @@ target "omni" {
     "base-yt"       = "target:base-yt"
     "base-frontend" = "target:base-frontend"
   }
-  inherits = ["meta-omni"]
+  tags = [for t in target.docker-metadata-action.tags : replace(t, REPO_NAME, "${REPO_NAME}-omni")]
 }
