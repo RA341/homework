@@ -21,9 +21,6 @@ permissions:
 jobs:
   meta:
     runs-on: ubuntu-latest
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
     strategy:
       matrix:
         image: [ lite/core, lite/downloader, omni ]
