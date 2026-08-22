@@ -21,6 +21,9 @@ permissions:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -36,33 +39,19 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate Tags and Format Registry
+        uses: docker/metadata-action@v5
         id: meta
-        run: |
-          # Lowercase repository name for GHCR
-          REPO_LOWER=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
-          REGISTRY="ghcr.io/${REPO_LOWER}"
-          
-          # Generate tag list based on ref
-          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            VERSION="${GITHUB_REF_NAME#v}"
-            TAGS="${GITHUB_REF_NAME},${VERSION},latest"
-          elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-            TAGS="latest,main,sha-${GITHUB_SHA::7}"
-          elif [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
-            TAGS="dev,sha-${GITHUB_SHA::7}"          
-          else
-            TAGS="sha-${GITHUB_SHA::7}"
-          fi
-          
-          echo "registry=${REGISTRY}" >> "$GITHUB_OUTPUT"
-          echo "tags=${TAGS}" >> "$GITHUB_OUTPUT"
-          
-          echo "Registry: ${REGISTRY}"
-          echo "Tags: ${TAGS}"
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=main,enable=${{ github.ref == 'refs/heads/main' }}
+            type=raw,value=dev,enable=${{ github.ref == 'refs/heads/dev' }}
+            type=sha,prefix=sha-,format=short
 
-      - name: Build and Push Images
+      - name: Build and Push
         env:
-          REGISTRY: ${{ steps.meta.outputs.registry }}
           TAGS: ${{ steps.meta.outputs.tags }}
-        run: |
-          docker buildx bake -f docker/docker-bake.hcl default --push
+          LABELS: ${{ steps.meta.outputs.labels }}
+        run: docker buildx bake -f docker/docker-bake.hcl default --push

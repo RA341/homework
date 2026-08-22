@@ -16,6 +16,8 @@ function "tags" {
 }
 
 group "default" {
+  cache-from = ["type=gha"]
+  cache-to   = ["type=gha,mode=max"]
   targets = ["lite-core", "lite-downloader", "omni"]
 }
 
