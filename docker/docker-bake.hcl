@@ -11,19 +11,15 @@ target "docker-metadata-action" {
 group "default" {
   cache-from = ["type=gha"]
   cache-to   = ["type=gha,mode=max"]
-  targets    = ["lite-core", "lite-downloader", "omni"]
+  targets    = ["core", "downloader", "omni"]
 }
 
 group "base" {
   targets = ["base-frontend", "base-yt", "base-gomod"]
 }
 
-group "lite" {
-  targets = ["lite-core", "lite-downloader"]
-}
-
 group "all" {
-  targets = ["base-frontend", "base-yt", "base-gomod", "lite-core", "lite-downloader", "omni"]
+  targets = ["base-frontend", "base-yt", "base-gomod", "core", "downloader", "omni"]
 }
 
 # --- Base Targets (Intermediate / Cache-only) ---
@@ -48,10 +44,10 @@ target "base-gomod" {
 
 # --- Product Targets ---
 
-target "lite-core" {
+target "core" {
   inherits   = ["docker-metadata-action"]
   context    = "."
-  dockerfile = "docker/Dockerfile.lite.core"
+  dockerfile = "docker/Dockerfile.core"
   contexts = {
     "base-gomod"    = "target:base-gomod"
     "base-frontend" = "target:base-frontend"
@@ -59,15 +55,15 @@ target "lite-core" {
   tags = [
     for t in target.docker-metadata-action.tags :
       can(regex("^ghcr\\.io", t)) ?
-        replace(t, "${REPO_NAME}:", "${REPO_NAME}/lite/core:") :
-        replace(t, "${REPO_NAME}:", "${REPO_NAME}:lite.core-")
+        replace(t, "${REPO_NAME}:", "${REPO_NAME}/core:") :
+        replace(t, "${REPO_NAME}:", "${REPO_NAME}:core-")
   ]
 }
 
-target "lite-downloader" {
+target "downloader" {
   inherits   = ["docker-metadata-action"]
   context    = "."
-  dockerfile = "docker/Dockerfile.lite.downloader"
+  dockerfile = "docker/Dockerfile.downloader"
   contexts = {
     "base-gomod" = "target:base-gomod"
     "base-yt"    = "target:base-yt"
@@ -75,8 +71,8 @@ target "lite-downloader" {
   tags = [
     for t in target.docker-metadata-action.tags :
       can(regex("^ghcr\\.io", t)) ?
-        replace(t, "${REPO_NAME}:", "${REPO_NAME}/lite/downloader:") :
-        replace(t, "${REPO_NAME}:", "${REPO_NAME}:lite.downloader-")
+        replace(t, "${REPO_NAME}:", "${REPO_NAME}/downloader:") :
+        replace(t, "${REPO_NAME}:", "${REPO_NAME}:downloader-")
   ]
 }
 
