@@ -3,7 +3,9 @@ variable "REPO_NAME" {
 }
 
 target "docker-metadata-action" {
-  tags = ["${REPO_NAME}:latest"]
+  tags = [
+    "${REPO_NAME}:latest"
+  ]
 }
 
 group "default" {
@@ -54,7 +56,12 @@ target "lite-core" {
     "base-gomod"    = "target:base-gomod"
     "base-frontend" = "target:base-frontend"
   }
-  tags = [for t in target.docker-metadata-action.tags : replace(t, REPO_NAME, "${REPO_NAME}-lite-core")]
+  tags = [
+    for t in target.docker-metadata-action.tags :
+      can(regex("^ghcr\\.io", t)) ?
+        replace(t, "${REPO_NAME}:", "${REPO_NAME}/lite/core:") :
+        replace(t, "${REPO_NAME}:", "${REPO_NAME}:lite.core-")
+  ]
 }
 
 target "lite-downloader" {
@@ -65,7 +72,12 @@ target "lite-downloader" {
     "base-gomod" = "target:base-gomod"
     "base-yt"    = "target:base-yt"
   }
-  tags = [for t in target.docker-metadata-action.tags : replace(t, REPO_NAME, "${REPO_NAME}-lite-downloader")]
+  tags = [
+    for t in target.docker-metadata-action.tags :
+      can(regex("^ghcr\\.io", t)) ?
+        replace(t, "${REPO_NAME}:", "${REPO_NAME}/lite/downloader:") :
+        replace(t, "${REPO_NAME}:", "${REPO_NAME}:lite.downloader-")
+  ]
 }
 
 target "omni" {
@@ -77,5 +89,10 @@ target "omni" {
     "base-yt"       = "target:base-yt"
     "base-frontend" = "target:base-frontend"
   }
-  tags = [for t in target.docker-metadata-action.tags : replace(t, REPO_NAME, "${REPO_NAME}-omni")]
+  tags = [
+    for t in target.docker-metadata-action.tags :
+      can(regex("^ghcr\\.io", t)) ?
+        replace(t, "${REPO_NAME}:", "${REPO_NAME}/omni:") :
+        replace(t, "${REPO_NAME}:", "${REPO_NAME}:omni-")
+  ]
 }
