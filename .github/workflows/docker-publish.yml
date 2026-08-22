@@ -19,40 +19,61 @@ permissions:
   packages: write
 
 jobs:
-  build-and-push:
+  meta:
     runs-on: ubuntu-latest
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
+    strategy:
+      matrix:
+        image: [ lite/core, lite/downloader, omni ]
+    outputs:
+      bake-file-core: ${{ steps.export.outputs.core }}
+      bake-file-downloader: ${{ steps.export.outputs.downloader }}
+      bake-file-omni: ${{ steps.export.outputs.omni }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Generate Tags and Format Registry
-        uses: docker/metadata-action@v5
+      - name: Docker meta
         id: meta
+        uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository }}
+          images: ghcr.io/${{ github.repository }}/${{ matrix.image }}
+          bake-target: meta-${{ matrix.image }}
           tags: |
             type=semver,pattern={{version}}
             type=raw,value=latest,enable={{is_default_branch}}
             type=raw,value=main,enable=${{ github.ref == 'refs/heads/main' }}
             type=raw,value=dev,enable=${{ github.ref == 'refs/heads/dev' }}
             type=sha,prefix=sha-,format=short
+      - name: Upload bake file
+        uses: actions/upload-artifact@v4
+        with:
+          name: bake-meta-${{ strategy.job-index }}
+          path: ${{ steps.meta.outputs.bake-file }}
 
+  build-and-push:
+    needs: meta
+    runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
+    steps:
+      - uses: actions/checkout@v7
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: bake-meta-*
+          path: bake-meta
+          merge-multiple: true
       - name: Build and Push
-        env:
-          GHCR: ${{ steps.meta.outputs.ghcr }}
-          DOCKERHUB: ${{ steps.meta.outputs.dockerhub }}
-          TAGS: ${{ steps.meta.outputs.tags }}
-        run: docker buildx bake -f docker/docker-bake.hcl default --push
+        uses: docker/bake-action@v5
+        with:
+          files: |
+            ./docker/docker-bake.hcl
+            bake-meta/*.json
+          targets: default
+          push: true

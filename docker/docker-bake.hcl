@@ -62,7 +62,7 @@ target "lite-core" {
     "base-gomod"    = "target:base-gomod"
     "base-frontend" = "target:base-frontend"
   }
-  tags = tags("lite/core")
+  inherits = ["meta-core"]
 }
 
 target "lite-downloader" {
@@ -72,7 +72,7 @@ target "lite-downloader" {
     "base-gomod" = "target:base-gomod"
     "base-yt"    = "target:base-yt"
   }
-  tags = tags("lite/downloader")
+  inherits = ["meta-downloader"]
 }
 
 target "omni" {
@@ -83,5 +83,5 @@ target "omni" {
     "base-yt"       = "target:base-yt"
     "base-frontend" = "target:base-frontend"
   }
-  tags = tags("omni")
+  inherits = ["meta-omni"]
 }
