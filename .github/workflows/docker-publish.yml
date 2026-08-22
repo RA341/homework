@@ -52,6 +52,7 @@ jobs:
 
       - name: Build and Push
         env:
+          GHCR: ${{ steps.meta.outputs.ghcr }}
+          DOCKERHUB: ${{ steps.meta.outputs.dockerhub }}
           TAGS: ${{ steps.meta.outputs.tags }}
-          LABELS: ${{ steps.meta.outputs.labels }}
         run: docker buildx bake -f docker/docker-bake.hcl default --push
