@@ -33,7 +33,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Step 1 - Generate Tags and Format Registry
+      - name: Generate Tags and Format Registry
         id: meta
         run: |
           # Lowercase repository name for GHCR
@@ -56,7 +56,7 @@ jobs:
           echo "Registry: ${REGISTRY}"
           echo "Tags: ${TAGS}"
 
-      - name: Step 2 - Build and Push Images
+      - name: Build and Push Images
         env:
           REGISTRY: ${{ steps.meta.outputs.registry }}
           TAGS: ${{ steps.meta.outputs.tags }}
