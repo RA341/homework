@@ -46,8 +46,10 @@ jobs:
             TAGS="${GITHUB_REF_NAME},${VERSION},latest"
           elif [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
             TAGS="latest,main,sha-${GITHUB_SHA::7}"
+          elif [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
+            TAGS="dev,sha-${GITHUB_SHA::7}"          
           else
-            TAGS="dev,sha-${GITHUB_SHA::7}"
+            TAGS="sha-${GITHUB_SHA::7}"
           fi
           
           echo "registry=${REGISTRY}" >> "$GITHUB_OUTPUT"
