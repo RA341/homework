@@ -64,9 +64,9 @@ func (s *StoreGorm) SetDownloadErr(id uint, errStr string) error {
 		Model(&Download{}).
 		Where("id = ?", id).
 		Updates(Download{
-			Status: Error,
 			Progress: DownloadProgress{
-				Error: errStr,
+				Error:  errStr,
+				Status: Error,
 			},
 		}).
 		Error

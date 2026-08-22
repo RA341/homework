@@ -1,10 +1,15 @@
 package downloader
 
-import "net/http"
+import (
+	"encoding/json/v2"
+	"net/http"
+)
 
 type HandlerHttp struct {
 	srv *Service
 }
+
+const downloaderEndpointPrefix = "/downloader"
 
 func NewHandlerHttp(srv *Service) (string, http.Handler) {
 	h := &HandlerHttp{
@@ -14,25 +19,61 @@ func NewHandlerHttp(srv *Service) (string, http.Handler) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/download", h.Download)
 
-	return "/downloader", mux
+	return downloaderEndpointPrefix, mux
 }
 
-func (h *HandlerHttp) Download(writer http.ResponseWriter, request *http.Request) {
-	query := request.URL.Query()
+func (h *HandlerHttp) Status(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		http.Error(w, "id is required", http.StatusBadRequest)
+		return
+	}
+
+	status, err := h.srv.Status(id)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	marshal, err := json.Marshal(status)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(marshal)
+}
+
+type DownloadResponse struct {
+	Id string
+}
+
+func (h *HandlerHttp) Download(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query()
 	url := query.Get("url")
 	if url == "" {
-		writer.WriteHeader(http.StatusBadRequest)
-		_, _ = writer.Write([]byte("url is empty"))
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write([]byte("url is empty"))
 		return
 	}
 
-	err := h.srv.Start(url)
+	downloadID, err := h.srv.Start(url)
 	if err != nil {
-		writer.WriteHeader(http.StatusBadRequest)
-		_, _ = writer.Write([]byte("could not start download " + err.Error()))
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte("could not start download " + err.Error()))
 		return
 	}
 
-	writer.WriteHeader(http.StatusOK)
-	_, _ = writer.Write([]byte("Download Started"))
+	resp := &DownloadResponse{
+		Id: downloadID,
+	}
+
+	marshal, err := json.Marshal(resp)
+	if err != nil {
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(marshal)
 }

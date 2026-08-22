@@ -20,7 +20,7 @@ func NewConfig(wd string) *Config {
 	return &Config{
 		ServerUrl: pick.Pk[string]().
 			Env("HW_SERVER_URL").
-			GetOrDefault("http://localhost:8000"),
+			GetOrDefault("http://localhost:9922"),
 		SocketPath: pick.Pk[string]().
 			Env("HW_SOCKET_PATH").
 			GetOrDefault(DefaultSocket),

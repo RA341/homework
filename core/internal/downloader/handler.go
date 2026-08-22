@@ -82,8 +82,8 @@ func toDownload(t Download) *v1.Download {
 	progress := &v1.DownloadProgress{
 		TimeLeftSecs:           uint64(t.Progress.TimeLeftSecs),
 		DownloadBytesPerSecond: uint64(t.Progress.DownloadBytesPerSecond),
-		Complete:               uint64(t.Progress.Complete),
-		Left:                   uint64(t.Progress.Left),
+		Complete:               uint64(t.Progress.Total),
+		Left:                   uint64(t.Progress.Completed),
 		Error:                  t.Progress.Error,
 	}
 
@@ -93,7 +93,7 @@ func toDownload(t Download) *v1.Download {
 		UpdatedAtSec: uint64(t.UpdatedAt.Unix()),
 		Name:         t.Name,
 		DownloadLink: t.DownloadLink,
-		Status:       v1.DownloadState(t.Status),
+		Status:       v1.DownloadState(t.Progress.Status),
 		Progress:     progress,
 		DownloadPath: t.DownloadPath,
 	}

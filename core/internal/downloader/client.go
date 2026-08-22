@@ -56,7 +56,7 @@ func (s *PythonDownloader) ping() error {
 	return nil
 }
 
-func (s *PythonDownloader) download(video string) (downloadId string, err error) {
+func (s *PythonDownloader) Download(video string) (downloadId string, err error) {
 	endpoint := s.formatUrl("/download")
 
 	body := map[string]string{
@@ -90,7 +90,11 @@ func (s *PythonDownloader) download(video string) (downloadId string, err error)
 	return string(respBody), nil
 }
 
-func (s *PythonDownloader) progress(id string) (DownloadState, *DownloadProgress, error) {
+func (s *PythonDownloader) Progress(id string) (*DownloadProgress, error) {
+	panic("DO NO USE IDIOT")
+}
+
+func (s *PythonDownloader) Progress2(id string) (DownloadState, *DownloadProgress, error) {
 	resp, err := s.cli.Get(s.formatUrl("/status?id=" + id))
 	if err != nil {
 		return Failed, nil, err

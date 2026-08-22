@@ -37,7 +37,7 @@ func (yt *Service) init() error {
 	return nil
 }
 
-func (yt *Service) Download(url string, outputFolder string, setProgress func(p *downloader.Progress)) {
+func (yt *Service) Download(item *downloader.DownloadItem, setProgress func(p *downloader.Progress)) {
 	var resp ProgressStr
 
 	defer func() {
@@ -49,7 +49,7 @@ func (yt *Service) Download(url string, outputFolder string, setProgress func(p 
 	}()
 
 	progressFmt := `{"status":"%(progress.status)s", "time":"%(progress.eta)s","speed":"%(progress.speed)s","downloaded":"%(progress.downloaded_bytes)s","total":"%(progress.total_bytes)s"}`
-	outputPath := filepath.Join(outputFolder, "%(title)s.%(ext)s")
+	outputPath := filepath.Join(item.DownloadFolder, "%(title)s.%(ext)s")
 	args := []string{
 		"--newline",
 		"--progress-template",
@@ -57,10 +57,10 @@ func (yt *Service) Download(url string, outputFolder string, setProgress func(p 
 		"--cookies-from-browser", fmt.Sprintf("chrome:%s/.config/chromium", yt.browserData),
 		"--impersonate", "chrome",
 		"-o", outputPath,
-		url,
+		item.Url,
 	}
 
-	cmd := exec.Command("yt-dlp", args...)
+	cmd := exec.CommandContext(item.Ctx, "yt-dlp", args...)
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		resp.Error = err.Error()

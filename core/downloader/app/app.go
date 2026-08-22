@@ -30,7 +30,10 @@ func (a *App) loadServices() {
 }
 
 func (a *App) RegisterHandlers(mux *http.ServeMux) {
-	rou := router.Router{ParentMux: mux}
+	mux.HandleFunc("/hello", func(writer http.ResponseWriter, request *http.Request) {
+		_, _ = writer.Write([]byte("fuck you Ezekiel"))
+	})
 
+	rou := router.Router{ParentMux: mux}
 	rou.AddRouter(downloader.NewHandlerHttp(a.downloader))
 }

@@ -19,12 +19,15 @@ type Downloader interface {
 
 type DownloadWorker struct {
 	MaxWorkers    int
+	ExitThreshold int
+
 	downloadStore DownloadStore
 	downloader    Downloader
 
 	workerLock    sem.Sem
 	workerRunning chan struct{}
-	ExitThreshold int
+
+	triggerDownloads chan struct{}
 }
 
 func NewDownloadWorker(
@@ -39,7 +42,9 @@ func NewDownloadWorker(
 
 		downloadStore: downloadStore,
 		downloader:    downloader,
-		workerLock:    sem.New(1),
+
+		triggerDownloads: make(chan struct{}, 1),
+		workerLock:       sem.New(1),
 	}
 }
 
@@ -49,9 +54,18 @@ func (dw *DownloadWorker) Start() {
 		log.Info().Msg("launched download worker")
 		// send max workers, threshold first because we might change max workers during runtime
 		// and directly accessing may cause race condition after the worker is running
-		go dw.worker(dw.MaxWorkers, dw.ExitThreshold)
+		go dw.worker(dw.MaxWorkers)
 	} else {
+		dw.triggerRecheck()
 		log.Info().Msg("download worker is already running")
+	}
+}
+
+func (dw *DownloadWorker) triggerRecheck() {
+	select {
+	case dw.triggerDownloads <- struct{}{}:
+	default:
+		log.Warn().Msg("trigger chan is full")
 	}
 }
 
@@ -68,78 +82,82 @@ func (dw *DownloadWorker) isRunning() bool {
 	}
 }
 
-func (dw *DownloadWorker) worker(maxWorkers, exitThreshold int) {
+func (dw *DownloadWorker) worker(maxWorkers int) {
 	dw.workerRunning = make(chan struct{}, 1)
-
-	downloadChan := make(chan *Download, 1)
-	consumerExited := make(chan struct{}, 1)
-
 	defer func() {
-		log.Debug().Msg("beginning worker cleanup")
-
-		close(downloadChan)
-		//log.Debug().Msg("stopping consumer")
-		<-consumerExited
-		//log.Debug().Msg("consumer stopped")
-
 		dw.workerLock.Release()
 		close(dw.workerRunning)
-
 		log.Info().Msg("worker stopped")
-
-		queued, err := dw.downloadStore.ListQueued(maxWorkers)
-		if err != nil {
-			log.Warn().Err(err).Msg("Could not load downloading items")
-			return
-		}
-
-		if len(queued) != 0 {
-			log.Info().Msg("queued items starting worker again")
-			dw.Start()
-		}
 	}()
 
-	const waitInterval = 5 * time.Second
-
 	downloadSem := sem.New(maxWorkers)
-	go dw.consumer(&downloadSem, downloadChan, consumerExited)
+	wg := sync.WaitGroup{}
 
 	strikes := 0
 	for {
-		exitCondition := strikes > exitThreshold
-		if exitCondition {
+		var done bool
+		done, strikes = dw.loop(
+			&wg,
+			&downloadSem,
+			strikes,
+			dw.ExitThreshold,
+			maxWorkers,
+		)
+		if done {
 			return
-		}
-
-		queued, err := dw.downloadStore.ListQueued(maxWorkers)
-		if err != nil {
-			log.Warn().Err(err).Msg("Could not load downloading items")
-			return
-		}
-
-		if len(queued) == 0 {
-			strikes++
-			<-time.After(waitInterval)
-			continue
-		}
-
-		strikes = 0
-		for _, q := range queued {
-			downloadChan <- &q
 		}
 	}
 }
 
-func (dw *DownloadWorker) consumer(
+func (dw *DownloadWorker) loop(
+	wg *sync.WaitGroup,
 	downloadSem *sem.Sem,
-	downloadChan chan *Download,
-	consumerDone chan struct{},
-) {
-	wg := sync.WaitGroup{}
+	strikes int,
+	exitThreshold int,
+	queueLimit int,
+) (done bool, strikesOut int) {
+	const waitInterval = 5 * time.Second
 
-	for d := range downloadChan {
+	wgDone := make(chan struct{}, 1)
+	exitCondition := strikes > exitThreshold
+	if exitCondition {
+		go func() {
+			// in the event a retry is called
+			// we leak go the routine, but since
+			// once all tasks are done we exit immediately anyway
+			// wgDone is also leaked until go routine is done
+			wg.Wait()
+			close(wgDone)
+		}()
+
+		select {
+		case <-wgDone:
+			log.Info().Msg("exiting loop")
+			return true, strikes
+		case <-dw.triggerDownloads:
+			log.Info().Msg("trigger received starting loop again")
+			strikes = 0
+			return false, strikes
+		}
+	}
+
+	queued, err := dw.downloadStore.ListQueued(queueLimit)
+	if err != nil {
+		log.Warn().Err(err).Msg("Could not load downloading items")
+		return false, strikes
+	}
+
+	if len(queued) == 0 {
+		strikes++
+		<-time.After(waitInterval)
+		return false, strikes
+	}
+
+	strikes = 0
+
+	for _, d := range queued {
 		downloadSem.Acquire()
-		err := dw.downloadStore.SetStatus(d.ID, Downloading)
+		err = dw.downloadStore.SetStatus(d.ID, Downloading)
 		if err != nil {
 			log.Warn().Err(err).Any("download", d).Msg("Could not set status to downloading, skipping...")
 			continue
@@ -147,10 +165,9 @@ func (dw *DownloadWorker) consumer(
 
 		wg.Go(func() {
 			defer downloadSem.Release()
-			dw.downloader.download(d)
+			dw.downloader.download(&d)
 		})
 	}
 
-	wg.Wait()
-	close(consumerDone)
+	return false, strikes
 }

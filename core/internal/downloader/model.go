@@ -26,16 +26,17 @@ type Download struct {
 
 	Name         string
 	DownloadLink string
-	Status       DownloadState
 	Progress     DownloadProgress `gorm:"embedded;embeddedPrefix:progress_"`
 	DownloadPath string
 }
 
 type DownloadProgress struct {
+	Status DownloadState
+	Error  string
+
 	TimeLeftSecs           uint
 	DownloadBytesPerSecond uint
 
-	Complete uint
-	Left     uint
-	Error    string
+	Completed uint
+	Total     uint
 }

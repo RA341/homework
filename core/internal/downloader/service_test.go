@@ -131,8 +131,8 @@ func (t *TestDownloader) progress(id string) (DownloadState, *DownloadProgress, 
 			return Complete, &DownloadProgress{
 				TimeLeftSecs:           0,
 				DownloadBytesPerSecond: 0,
-				Complete:               100,
-				Left:                   0,
+				Total:                  100,
+				Completed:              0,
 				Error:                  "",
 			}, nil
 		}
@@ -140,8 +140,8 @@ func (t *TestDownloader) progress(id string) (DownloadState, *DownloadProgress, 
 		return Error, &DownloadProgress{
 			TimeLeftSecs:           0,
 			DownloadBytesPerSecond: 0,
-			Complete:               0,
-			Left:                   100,
+			Total:                  0,
+			Completed:              100,
 			Error:                  "download failed randomly",
 		}, errors.New("download failed randomly")
 	}
@@ -152,8 +152,8 @@ func (t *TestDownloader) progress(id string) (DownloadState, *DownloadProgress, 
 	return Downloading, &DownloadProgress{
 		TimeLeftSecs:           uint(5 - elapsed.Seconds()),
 		DownloadBytesPerSecond: 1024 * 1024,
-		Complete:               percent,
-		Left:                   100 - percent,
+		Total:                  percent,
+		Completed:              100 - percent,
 		Error:                  "",
 	}, nil
 }

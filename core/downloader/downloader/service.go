@@ -1,19 +1,21 @@
 package downloader
 
 import (
+	"context"
 	"crypto/sha1"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/ra341/homework/common/sm"
+	"github.com/rs/zerolog/log"
 )
 
 type Service struct {
 	DownloadFolder string
 	ytd            Provider
 
-	downloadItems sm.Map[string, *Progress]
+	downloadItems sm.Map[string, *DownloadItem]
 }
 
 func NewDownloader(DownloadFolder string, ytd Provider) (*Service, error) {
@@ -41,26 +43,74 @@ func (d *Service) init() (err error) {
 	return nil
 }
 
-func (d *Service) Start(url string) (err error) {
+func (d *Service) Start(url string) (id string, err error) {
 	sum := sha1.Sum([]byte(url))
 	downloadId := fmt.Sprintf("%x", sum)
 	downloadFolder := filepath.Join(d.DownloadFolder, downloadId)
 
 	err = os.MkdirAll(downloadFolder, os.ModePerm)
 	if err != nil {
-		return err
+		return id, err
 	}
 
-	d.downloadItems.Store(downloadId, &Progress{
-		Status: Queued,
-	})
+	ctx, cancelFn := context.WithCancel(context.Background())
+	item := &DownloadItem{
+		Ctx:            ctx,
+		cancel:         cancelFn,
+		Url:            url,
+		DownloadFolder: downloadFolder,
+		WorkerDone:     make(chan struct{}, 1),
+	}
 
-	d.ytd.Download(url, downloadFolder,
-		func(p *Progress) {
-			fmt.Println("Downloading...", p)
-			d.downloadItems.LoadOrStore(downloadId, p)
-		},
-	)
+	d.downloadItems.Store(downloadId, item)
+
+	go d.worker(downloadId, item)
+
+	return downloadId, nil
+}
+
+func (d *Service) Stop(downloadId string) error {
+	val, ok := d.downloadItems.Load(downloadId)
+	if !ok {
+		return fmt.Errorf("download not found")
+	}
+
+	val.cancel()
+	val.WaitForWorker()
+	d.downloadItems.Delete(downloadId)
 
 	return nil
+}
+
+func (d *Service) Status(downloadId string) (*Progress, error) {
+	val, ok := d.downloadItems.Load(downloadId)
+	if !ok {
+		return nil, fmt.Errorf("download not found")
+	}
+
+	return val.progress, nil
+}
+
+func (d *Service) ProgressSetter(id string) func(p *Progress) {
+	return func(p *Progress) {
+		fmt.Println("Downloading...", p)
+
+		item, ok := d.downloadItems.Load(id)
+		if !ok {
+			log.Error().Str("id", id).Msg("Download item not found, THIS SHOULD NEVER HAPPEN")
+			return
+		}
+
+		item.progress = p
+		d.downloadItems.Store(id, item)
+	}
+}
+
+func (d *Service) worker(downloadId string, item *DownloadItem) {
+	defer func() {
+		// for anybody listening for this download
+		close(item.WorkerDone)
+	}()
+
+	d.ytd.Download(item, d.ProgressSetter(downloadId))
 }

@@ -1,7 +1,23 @@
 package downloader
 
+import "context"
+
 type Provider interface {
-	Download(url string, outputFolder string, setProgress func(p *Progress))
+	Download(item *DownloadItem, setProgress func(p *Progress))
+}
+
+type DownloadItem struct {
+	Ctx            context.Context
+	Url            string
+	DownloadFolder string
+	WorkerDone     chan struct{}
+
+	progress *Progress
+	cancel   context.CancelFunc
+}
+
+func (d *DownloadItem) WaitForWorker() {
+	<-d.WorkerDone
 }
 
 type DownloadStatus int

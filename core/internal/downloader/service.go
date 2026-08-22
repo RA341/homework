@@ -11,8 +11,8 @@ import (
 )
 
 type DownloadClient interface {
-	download(video string) (downloadId string, err error)
-	progress(id string) (DownloadState, *DownloadProgress, error)
+	Download(video string) (downloadId string, err error)
+	Progress(id string) (*DownloadProgress, error)
 }
 
 type AssetFinalizer interface {
@@ -75,10 +75,10 @@ func (s *Service) Init() error {
 func (s *Service) Add(assetId uint, Name string, DownloadLink string) (err error) {
 	download := Download{
 		AssetID:      assetId,
-		Status:       Queued,
 		Name:         Name,
 		DownloadLink: DownloadLink,
 	}
+	download.Progress.Status = Queued
 
 	err = s.store.AddDownload(&download)
 	if err != nil {
@@ -102,8 +102,8 @@ func (s *Service) Retry(id uint) error {
 	err = s.store.SetProgress(id, &DownloadProgress{
 		TimeLeftSecs:           0,
 		DownloadBytesPerSecond: 0,
-		Complete:               0,
-		Left:                   0,
+		Total:                  0,
+		Completed:              0,
 		Error:                  "",
 	})
 	if err != nil {
@@ -164,7 +164,7 @@ func (s *Service) download(download *Download) {
 }
 
 func (s *Service) monitorDownload(down *Download) (DownloadState, error) {
-	downloadId, err := s.cli.download(down.DownloadLink)
+	downloadId, err := s.cli.Download(down.DownloadLink)
 	if err != nil {
 		return 0, err
 	}
@@ -183,7 +183,7 @@ func (s *Service) monitorDownload(down *Download) (DownloadState, error) {
 				return Failed, fmt.Errorf("could not get progress after %d tries, please check logs", strikes)
 			}
 
-			status, progress, err := s.cli.progress(downloadId)
+			progress, err := s.cli.Progress(downloadId)
 			if err != nil {
 				strikes++
 				log.Warn().
@@ -202,8 +202,8 @@ func (s *Service) monitorDownload(down *Download) (DownloadState, error) {
 
 			//log.Debug().Any("data", progress).Msg("Download progress")
 
-			if status == Complete || status == Error {
-				return status, nil
+			if progress.Status == Complete || progress.Status == Error {
+				return progress.Status, nil
 			}
 		}
 	}
