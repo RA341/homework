@@ -1,23 +1,15 @@
 package downloader
 
-import (
-	"github.com/ra341/homework/common/sm"
-	"github.com/ra341/homework/internal/downloader"
-)
+import "github.com/ra341/homework/internal/downloads"
 
 type Client struct {
 	srv *Service
 }
 
-func NewClient() downloader.DownloadClient {
+func NewClient(srv *Service) downloads.DownloadClient {
 	s := &Client{
-		srv: &Service{
-			DownloadFolder: "",
-			ytd:            nil,
-			downloadItems:  sm.Map[string, *DownloadItem]{},
-		},
+		srv: srv,
 	}
-
 	return s
 }
 
@@ -26,7 +18,7 @@ func (c *Client) Download(video string) (downloadId string, err error) {
 	panic("implement me")
 }
 
-func (c *Client) Progress(id string) (*downloader.DownloadProgress, error) {
+func (c *Client) Progress(id string) (*downloads.DownloadProgress, error) {
 	//TODO implement me
 	panic("implement me")
 }

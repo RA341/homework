@@ -18,7 +18,7 @@ type Service struct {
 	downloadItems sm.Map[string, *DownloadItem]
 }
 
-func NewDownloader(DownloadFolder string, ytd Provider) (*Service, error) {
+func NewService(DownloadFolder string, ytd Provider) (*Service, error) {
 	d := &Service{
 		DownloadFolder: DownloadFolder,
 		ytd:            ytd,

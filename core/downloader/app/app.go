@@ -48,7 +48,7 @@ func (a *App) loadServices() {
 	}
 
 	downloadFolder := "downloads"
-	a.downloader, err = downloader.NewDownloader(downloadFolder, ytd)
+	a.downloader, err = downloader.NewService(downloadFolder, ytd)
 	if err != nil {
 		log.Fatal().Err(err).Msg("could not init downloader")
 	}

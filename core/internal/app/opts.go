@@ -3,6 +3,8 @@ package app
 import (
 	"context"
 	"net/http"
+
+	"github.com/ra341/homework/internal/downloads"
 )
 
 type Option func(*App)
@@ -17,4 +19,10 @@ func WithUI(ui http.Handler) Option {
 
 func WithPort(port int) Option {
 	return func(s *App) { s.port = port }
+}
+
+func WithDownloadCli(cli downloads.DownloadClient) Option {
+	return func(app *App) {
+		app.downloadsClient = cli
+	}
 }

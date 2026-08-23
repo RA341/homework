@@ -9,10 +9,11 @@ import (
 
 	"github.com/ra341/homework/common/database"
 	"github.com/ra341/homework/common/router"
+	"github.com/ra341/homework/downloader/app"
 	"github.com/ra341/homework/internal/auth/authentication"
 	"github.com/ra341/homework/internal/auth/session"
 	"github.com/ra341/homework/internal/browser"
-	"github.com/ra341/homework/internal/downloader"
+	"github.com/ra341/homework/internal/downloads"
 	"github.com/ra341/homework/internal/media"
 	"github.com/ra341/homework/internal/media/asset"
 	"github.com/ra341/homework/internal/media/content"
@@ -32,21 +33,23 @@ type App struct {
 	ui   http.Handler
 	port int
 
-	db        *gorm.DB
-	content   *content.Service
-	asset     *asset.Service
-	media     *media.Service
-	downloads *downloader.Service
-	browser   *browser.Service
-	user      *users.Service
-	auth      *authentication.Service
-	session   *session.Service
+	db      *gorm.DB
+	content *content.Service
+	asset   *asset.Service
+	media   *media.Service
+
+	downloads       *downloads.Service
+	downloadsClient downloads.DownloadClient
+
+	browser *browser.Service
+	user    *users.Service
+	auth    *authentication.Service
+	session *session.Service
 }
 
 func (a *App) Run(opts ...Option) {
 	a.port = 9911
 	a.ctx = context.Background()
-
 	for _, opt := range opts {
 		opt(a)
 	}
@@ -64,18 +67,98 @@ func (a *App) Run(opts ...Option) {
 }
 
 func (a *App) addServices() {
-	dir, err := os.Getwd()
+	workingDir, dataDir := a.initAppDataDir()
+
+	a.initDB(dataDir)
+
+	a.addAssetSrv()
+	a.addContentSrv()
+	a.addBrowserSrv()
+	a.addDownloadsSrv(workingDir)
+	a.addMediaSrv()
+
+	a.addSessionSrv()
+	a.addUserSrv()
+	a.addAuthSrv()
+}
+
+func (a *App) addAuthSrv() {
+	jwtSecret := "test-secret-change-me"
+	a.auth = authentication.NewService(jwtSecret, a.session, a.user)
+}
+
+func (a *App) addUserSrv() {
+	var err error
+
+	userStore := users.NewStore(a.db)
+	a.user, err = users.NewService(userStore)
+	if err != nil {
+		log.Warn().Err(err).Msg("could not init user service")
+	}
+}
+
+func (a *App) addSessionSrv() {
+	sessionDb := session.NewStore(a.db)
+	sessionExpiry := time.Hour * 24 * 7
+	a.session = session.NewService(sessionDb, sessionExpiry)
+}
+
+func (a *App) initAppDataDir() (workingDir string, dataDir string) {
+	var err error
+
+	workingDir, err = os.Getwd()
 	if err != nil {
 		log.Fatal().Err(err).Msg("could not get working directory")
 	}
 
-	dataPath := filepath.Join(dir, "data")
-	err = os.MkdirAll(dataPath, 0755)
+	dataDir = filepath.Join(workingDir, "data")
+	err = os.MkdirAll(dataDir, 0755)
 	if err != nil {
-		log.Fatal().Err(err).Str("path", dataPath).Msg("could make data dir")
+		log.Fatal().Err(err).Str("path", dataDir).Msg("could make data dir")
 	}
 
-	a.initDB(dataPath)
+	return workingDir, dataDir
+}
+
+func (a *App) addMediaSrv() {
+	var err error
+
+	const uploadFolder = "temp"
+	a.media, err = media.NewService(
+		a.content,
+		a.asset,
+		a.downloads,
+		uploadFolder,
+	)
+	if err != nil {
+		log.Fatal().Err(err).Msg("could not create media service")
+	}
+}
+
+func (a *App) addDownloadsSrv(dir string) {
+	config := downloads.NewConfig(dir)
+
+	browserData := "browser"
+	downloaderCli, err := app.NewDownloaderClient(browserData, config.DownloadsDir)
+	if err != nil {
+		log.Fatal().Err(err).Msg("could not create downloader client")
+	}
+
+	downloadDb := downloads.NewStoreGorm(a.db)
+	a.downloads, err = downloads.NewService(config, downloadDb, downloaderCli, a.asset)
+	if err != nil {
+		// todo handle gracefully
+		log.Fatal().Err(err).Msg("could not create downloads service")
+	}
+}
+
+func (a *App) addContentSrv() {
+	contentStore := content.NewStore(a.db)
+	a.content = content.NewService(contentStore)
+}
+
+func (a *App) addAssetSrv() {
+	var err error
 
 	assetStore := asset.NewStore(a.db)
 	assetFolder := "assets"
@@ -83,9 +166,11 @@ func (a *App) addServices() {
 	if err != nil {
 		log.Fatal().Msg("error initializing asset service")
 	}
+	return
+}
 
-	contentStore := content.NewStore(a.db)
-	a.content = content.NewService(contentStore)
+func (a *App) addBrowserSrv() {
+	var err error
 
 	apiUrl := "http://localhost:8998"
 	vncUrl := "http://localhost:3012/"
@@ -93,42 +178,7 @@ func (a *App) addServices() {
 	if err != nil {
 		log.Warn().Err(err).Msg("could not create chromtrol client")
 	}
-
-	config := downloader.NewConfig(dir)
-	log.Debug().Any("val", config).Msg("config")
-
-	pyDownloader, err := downloader.NewPyClient(config.ServerUrl)
-	if err != nil {
-		log.Warn().Err(err).Msg("could not create ping downloader")
-		// todo handle gracefully
-		//log.Fatal().Err(err).Msg("could not create py downloader")
-	}
-
-	downloadDb := downloader.NewStoreGorm(a.db)
-	a.downloads, err = downloader.NewService(config, downloadDb, pyDownloader, a.asset)
-	if err != nil {
-		// todo handle gracefully
-		log.Fatal().Err(err).Msg("could not create downloads service")
-	}
-
-	const uploadFolder = "temp"
-	a.media, err = media.NewService(a.content, a.asset, a.downloads, uploadFolder)
-	if err != nil {
-		log.Fatal().Err(err).Msg("could not create media service")
-	}
-
-	sessionDb := session.NewStore(a.db)
-	sessionExpiry := time.Hour * 24 * 7
-	a.session = session.NewService(sessionDb, sessionExpiry)
-
-	userStore := users.NewStore(a.db)
-	a.user, err = users.NewService(userStore)
-	if err != nil {
-		log.Warn().Err(err).Msg("could not init user service")
-	}
-
-	jwtSecret := "test-secret-change-me"
-	a.auth = authentication.NewService(jwtSecret, a.session, a.user)
+	return
 }
 
 func (a *App) initDB(dataPath string) {
@@ -141,7 +191,7 @@ func (a *App) initDB(dataPath string) {
 	models := []any{
 		&asset.Asset{},
 		&content.Content{},
-		&downloader.Download{},
+		&downloads.Download{},
 		&users.User{},
 		&session.Session{},
 	}
@@ -161,23 +211,12 @@ func (a *App) addHandlers(r *http.ServeMux) {
 	apiMux := http.NewServeMux()
 	a.addApiHandlers(apiMux)
 
-	logger := loggerMiddleware(false)
+	logger := router.LoggerMiddleware(false)
 
 	ro.AddRouter(ApiPrefix, logger(apiMux))
 
 	a.addUIHandler(r)
 
-}
-
-func (a *App) addUIHandler(r *http.ServeMux) {
-	if a.ui == nil {
-		r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			_, _ = w.Write([]byte("No ui set fuck off"))
-		})
-		return
-	}
-
-	r.Handle("/", a.ui)
 }
 
 func (a *App) addApiHandlers(r *http.ServeMux) {
@@ -210,7 +249,7 @@ func (a *App) addProtectedHandlers(mux *http.ServeMux) {
 	rou.AddHandler(users.NewHandler(a.user))
 	rou.AddHandler(browser.NewHandler(a.browser))
 	rou.AddHandler(media.NewHandler(a.media))
-	rou.AddHandler(downloader.NewHandler(a.downloads))
+	rou.AddHandler(downloads.NewHandler(a.downloads))
 	rou.AddHandler(content.NewHandler(a.content))
 }
 
@@ -225,16 +264,13 @@ func (a *App) addPublicHandlers(mux *http.ServeMux) {
 	})
 }
 
-func loggerMiddleware(enable bool) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		if !enable {
-			return next
-		}
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			log.Info().Str("method", r.Method).
-				Str("path", r.URL.Path).
-				Msg("request started")
-			next.ServeHTTP(w, r)
+func (a *App) addUIHandler(r *http.ServeMux) {
+	if a.ui == nil {
+		r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			_, _ = w.Write([]byte("No ui set fuck off"))
 		})
+		return
 	}
+
+	r.Handle("/", a.ui)
 }

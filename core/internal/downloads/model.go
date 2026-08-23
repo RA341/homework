@@ -1,4 +1,4 @@
-package downloader
+package downloads
 
 import (
 	"github.com/ra341/homework/internal/media/asset"

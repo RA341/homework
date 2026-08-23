@@ -1,7 +1,8 @@
-package downloader
+package downloads
 
 import (
 	"github.com/ra341/homework/common/pick"
+	"github.com/rs/zerolog/log"
 )
 
 type Config struct {
@@ -17,7 +18,7 @@ type Config struct {
 const DefaultSocket = "/tmp/hw.sock"
 
 func NewConfig(wd string) *Config {
-	return &Config{
+	c := &Config{
 		ServerUrl: pick.Pk[string]().
 			Env("HW_SERVER_URL").
 			GetOrDefault("http://localhost:9922"),
@@ -29,4 +30,6 @@ func NewConfig(wd string) *Config {
 			Env("HW_DOWNLOADS_DIR").
 			GetOrDefault(wd + "/downloads"),
 	}
+	log.Debug().Any("val", c).Msg("config")
+	return c
 }

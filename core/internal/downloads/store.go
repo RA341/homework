@@ -1,4 +1,4 @@
-package downloader
+package downloads
 
 type Store interface {
 	ListQueued(limit int) ([]Download, error)

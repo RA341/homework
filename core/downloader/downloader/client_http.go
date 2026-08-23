@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/ra341/homework/common/fu"
-	"github.com/ra341/homework/internal/downloader"
+	"github.com/ra341/homework/internal/downloads"
 )
 
 type ClientHttp struct {
@@ -18,7 +18,7 @@ type ClientHttp struct {
 	hcli     *http.Client
 }
 
-func NewClientHttp(basepath string) (downloader.DownloadClient, error) {
+func NewClientHttp(basepath string) (downloads.DownloadClient, error) {
 	client := &http.Client{
 		Timeout: 10 * time.Second,
 		Transport: &http.Transport{
@@ -55,7 +55,7 @@ func (c *ClientHttp) ping() error {
 	return nil
 }
 
-func (c *ClientHttp) Progress(id string) (*downloader.DownloadProgress, error) {
+func (c *ClientHttp) Progress(id string) (*downloads.DownloadProgress, error) {
 	//TODO implement me
 	panic("implement me")
 }
