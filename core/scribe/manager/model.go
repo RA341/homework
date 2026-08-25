@@ -16,7 +16,7 @@ type DownloadItem struct {
 	DownloadFolder string
 	WorkerDone     chan struct{}
 
-	progress *downloads.Progress
+	progress downloads.Progress
 	cancel   context.CancelFunc
 }
 

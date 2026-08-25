@@ -2,12 +2,10 @@ package scribe
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 
 	"github.com/ra341/homework/common/router"
-	"github.com/ra341/homework/internal/downloads"
 	"github.com/ra341/homework/scribe/manager"
 	"github.com/ra341/homework/scribe/ytdlp"
 	"github.com/rs/zerolog"
@@ -16,21 +14,6 @@ import (
 
 func init() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"})
-}
-
-func NewClient(browserData, downloadFolder string) (downloads.DownloadClient, error) {
-	srv, err := ytdlp.NewService(browserData)
-	if err != nil {
-		return nil, fmt.Errorf("could not create ytdlp service: %w", err)
-	}
-
-	downloaderSrv, err := manager.NewService(downloadFolder, srv)
-	if err != nil {
-		log.Fatal().Err(err).Msg("could not create downloader")
-	}
-
-	downloaderCli := manager.NewClient(downloaderSrv)
-	return downloaderCli, nil
 }
 
 type App struct {

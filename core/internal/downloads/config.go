@@ -6,8 +6,10 @@ import (
 )
 
 type Config struct {
-	SocketPath   string
-	DownloadsDir string
+	SocketPath string
+
+	DownloadsDir      string
+	BrowserCookiesDir string
 
 	ProgressCheckThreshold int
 	CheckIntervalSecs      int
@@ -29,7 +31,12 @@ func NewConfig(wd string) *Config {
 			Pk[string]().
 			Env("HW_DOWNLOADS_DIR").
 			GetOrDefault(wd + "/downloads"),
+		BrowserCookiesDir: pick.
+			Pk[string]().
+			Env("HW_BROWSER_DIR").
+			GetOrDefault(wd + "/browser"),
 	}
+
 	log.Debug().Any("val", c).Msg("config")
 	return c
 }

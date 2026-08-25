@@ -17,6 +17,7 @@ import (
 	"github.com/ra341/homework/internal/media/asset"
 	"github.com/ra341/homework/internal/media/content"
 	"github.com/ra341/homework/internal/users"
+	"github.com/ra341/homework/scribe"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
@@ -36,8 +37,8 @@ type App struct {
 	asset   *asset.Service
 	media   *media.Service
 
-	downloads *downloads.Service
-	scribeCli downloads.DownloadClient
+	downloads        *downloads.Service
+	scribeCliFactory scribe.ClientFactory
 
 	browser *browser.Service
 	user    *users.Service
@@ -144,10 +145,17 @@ func (a *App) addDownloadsSrv(dir string) {
 
 	config := downloads.NewConfig(dir)
 	downloadDb := downloads.NewStoreGorm(a.db)
+
+	scribeCli, err := a.scribeCliFactory(config.BrowserCookiesDir, config.DownloadsDir)
+	if err != nil {
+		log.Fatal().Err(err).Msg("could not load scribe client")
+		return
+	}
+
 	a.downloads, err = downloads.NewService(
 		config,
 		downloadDb,
-		a.scribeCli,
+		scribeCli,
 		a.asset,
 	)
 	if err != nil {

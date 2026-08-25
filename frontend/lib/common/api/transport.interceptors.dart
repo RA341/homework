@@ -43,7 +43,7 @@ connect.Interceptor retryInterceptor({int maxAttempts = 2}) {
           logger.w(
             "Request to ${req.spec.procedure} failed. Retrying (attempt $attempts of $maxAttempts)... Error: $e",
           );
-          await Future.delayed(Duration(seconds: attempts));
+          // await Future.delayed(Duration(milliseconds: attempts));
         }
       }
     };

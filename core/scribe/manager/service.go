@@ -90,12 +90,12 @@ func (d *Service) Progress(downloadId string) (*downloads.Progress, error) {
 		return nil, fmt.Errorf("download not found")
 	}
 
-	return val.progress, nil
+	return &val.progress, nil
 }
 
 func (d *Service) progressSetter(id string) func(p *downloads.Progress) {
 	return func(p *downloads.Progress) {
-		fmt.Println("Downloading...", p)
+		//log.Debug().Any("download", p).Msg("Downloading")
 
 		item, ok := d.downloadItems.Load(id)
 		if !ok {
@@ -103,7 +103,7 @@ func (d *Service) progressSetter(id string) func(p *downloads.Progress) {
 			return
 		}
 
-		item.progress = p
+		item.progress = *p
 		d.downloadItems.Store(id, item)
 	}
 }

@@ -9,6 +9,7 @@ import (
 
 	"github.com/ra341/homework/common/fu"
 	"github.com/ra341/homework/internal/app"
+	"github.com/ra341/homework/scribe"
 	"github.com/rs/zerolog/log"
 )
 
@@ -28,6 +29,7 @@ func main() {
 	a.Run(
 		app.WithUI(ui),
 		app.WithCtx(ctx),
+		app.WithScribeCli(scribe.NewClient),
 	)
 }
 

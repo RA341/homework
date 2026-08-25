@@ -22,7 +22,7 @@ func (p *ProgressStr) ToProgress(status downloads.DownloadState) *downloads.Prog
 		Status: status,
 	}
 
-	timeSecs, err := strconv.ParseInt(p.Time, 10, 64)
+	timeSecs, err := strconv.ParseFloat(p.Time, 64)
 	if err == nil {
 		prog.TimeLeftSecs = uint(timeSecs)
 	}

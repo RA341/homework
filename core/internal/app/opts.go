@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/ra341/homework/internal/downloads"
+	"github.com/ra341/homework/scribe"
 )
 
 type Option func(*App)
@@ -21,8 +21,8 @@ func WithPort(port int) Option {
 	return func(s *App) { s.port = port }
 }
 
-func WithScribeCli(cli downloads.DownloadClient) Option {
+func WithScribeCli(cli scribe.ClientFactory) Option {
 	return func(app *App) {
-		app.scribeCli = cli
+		app.scribeCliFactory = cli
 	}
 }
