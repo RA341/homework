@@ -9,6 +9,7 @@ import (
 
 	"github.com/ra341/homework/common/fu"
 	"github.com/ra341/homework/internal/app"
+	"github.com/ra341/homework/internal/downloads"
 	"github.com/ra341/homework/scribe"
 	"github.com/rs/zerolog/log"
 )
@@ -26,10 +27,14 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
+	cli := func(config scribe.FactoryClientConfig) (downloads.DownloadClient, error) {
+		return scribe.NewClientUnified(config)
+	}
+
 	a.Run(
 		app.WithUI(ui),
 		app.WithCtx(ctx),
-		app.WithScribeCli(scribe.NewClient),
+		app.WithScribeCli(cli),
 	)
 }
 

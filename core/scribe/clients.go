@@ -8,18 +8,25 @@ import (
 	"github.com/ra341/homework/scribe/ytdlp"
 )
 
-type ClientConfig interface {
-	BrowserDir() string
-	DownloadsDir() string
+type FactoryClientConfig interface {
+	ClientUnifiedConfig
+	ClientHttpConfig
 }
 
-func NewClient(config ClientConfig) (downloads.DownloadClient, error) {
-	srv, err := ytdlp.NewService(config.BrowserDir())
+type ClientFactory func(config FactoryClientConfig) (downloads.DownloadClient, error)
+
+type ClientUnifiedConfig interface {
+	GetBrowserDir() string
+	GetDownloadsDir() string
+}
+
+func NewClientUnified(config ClientUnifiedConfig) (downloads.DownloadClient, error) {
+	srv, err := ytdlp.NewService(config.GetBrowserDir())
 	if err != nil {
 		return nil, fmt.Errorf("could not create ytdlp service: %w", err)
 	}
 
-	downloaderSrv, err := manager.NewService(config.DownloadsDir(), srv)
+	downloaderSrv, err := manager.NewService(config.GetDownloadsDir(), srv)
 	if err != nil {
 		return nil, fmt.Errorf("could not create manager service: %s", err)
 	}
@@ -29,11 +36,11 @@ func NewClient(config ClientConfig) (downloads.DownloadClient, error) {
 }
 
 type ClientHttpConfig interface {
-	HttpServiceUrl() string
+	GetServiceUrl() string
 }
 
 func NewClientHttp(config ClientHttpConfig) (downloads.DownloadClient, error) {
-	url := config.HttpServiceUrl()
+	url := config.GetServiceUrl()
 	if url == "" {
 
 	}

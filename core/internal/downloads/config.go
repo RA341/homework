@@ -8,20 +8,32 @@ import (
 type Config struct {
 	SocketPath string
 
-	DownloadsDir      string
-	BrowserCookiesDir string
+	DownloadsDir     string
+	BrowserDir       string
+	ScribeServiceUrl string
 
 	ProgressCheckThreshold int
 	CheckIntervalSecs      int
 	MaxDownloads           int
-	ServerUrl              string
+}
+
+func (c *Config) GetBrowserDir() string {
+	return c.BrowserDir
+}
+
+func (c *Config) GetDownloadsDir() string {
+	return c.DownloadsDir
+}
+
+func (c *Config) GetServiceUrl() string {
+	return c.ScribeServiceUrl
 }
 
 const DefaultSocket = "/tmp/hw.sock"
 
 func NewConfig(wd string) *Config {
 	c := &Config{
-		ServerUrl: pick.Pk[string]().
+		ScribeServiceUrl: pick.Pk[string]().
 			Env("HW_SERVER_URL").
 			GetOrDefault("http://localhost:9922"),
 		SocketPath: pick.Pk[string]().
@@ -31,7 +43,7 @@ func NewConfig(wd string) *Config {
 			Pk[string]().
 			Env("HW_DOWNLOADS_DIR").
 			GetOrDefault(wd + "/downloads"),
-		BrowserCookiesDir: pick.
+		BrowserDir: pick.
 			Pk[string]().
 			Env("HW_BROWSER_DIR").
 			GetOrDefault(wd + "/browser"),

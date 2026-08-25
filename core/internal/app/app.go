@@ -146,7 +146,7 @@ func (a *App) addDownloadsSrv(dir string) {
 	config := downloads.NewConfig(dir)
 	downloadDb := downloads.NewStoreGorm(a.db)
 
-	scribeCli, err := a.scribeCliFactory(config.BrowserCookiesDir, config.DownloadsDir)
+	scribeCli, err := a.scribeCliFactory(config)
 	if err != nil {
 		log.Fatal().Err(err).Msg("could not load scribe client")
 		return
