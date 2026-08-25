@@ -12,7 +12,8 @@ import (
 
 type DownloadClient interface {
 	Download(video string) (downloadId string, err error)
-	Progress(id string) (*DownloadProgress, error)
+	Cancel(id string) error
+	Progress(id string) (*Progress, error)
 }
 
 type AssetFinalizer interface {
@@ -29,7 +30,12 @@ type Service struct {
 	downloadWorker *DownloadWorker
 }
 
-func NewService(conf *Config, store Store, cli DownloadClient, asset AssetFinalizer) (s *Service, err error) {
+func NewService(
+	conf *Config,
+	store Store,
+	cli DownloadClient,
+	asset AssetFinalizer,
+) (s *Service, err error) {
 	s = &Service{
 		conf:  conf,
 		store: store,
@@ -67,7 +73,7 @@ func (s *Service) Init() error {
 		s,
 	)
 
-	s.launchWorker()
+	//s.launchWorker()
 
 	return nil
 }
@@ -99,7 +105,7 @@ func (s *Service) Retry(id uint) error {
 		return err
 	}
 
-	err = s.store.SetProgress(id, &DownloadProgress{
+	err = s.store.SetProgress(id, &Progress{
 		TimeLeftSecs:           0,
 		DownloadBytesPerSecond: 0,
 		Total:                  0,

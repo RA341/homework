@@ -10,7 +10,8 @@ import (
 	"strings"
 
 	"github.com/ra341/homework/common/cli"
-	"github.com/ra341/homework/downloader/downloader"
+	"github.com/ra341/homework/internal/downloads"
+	"github.com/ra341/homework/scribe/manager"
 )
 
 type Service struct {
@@ -37,14 +38,14 @@ func (yt *Service) init() error {
 	return nil
 }
 
-func (yt *Service) Download(item *downloader.DownloadItem, setProgress func(p *downloader.Progress)) {
+func (yt *Service) Download(item *manager.DownloadItem, setProgress func(p *downloads.Progress)) {
 	var resp ProgressStr
 
 	defer func() {
 		if resp.Error == "" {
-			setProgress(resp.ToProgress(downloader.Complete))
+			setProgress(resp.ToProgress(downloads.Complete))
 		} else {
-			setProgress(resp.ToProgress(downloader.Error))
+			setProgress(resp.ToProgress(downloads.Error))
 		}
 	}()
 
@@ -93,7 +94,7 @@ func (yt *Service) Download(item *downloader.DownloadItem, setProgress func(p *d
 			continue
 		}
 
-		setProgress(resp.ToProgress(downloader.Downloading))
+		setProgress(resp.ToProgress(downloads.Downloading))
 	}
 
 	err = cmd.Wait()

@@ -16,4 +16,4 @@ COPY --from=base-frontend /build/build/web web
 
 COPY docker/entrypoint.sh entrypoint.sh
 
-ENTRYPOINT ["./entrypoint.sh", "hwlite"]
+ENTRYPOINT ["hwlite"]

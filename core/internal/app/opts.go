@@ -21,8 +21,8 @@ func WithPort(port int) Option {
 	return func(s *App) { s.port = port }
 }
 
-func WithDownloadCli(cli downloads.DownloadClient) Option {
+func WithScribeCli(cli downloads.DownloadClient) Option {
 	return func(app *App) {
-		app.downloadsClient = cli
+		app.scribeCli = cli
 	}
 }

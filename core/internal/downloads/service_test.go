@@ -114,7 +114,7 @@ func (t *TestDownloader) download(video string) (downloadId string, err error) {
 	return id, nil
 }
 
-func (t *TestDownloader) progress(id string) (DownloadState, *DownloadProgress, error) {
+func (t *TestDownloader) progress(id string) (DownloadState, *Progress, error) {
 	<-time.After(500 * time.Millisecond)
 
 	t.mu.Lock()
@@ -128,7 +128,7 @@ func (t *TestDownloader) progress(id string) (DownloadState, *DownloadProgress, 
 	elapsed := time.Since(info.startTime)
 	if elapsed >= 5*time.Second {
 		if info.isSuccess {
-			return Complete, &DownloadProgress{
+			return Complete, &Progress{
 				TimeLeftSecs:           0,
 				DownloadBytesPerSecond: 0,
 				Total:                  100,
@@ -137,7 +137,7 @@ func (t *TestDownloader) progress(id string) (DownloadState, *DownloadProgress, 
 			}, nil
 		}
 
-		return Error, &DownloadProgress{
+		return Error, &Progress{
 			TimeLeftSecs:           0,
 			DownloadBytesPerSecond: 0,
 			Total:                  0,
@@ -149,7 +149,7 @@ func (t *TestDownloader) progress(id string) (DownloadState, *DownloadProgress, 
 	// Calculate simulated progress
 	percent := min(uint(elapsed.Seconds()/5.0*100), 99)
 
-	return Downloading, &DownloadProgress{
+	return Downloading, &Progress{
 		TimeLeftSecs:           uint(5 - elapsed.Seconds()),
 		DownloadBytesPerSecond: 1024 * 1024,
 		Total:                  percent,

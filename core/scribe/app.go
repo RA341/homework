@@ -1,13 +1,15 @@
-package app
+package scribe
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 
 	"github.com/ra341/homework/common/router"
-	"github.com/ra341/homework/downloader/downloader"
-	"github.com/ra341/homework/downloader/ytdlp"
+	"github.com/ra341/homework/internal/downloads"
+	"github.com/ra341/homework/scribe/manager"
+	"github.com/ra341/homework/scribe/ytdlp"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -16,20 +18,34 @@ func init() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"})
 }
 
+func NewClient(browserData, downloadFolder string) (downloads.DownloadClient, error) {
+	srv, err := ytdlp.NewService(browserData)
+	if err != nil {
+		return nil, fmt.Errorf("could not create ytdlp service: %w", err)
+	}
+
+	downloaderSrv, err := manager.NewService(downloadFolder, srv)
+	if err != nil {
+		log.Fatal().Err(err).Msg("could not create downloader")
+	}
+
+	downloaderCli := manager.NewClient(downloaderSrv)
+	return downloaderCli, nil
+}
+
 type App struct {
-	downloader *downloader.Service
+	downloader *manager.Service
 }
 
 func (a *App) Run() {
 	ctx := context.Background()
 
-	app := App{}
-	app.loadServices()
+	a.loadServices()
 
 	port := 9922
 
 	mux := http.NewServeMux()
-	app.RegisterHandlers(mux)
+	a.RegisterHandlers(mux)
 
 	//mux.Handle("/", server.base.UIHandler)
 	//finalMux := api.WithCors(mux, allowedOrigins)
@@ -48,7 +64,7 @@ func (a *App) loadServices() {
 	}
 
 	downloadFolder := "downloads"
-	a.downloader, err = downloader.NewService(downloadFolder, ytd)
+	a.downloader, err = manager.NewService(downloadFolder, ytd)
 	if err != nil {
 		log.Fatal().Err(err).Msg("could not init downloader")
 	}
@@ -60,5 +76,5 @@ func (a *App) RegisterHandlers(mux *http.ServeMux) {
 	})
 
 	rou := router.Router{ParentMux: mux}
-	rou.AddRouter(downloader.NewHandlerHttp(a.downloader))
+	rou.AddRouter(manager.NewHandlerHttp(a.downloader))
 }

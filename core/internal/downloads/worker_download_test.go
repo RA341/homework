@@ -88,7 +88,7 @@ func (s *InMemoryDownloadStore) Add(count int) {
 			Name:         fmt.Sprintf("asset-%d.bin", id),
 			DownloadLink: fmt.Sprintf("https://example.com/downloads/%d", id),
 			Status:       Queued,
-			Progress:     DownloadProgress{},
+			Progress:     Progress{},
 		})
 	}
 }

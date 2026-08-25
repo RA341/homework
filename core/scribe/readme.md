@@ -1,6 +1,6 @@
-# Downloader 
+# Scribe 
 
-Downloader for the hw project
+Scribe is the downloader for the hw project
 
 ## yt-dlp Options
 

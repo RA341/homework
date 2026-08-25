@@ -1,4 +1,4 @@
-package downloader
+package manager
 
 import (
 	"context"
@@ -16,6 +16,11 @@ import (
 type ClientHttp struct {
 	basepath string
 	hcli     *http.Client
+}
+
+func (c *ClientHttp) Cancel(id string) error {
+	//TODO implement me
+	panic("implement me")
 }
 
 func NewClientHttp(basepath string) (downloads.DownloadClient, error) {
@@ -55,7 +60,7 @@ func (c *ClientHttp) ping() error {
 	return nil
 }
 
-func (c *ClientHttp) Progress(id string) (*downloads.DownloadProgress, error) {
+func (c *ClientHttp) Progress(id string) (*downloads.Progress, error) {
 	//TODO implement me
 	panic("implement me")
 }

@@ -122,9 +122,8 @@ func (dw *DownloadWorker) loop(
 	exitCondition := strikes > exitThreshold
 	if exitCondition {
 		go func() {
-			// in the event a retry is called
-			// we leak go the routine, but since
-			// once all tasks are done we exit immediately anyway
+			// in the event a retry is called, we leak go the routine,
+			// but once all tasks are done we exit immediately anyway
 			// wgDone is also leaked until go routine is done
 			wg.Wait()
 			close(wgDone)

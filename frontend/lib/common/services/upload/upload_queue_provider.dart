@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:homework/common/api/basepath.provider.dart';
 import 'package:homework/common/prefs/prefs.dart';
 import 'package:homework/common/services/upload/upload.provider.dart';
 import 'package:homework/common/utils/result.dart';

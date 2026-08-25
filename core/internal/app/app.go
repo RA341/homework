@@ -9,7 +9,6 @@ import (
 
 	"github.com/ra341/homework/common/database"
 	"github.com/ra341/homework/common/router"
-	"github.com/ra341/homework/downloader/app"
 	"github.com/ra341/homework/internal/auth/authentication"
 	"github.com/ra341/homework/internal/auth/session"
 	"github.com/ra341/homework/internal/browser"
@@ -18,7 +17,6 @@ import (
 	"github.com/ra341/homework/internal/media/asset"
 	"github.com/ra341/homework/internal/media/content"
 	"github.com/ra341/homework/internal/users"
-
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
@@ -38,8 +36,8 @@ type App struct {
 	asset   *asset.Service
 	media   *media.Service
 
-	downloads       *downloads.Service
-	downloadsClient downloads.DownloadClient
+	downloads *downloads.Service
+	scribeCli downloads.DownloadClient
 
 	browser *browser.Service
 	user    *users.Service
@@ -136,16 +134,22 @@ func (a *App) addMediaSrv() {
 }
 
 func (a *App) addDownloadsSrv(dir string) {
+	var err error
+
+	//browserData := "browser"
+	//downloaderCli, err := scribe.NewClient(browserData, config.DownloadsDir)
+	//if err != nil {
+	//	log.Fatal().Err(err).Msg("could not create downloader client")
+	//}
+
 	config := downloads.NewConfig(dir)
-
-	browserData := "browser"
-	downloaderCli, err := app.NewDownloaderClient(browserData, config.DownloadsDir)
-	if err != nil {
-		log.Fatal().Err(err).Msg("could not create downloader client")
-	}
-
 	downloadDb := downloads.NewStoreGorm(a.db)
-	a.downloads, err = downloads.NewService(config, downloadDb, downloaderCli, a.asset)
+	a.downloads, err = downloads.NewService(
+		config,
+		downloadDb,
+		a.scribeCli,
+		a.asset,
+	)
 	if err != nil {
 		// todo handle gracefully
 		log.Fatal().Err(err).Msg("could not create downloads service")

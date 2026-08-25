@@ -16,6 +16,8 @@ const (
 	Complete
 	// Failed indicates if something with the server is wrong (not download issues)
 	Failed
+	// Canceled by user
+	Canceled
 )
 
 type Download struct {
@@ -26,11 +28,11 @@ type Download struct {
 
 	Name         string
 	DownloadLink string
-	Progress     DownloadProgress `gorm:"embedded;embeddedPrefix:progress_"`
+	Progress     Progress `gorm:"embedded;embeddedPrefix:progress_"`
 	DownloadPath string
 }
 
-type DownloadProgress struct {
+type Progress struct {
 	Status DownloadState
 	Error  string
 

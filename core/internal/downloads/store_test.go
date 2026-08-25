@@ -13,7 +13,7 @@ type TestStore struct {
 	nextID    uint
 }
 
-func (s *TestStore) SetProgress(id uint, status *DownloadProgress) error {
+func (s *TestStore) SetProgress(id uint, status *Progress) error {
 	//TODO implement me
 	panic("implement me")
 }
@@ -132,7 +132,7 @@ func (s *TestStore) SetStatus(id uint, state DownloadState) error {
 	return nil
 }
 
-func (s *TestStore) setProgress(id uint, status *DownloadProgress) error {
+func (s *TestStore) setProgress(id uint, status *Progress) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

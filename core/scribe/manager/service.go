@@ -1,4 +1,4 @@
-package downloader
+package manager
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/ra341/homework/common/sm"
+	"github.com/ra341/homework/internal/downloads"
 	"github.com/rs/zerolog/log"
 )
 
@@ -34,6 +35,7 @@ func (d *Service) init() (err error) {
 	if err != nil {
 		return err
 	}
+
 	err = os.MkdirAll(downloadBaseFolder, os.ModePerm)
 	if err != nil {
 		return err
@@ -43,7 +45,7 @@ func (d *Service) init() (err error) {
 	return nil
 }
 
-func (d *Service) Start(url string) (id string, err error) {
+func (d *Service) Download(url string) (id string, err error) {
 	sum := sha1.Sum([]byte(url))
 	downloadId := fmt.Sprintf("%x", sum)
 	downloadFolder := filepath.Join(d.DownloadFolder, downloadId)
@@ -69,7 +71,7 @@ func (d *Service) Start(url string) (id string, err error) {
 	return downloadId, nil
 }
 
-func (d *Service) Stop(downloadId string) error {
+func (d *Service) Cancel(downloadId string) error {
 	val, ok := d.downloadItems.Load(downloadId)
 	if !ok {
 		return fmt.Errorf("download not found")
@@ -82,7 +84,7 @@ func (d *Service) Stop(downloadId string) error {
 	return nil
 }
 
-func (d *Service) Status(downloadId string) (*Progress, error) {
+func (d *Service) Progress(downloadId string) (*downloads.Progress, error) {
 	val, ok := d.downloadItems.Load(downloadId)
 	if !ok {
 		return nil, fmt.Errorf("download not found")
@@ -91,8 +93,8 @@ func (d *Service) Status(downloadId string) (*Progress, error) {
 	return val.progress, nil
 }
 
-func (d *Service) ProgressSetter(id string) func(p *Progress) {
-	return func(p *Progress) {
+func (d *Service) progressSetter(id string) func(p *downloads.Progress) {
+	return func(p *downloads.Progress) {
 		fmt.Println("Downloading...", p)
 
 		item, ok := d.downloadItems.Load(id)
@@ -112,5 +114,5 @@ func (d *Service) worker(downloadId string, item *DownloadItem) {
 		close(item.WorkerDone)
 	}()
 
-	d.ytd.Download(item, d.ProgressSetter(downloadId))
+	d.ytd.Download(item, d.progressSetter(downloadId))
 }

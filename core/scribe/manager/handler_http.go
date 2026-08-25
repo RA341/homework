@@ -1,4 +1,4 @@
-package downloader
+package manager
 
 import (
 	"encoding/json/v2"
@@ -29,7 +29,7 @@ func (h *HandlerHttp) Status(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	status, err := h.srv.Status(id)
+	status, err := h.srv.Progress(id)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -58,7 +58,7 @@ func (h *HandlerHttp) Download(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	downloadID, err := h.srv.Start(url)
+	downloadID, err := h.srv.Download(url)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte("could not start download " + err.Error()))
