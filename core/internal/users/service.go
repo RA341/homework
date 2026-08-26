@@ -32,12 +32,12 @@ func (s *Service) ensureDefaultUser() error {
 	}
 
 	if count != 0 {
-		log.Debug().Int("count", count).Msg("users exist")
+		//log.Debug().Int("users", count).Msg("skipping default user creation, users exist")
 		return nil
 	}
 
-	defaultUser := "admin"
-	defaultPassword := "hwisnice"
+	const defaultUser = "admin"
+	const defaultPassword = "hwisnice"
 
 	err = s.Create(defaultUser, defaultPassword)
 	if err != nil {

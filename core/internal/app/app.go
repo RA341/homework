@@ -24,7 +24,24 @@ import (
 )
 
 func init() {
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"})
+	//zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
+	//	short := file
+	//
+	//
+	//
+	//	filepath.Base()
+	//	// keep last 2 path segments: package dir + filename
+	//	if idx := strings.LastIndexByte(file, '/'); idx != -1 {
+	//		if idx2 := strings.LastIndexByte(file[:idx], '/'); idx2 != -1 {
+	//			short = file[idx2+1:]
+	//		}
+	//	}
+	//	return short + ":" + strconv.Itoa(line)
+	//}
+
+	log.Logger = log.With().Caller().Logger().Output(
+		zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"},
+	)
 }
 
 type App struct {
@@ -182,14 +199,9 @@ func (a *App) addAssetSrv() {
 }
 
 func (a *App) addBrowserSrv() {
-	var err error
-
 	apiUrl := "http://localhost:8998"
 	vncUrl := "http://localhost:3012/"
-	a.browser, err = browser.NewService(apiUrl, vncUrl)
-	if err != nil {
-		log.Warn().Err(err).Msg("could not create chromtrol client")
-	}
+	a.browser = browser.NewService(a.ctx, apiUrl, vncUrl)
 	return
 }
 
