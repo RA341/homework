@@ -10,7 +10,19 @@ service DownloaderService {
   rpc Download (DownloadRequest) returns (DownloadResponse);
   rpc List (ListRequest) returns (ListResponse);
   rpc Edit(EditRequest) returns (EditResponse) {}
+  rpc Stats(StatsRequest) returns (StatsResponse) {}
 
+
+}
+
+message StatsRequest {}
+
+message StatsResponse {
+  int64 Count = 1;
+  double AvgTimeLeft = 2;
+  double AvgSpeed = 3;
+  double SumSpeed = 4;
+  uint64 TotalBytes = 5;
 }
 
 message EditRequest {
@@ -44,7 +56,8 @@ message ListRequest {
 }
 
 message ListResponse {
-  DownloadResult result = 1;
+  StatsResponse stats = 1;
+  DownloadResult result = 2;
 }
 
 enum DownloadState {
@@ -76,8 +89,8 @@ message Download {
 message DownloadProgress {
   uint64 TimeLeftSecs = 1;
   uint64 DownloadBytesPerSecond = 2;
-  uint64 Complete = 3;
-  uint64 Left = 4;
+  uint64 Total = 3;
+  uint64 Complete = 4;
   string Error = 5;
 }
 

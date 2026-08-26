@@ -10,4 +10,5 @@ type Store interface {
 	SetStatus(id uint, state DownloadState) error
 	SetProgress(id uint, status *Progress) error
 	EditLink(id int64, link string) error
+	Stats() (*DownloadStats, error)
 }

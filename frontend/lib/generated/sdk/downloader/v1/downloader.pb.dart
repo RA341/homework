@@ -22,6 +22,156 @@ export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
 export 'downloader.pbenum.dart';
 
+class StatsRequest extends $pb.GeneratedMessage {
+  factory StatsRequest() => create();
+
+  StatsRequest._();
+
+  factory StatsRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory StatsRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'StatsRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'downloader.v1'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  StatsRequest clone() => StatsRequest()..mergeFromMessage(this);
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  StatsRequest copyWith(void Function(StatsRequest) updates) =>
+      super.copyWith((message) => updates(message as StatsRequest))
+          as StatsRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static StatsRequest create() => StatsRequest._();
+  @$core.override
+  StatsRequest createEmptyInstance() => create();
+  static $pb.PbList<StatsRequest> createRepeated() =>
+      $pb.PbList<StatsRequest>();
+  @$core.pragma('dart2js:noInline')
+  static StatsRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<StatsRequest>(create);
+  static StatsRequest? _defaultInstance;
+}
+
+class StatsResponse extends $pb.GeneratedMessage {
+  factory StatsResponse({
+    $fixnum.Int64? count,
+    $core.double? avgTimeLeft,
+    $core.double? avgSpeed,
+    $core.double? sumSpeed,
+    $fixnum.Int64? totalBytes,
+  }) {
+    final result = create();
+    if (count != null) result.count = count;
+    if (avgTimeLeft != null) result.avgTimeLeft = avgTimeLeft;
+    if (avgSpeed != null) result.avgSpeed = avgSpeed;
+    if (sumSpeed != null) result.sumSpeed = sumSpeed;
+    if (totalBytes != null) result.totalBytes = totalBytes;
+    return result;
+  }
+
+  StatsResponse._();
+
+  factory StatsResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory StatsResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'StatsResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'downloader.v1'),
+      createEmptyInstance: create)
+    ..aInt64(1, _omitFieldNames ? '' : 'Count', protoName: 'Count')
+    ..a<$core.double>(
+        2, _omitFieldNames ? '' : 'AvgTimeLeft', $pb.PbFieldType.OD,
+        protoName: 'AvgTimeLeft')
+    ..a<$core.double>(3, _omitFieldNames ? '' : 'AvgSpeed', $pb.PbFieldType.OD,
+        protoName: 'AvgSpeed')
+    ..a<$core.double>(4, _omitFieldNames ? '' : 'SumSpeed', $pb.PbFieldType.OD,
+        protoName: 'SumSpeed')
+    ..a<$fixnum.Int64>(
+        5, _omitFieldNames ? '' : 'TotalBytes', $pb.PbFieldType.OU6,
+        protoName: 'TotalBytes', defaultOrMaker: $fixnum.Int64.ZERO)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  StatsResponse clone() => StatsResponse()..mergeFromMessage(this);
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  StatsResponse copyWith(void Function(StatsResponse) updates) =>
+      super.copyWith((message) => updates(message as StatsResponse))
+          as StatsResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static StatsResponse create() => StatsResponse._();
+  @$core.override
+  StatsResponse createEmptyInstance() => create();
+  static $pb.PbList<StatsResponse> createRepeated() =>
+      $pb.PbList<StatsResponse>();
+  @$core.pragma('dart2js:noInline')
+  static StatsResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<StatsResponse>(create);
+  static StatsResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get count => $_getI64(0);
+  @$pb.TagNumber(1)
+  set count($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasCount() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearCount() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.double get avgTimeLeft => $_getN(1);
+  @$pb.TagNumber(2)
+  set avgTimeLeft($core.double value) => $_setDouble(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasAvgTimeLeft() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearAvgTimeLeft() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.double get avgSpeed => $_getN(2);
+  @$pb.TagNumber(3)
+  set avgSpeed($core.double value) => $_setDouble(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasAvgSpeed() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearAvgSpeed() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.double get sumSpeed => $_getN(3);
+  @$pb.TagNumber(4)
+  set sumSpeed($core.double value) => $_setDouble(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasSumSpeed() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearSumSpeed() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $fixnum.Int64 get totalBytes => $_getI64(4);
+  @$pb.TagNumber(5)
+  set totalBytes($fixnum.Int64 value) => $_setInt64(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasTotalBytes() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearTotalBytes() => $_clearField(5);
+}
+
 class EditRequest extends $pb.GeneratedMessage {
   factory EditRequest({
     $fixnum.Int64? downloadId,
@@ -741,16 +891,16 @@ class DownloadProgress extends $pb.GeneratedMessage {
   factory DownloadProgress({
     $fixnum.Int64? timeLeftSecs,
     $fixnum.Int64? downloadBytesPerSecond,
+    $fixnum.Int64? total,
     $fixnum.Int64? complete,
-    $fixnum.Int64? left,
     $core.String? error,
   }) {
     final result = create();
     if (timeLeftSecs != null) result.timeLeftSecs = timeLeftSecs;
     if (downloadBytesPerSecond != null)
       result.downloadBytesPerSecond = downloadBytesPerSecond;
+    if (total != null) result.total = total;
     if (complete != null) result.complete = complete;
-    if (left != null) result.left = left;
     if (error != null) result.error = error;
     return result;
   }
@@ -774,11 +924,11 @@ class DownloadProgress extends $pb.GeneratedMessage {
     ..a<$fixnum.Int64>(
         2, _omitFieldNames ? '' : 'DownloadBytesPerSecond', $pb.PbFieldType.OU6,
         protoName: 'DownloadBytesPerSecond', defaultOrMaker: $fixnum.Int64.ZERO)
+    ..a<$fixnum.Int64>(3, _omitFieldNames ? '' : 'Total', $pb.PbFieldType.OU6,
+        protoName: 'Total', defaultOrMaker: $fixnum.Int64.ZERO)
     ..a<$fixnum.Int64>(
-        3, _omitFieldNames ? '' : 'Complete', $pb.PbFieldType.OU6,
+        4, _omitFieldNames ? '' : 'Complete', $pb.PbFieldType.OU6,
         protoName: 'Complete', defaultOrMaker: $fixnum.Int64.ZERO)
-    ..a<$fixnum.Int64>(4, _omitFieldNames ? '' : 'Left', $pb.PbFieldType.OU6,
-        protoName: 'Left', defaultOrMaker: $fixnum.Int64.ZERO)
     ..aOS(5, _omitFieldNames ? '' : 'Error', protoName: 'Error')
     ..hasRequiredFields = false;
 
@@ -822,22 +972,22 @@ class DownloadProgress extends $pb.GeneratedMessage {
   void clearDownloadBytesPerSecond() => $_clearField(2);
 
   @$pb.TagNumber(3)
-  $fixnum.Int64 get complete => $_getI64(2);
+  $fixnum.Int64 get total => $_getI64(2);
   @$pb.TagNumber(3)
-  set complete($fixnum.Int64 value) => $_setInt64(2, value);
+  set total($fixnum.Int64 value) => $_setInt64(2, value);
   @$pb.TagNumber(3)
-  $core.bool hasComplete() => $_has(2);
+  $core.bool hasTotal() => $_has(2);
   @$pb.TagNumber(3)
-  void clearComplete() => $_clearField(3);
+  void clearTotal() => $_clearField(3);
 
   @$pb.TagNumber(4)
-  $fixnum.Int64 get left => $_getI64(3);
+  $fixnum.Int64 get complete => $_getI64(3);
   @$pb.TagNumber(4)
-  set left($fixnum.Int64 value) => $_setInt64(3, value);
+  set complete($fixnum.Int64 value) => $_setInt64(3, value);
   @$pb.TagNumber(4)
-  $core.bool hasLeft() => $_has(3);
+  $core.bool hasComplete() => $_has(3);
   @$pb.TagNumber(4)
-  void clearLeft() => $_clearField(4);
+  void clearComplete() => $_clearField(4);
 
   @$pb.TagNumber(5)
   $core.String get error => $_getSZ(4);
@@ -957,6 +1107,10 @@ class DownloaderServiceApi {
           $pb.ClientContext? ctx, EditRequest request) =>
       _client.invoke<EditResponse>(
           ctx, 'DownloaderService', 'Edit', request, EditResponse());
+  $async.Future<StatsResponse> stats(
+          $pb.ClientContext? ctx, StatsRequest request) =>
+      _client.invoke<StatsResponse>(
+          ctx, 'DownloaderService', 'Stats', request, StatsResponse());
 }
 
 const $core.bool _omitFieldNames =

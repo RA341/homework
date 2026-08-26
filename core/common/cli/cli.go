@@ -13,9 +13,9 @@ func Check(name string) error {
 	var stderrBuf bytes.Buffer
 	cmd.Stderr = &stderrBuf
 
-	err := cmd.Start()
+	err := cmd.Run()
 	if err != nil {
-		return fmt.Errorf("could not access yt-dlp: %v", err)
+		return fmt.Errorf("could not access %s: %v", name, err)
 	}
 
 	return nil

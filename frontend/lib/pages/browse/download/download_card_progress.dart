@@ -9,10 +9,13 @@ class DownloadProgressDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final total = progress.complete.toInt() + progress.left.toInt();
-    final progressState = total > 0
-        ? progress.complete.toDouble() / total
-        : 0.0;
+    var left = 0;
+    var progressState = 0.0;
+
+    if (progressState > 0) {
+      left = progress.total.toInt() - progress.complete.toInt();
+      progressState = progress.complete.toDouble() / progress.total.toDouble();
+    }
 
     final time = Duration(seconds: progress.timeLeftSecs.toInt());
 
@@ -24,7 +27,10 @@ class DownloadProgressDisplay extends StatelessWidget {
           mainAxisAlignment: .spaceBetween,
           children: [
             Text("Time: ${formatDuration(time)}"),
-            Text("Total: ${formatBytes(total)}"),
+            Text("Total: ${formatBytes(progress.total.toInt())}"),
+            Text(
+              "Speed: ${formatBytes(progress.downloadBytesPerSecond.toInt()).toLowerCase()}/s",
+            ),
           ],
         ),
         Column(
@@ -36,7 +42,7 @@ class DownloadProgressDisplay extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text('${formatBytes(progress.complete.toInt())} complete'),
-                Text('${formatBytes(progress.left.toInt())} left'),
+                Text('${formatBytes(left)} left'),
               ],
             ),
           ],

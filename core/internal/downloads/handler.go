@@ -28,18 +28,20 @@ func NewHandler(srv *Service) (string, http.Handler) {
 	return v1connect.NewDownloaderServiceHandler(h)
 }
 
-//func (h *Handler) Download(_ context.Context, c *connect.Request[v1.DownloadRequest]) (*connect.Response[v1.DownloadResponse], error) {
-//
-//
-//	return v1connect.DownloaderServiceHandler()
-//
-//	//err := h.srv.Add(c.Msg.Name, c.Msg.DownloadLink, c.Msg.Filepath)
-//	//if err != nil {
-//	//	return nil, err
-//	//}
-//
-//	return connect.NewResponse(&v1.DownloadResponse{}), nil
-//}
+func (h *Handler) Stats(ctx context.Context, c *connect.Request[v1.StatsRequest]) (*connect.Response[v1.StatsResponse], error) {
+	stats, err := h.srv.store.Stats()
+	if err != nil {
+		return nil, err
+	}
+
+	return connect.NewResponse(&v1.StatsResponse{
+		Count:       stats.Count,
+		AvgTimeLeft: stats.AvgTimeLeft,
+		AvgSpeed:    stats.AvgSpeed,
+		SumSpeed:    stats.SumSpeed,
+		TotalBytes:  stats.TotalBytes,
+	}), nil
+}
 
 func (h *Handler) Edit(ctx context.Context, c *connect.Request[v1.EditRequest]) (*connect.Response[v1.EditResponse], error) {
 	err := h.srv.Edit(c.Msg.DownloadId, c.Msg.DownloadLink)
@@ -82,8 +84,8 @@ func toDownload(t Download) *v1.Download {
 	progress := &v1.DownloadProgress{
 		TimeLeftSecs:           uint64(t.Progress.TimeLeftSecs),
 		DownloadBytesPerSecond: uint64(t.Progress.DownloadBytesPerSecond),
-		Complete:               uint64(t.Progress.Total),
-		Left:                   uint64(t.Progress.Completed),
+		Complete:               uint64(t.Progress.Completed),
+		Total:                  uint64(t.Progress.Total),
 		Error:                  t.Progress.Error,
 	}
 

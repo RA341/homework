@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:homework/common/services/download/download.provider.list.dart';
+import 'package:homework/common/services/download/download.provider.stats.dart';
 import 'package:homework/pages/browse/download/download_card.dart';
+import 'package:homework/pages/browse/download/download_stats_bar.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 
@@ -23,25 +25,30 @@ class DownloadsList extends HookConsumerWidget {
       return null;
     }, [currentParams.params]);
 
-    // Auto-refresh downloads every 2 seconds
+    const refreshInterval = Duration(seconds: 2);
+
+    // Auto-refresh downloads and stats every 2 seconds
     useEffect(() {
-      final timer = Timer.periodic(const Duration(seconds: 2), (_) {
+      final timer = Timer.periodic(refreshInterval, (_) {
         ref.read(downloadListProvider.notifier).silentRefresh();
+        ref.read(downloadStatsProvider.notifier).silentRefresh();
       });
       return timer.cancel;
     }, []);
 
-
     return Column(
       children: [
+        const DownloadStatsBar(),
         Row(
           children: [
             Expanded(
               flex: 1,
               child: IconButton(
                 icon: const Icon(Icons.recycling),
-                onPressed: () =>
-                    ref.read(downloadListProvider.notifier).refresh(),
+                onPressed: () {
+                  ref.read(downloadListProvider.notifier).refresh();
+                  ref.read(downloadStatsProvider.notifier).refresh();
+                },
                 tooltip: 'Refresh',
               ),
             ),

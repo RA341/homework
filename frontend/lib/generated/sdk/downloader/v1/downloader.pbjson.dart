@@ -31,6 +31,33 @@ final $typed_data.Uint8List downloadStateDescriptor = $convert.base64Decode(
     'NUQVRFX0RPV05MT0FESU5HEAESGAoURE9XTkxPQURfU1RBVEVfRVJST1IQAhIaChZET1dOTE9B'
     'RF9TVEFURV9TVUNDRVNTEAM=');
 
+@$core.Deprecated('Use statsRequestDescriptor instead')
+const StatsRequest$json = {
+  '1': 'StatsRequest',
+};
+
+/// Descriptor for `StatsRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List statsRequestDescriptor =
+    $convert.base64Decode('CgxTdGF0c1JlcXVlc3Q=');
+
+@$core.Deprecated('Use statsResponseDescriptor instead')
+const StatsResponse$json = {
+  '1': 'StatsResponse',
+  '2': [
+    {'1': 'Count', '3': 1, '4': 1, '5': 3, '10': 'Count'},
+    {'1': 'AvgTimeLeft', '3': 2, '4': 1, '5': 1, '10': 'AvgTimeLeft'},
+    {'1': 'AvgSpeed', '3': 3, '4': 1, '5': 1, '10': 'AvgSpeed'},
+    {'1': 'SumSpeed', '3': 4, '4': 1, '5': 1, '10': 'SumSpeed'},
+    {'1': 'TotalBytes', '3': 5, '4': 1, '5': 4, '10': 'TotalBytes'},
+  ],
+};
+
+/// Descriptor for `StatsResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List statsResponseDescriptor = $convert.base64Decode(
+    'Cg1TdGF0c1Jlc3BvbnNlEhQKBUNvdW50GAEgASgDUgVDb3VudBIgCgtBdmdUaW1lTGVmdBgCIA'
+    'EoAVILQXZnVGltZUxlZnQSGgoIQXZnU3BlZWQYAyABKAFSCEF2Z1NwZWVkEhoKCFN1bVNwZWVk'
+    'GAQgASgBUghTdW1TcGVlZBIeCgpUb3RhbEJ5dGVzGAUgASgEUgpUb3RhbEJ5dGVz');
+
 @$core.Deprecated('Use editRequestDescriptor instead')
 const EditRequest$json = {
   '1': 'EditRequest',
@@ -201,8 +228,8 @@ const DownloadProgress$json = {
       '5': 4,
       '10': 'DownloadBytesPerSecond'
     },
-    {'1': 'Complete', '3': 3, '4': 1, '5': 4, '10': 'Complete'},
-    {'1': 'Left', '3': 4, '4': 1, '5': 4, '10': 'Left'},
+    {'1': 'Total', '3': 3, '4': 1, '5': 4, '10': 'Total'},
+    {'1': 'Complete', '3': 4, '4': 1, '5': 4, '10': 'Complete'},
     {'1': 'Error', '3': 5, '4': 1, '5': 9, '10': 'Error'},
   ],
 };
@@ -211,8 +238,8 @@ const DownloadProgress$json = {
 final $typed_data.Uint8List downloadProgressDescriptor = $convert.base64Decode(
     'ChBEb3dubG9hZFByb2dyZXNzEiIKDFRpbWVMZWZ0U2VjcxgBIAEoBFIMVGltZUxlZnRTZWNzEj'
     'YKFkRvd25sb2FkQnl0ZXNQZXJTZWNvbmQYAiABKARSFkRvd25sb2FkQnl0ZXNQZXJTZWNvbmQS'
-    'GgoIQ29tcGxldGUYAyABKARSCENvbXBsZXRlEhIKBExlZnQYBCABKARSBExlZnQSFAoFRXJyb3'
-    'IYBSABKAlSBUVycm9y');
+    'FAoFVG90YWwYAyABKARSBVRvdGFsEhoKCENvbXBsZXRlGAQgASgEUghDb21wbGV0ZRIUCgVFcn'
+    'JvchgFIAEoCVIFRXJyb3I=');
 
 @$core.Deprecated('Use downloadResultDescriptor instead')
 const DownloadResult$json = {
@@ -263,6 +290,12 @@ const $core.Map<$core.String, $core.dynamic> DownloaderServiceBase$json = {
       '3': '.downloader.v1.EditResponse',
       '4': {}
     },
+    {
+      '1': 'Stats',
+      '2': '.downloader.v1.StatsRequest',
+      '3': '.downloader.v1.StatsResponse',
+      '4': {}
+    },
   ],
 };
 
@@ -280,6 +313,8 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.downloader.v1.DownloadProgress': DownloadProgress$json,
   '.downloader.v1.EditRequest': EditRequest$json,
   '.downloader.v1.EditResponse': EditResponse$json,
+  '.downloader.v1.StatsRequest': StatsRequest$json,
+  '.downloader.v1.StatsResponse': StatsResponse$json,
 };
 
 /// Descriptor for `DownloaderService`. Decode as a `google.protobuf.ServiceDescriptorProto`.
@@ -289,4 +324,5 @@ final $typed_data.Uint8List downloaderServiceDescriptor = $convert.base64Decode(
     'ZGVyLnYxLkRvd25sb2FkUmVxdWVzdBofLmRvd25sb2FkZXIudjEuRG93bmxvYWRSZXNwb25zZR'
     'I/CgRMaXN0EhouZG93bmxvYWRlci52MS5MaXN0UmVxdWVzdBobLmRvd25sb2FkZXIudjEuTGlz'
     'dFJlc3BvbnNlEkEKBEVkaXQSGi5kb3dubG9hZGVyLnYxLkVkaXRSZXF1ZXN0GhsuZG93bmxvYW'
-    'Rlci52MS5FZGl0UmVzcG9uc2UiAA==');
+    'Rlci52MS5FZGl0UmVzcG9uc2UiABJECgVTdGF0cxIbLmRvd25sb2FkZXIudjEuU3RhdHNSZXF1'
+    'ZXN0GhwuZG93bmxvYWRlci52MS5TdGF0c1Jlc3BvbnNlIgA=');

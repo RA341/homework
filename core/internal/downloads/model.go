@@ -42,3 +42,11 @@ type Progress struct {
 	Completed uint
 	Total     uint
 }
+
+type DownloadStats struct {
+	Count       int64
+	AvgTimeLeft float64
+	AvgSpeed    float64
+	SumSpeed    float64
+	TotalBytes  uint64
+}

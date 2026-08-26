@@ -78,6 +78,10 @@ func (s *Service) Init() error {
 	return nil
 }
 
+func (s *Service) Stats() (*DownloadStats, error) {
+	return s.store.Stats()
+}
+
 func (s *Service) Add(assetId uint, Name string, DownloadLink string) (err error) {
 	download := Download{
 		AssetID:      assetId,

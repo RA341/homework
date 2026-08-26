@@ -75,6 +75,118 @@ func (DownloadState) EnumDescriptor() ([]byte, []int) {
 	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{0}
 }
 
+type StatsRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StatsRequest) Reset() {
+	*x = StatsRequest{}
+	mi := &file_downloader_v1_downloader_proto_msgTypes[0]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StatsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StatsRequest) ProtoMessage() {}
+
+func (x *StatsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_downloader_v1_downloader_proto_msgTypes[0]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StatsRequest.ProtoReflect.Descriptor instead.
+func (*StatsRequest) Descriptor() ([]byte, []int) {
+	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{0}
+}
+
+type StatsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Count         int64                  `protobuf:"varint,1,opt,name=Count,proto3" json:"Count,omitempty"`
+	AvgTimeLeft   float64                `protobuf:"fixed64,2,opt,name=AvgTimeLeft,proto3" json:"AvgTimeLeft,omitempty"`
+	AvgSpeed      float64                `protobuf:"fixed64,3,opt,name=AvgSpeed,proto3" json:"AvgSpeed,omitempty"`
+	SumSpeed      float64                `protobuf:"fixed64,4,opt,name=SumSpeed,proto3" json:"SumSpeed,omitempty"`
+	TotalBytes    uint64                 `protobuf:"varint,5,opt,name=TotalBytes,proto3" json:"TotalBytes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StatsResponse) Reset() {
+	*x = StatsResponse{}
+	mi := &file_downloader_v1_downloader_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StatsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StatsResponse) ProtoMessage() {}
+
+func (x *StatsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_downloader_v1_downloader_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StatsResponse.ProtoReflect.Descriptor instead.
+func (*StatsResponse) Descriptor() ([]byte, []int) {
+	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *StatsResponse) GetCount() int64 {
+	if x != nil {
+		return x.Count
+	}
+	return 0
+}
+
+func (x *StatsResponse) GetAvgTimeLeft() float64 {
+	if x != nil {
+		return x.AvgTimeLeft
+	}
+	return 0
+}
+
+func (x *StatsResponse) GetAvgSpeed() float64 {
+	if x != nil {
+		return x.AvgSpeed
+	}
+	return 0
+}
+
+func (x *StatsResponse) GetSumSpeed() float64 {
+	if x != nil {
+		return x.SumSpeed
+	}
+	return 0
+}
+
+func (x *StatsResponse) GetTotalBytes() uint64 {
+	if x != nil {
+		return x.TotalBytes
+	}
+	return 0
+}
+
 type EditRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	DownloadId    int64                  `protobuf:"varint,1,opt,name=downloadId,proto3" json:"downloadId,omitempty"`
@@ -85,7 +197,7 @@ type EditRequest struct {
 
 func (x *EditRequest) Reset() {
 	*x = EditRequest{}
-	mi := &file_downloader_v1_downloader_proto_msgTypes[0]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -97,7 +209,7 @@ func (x *EditRequest) String() string {
 func (*EditRequest) ProtoMessage() {}
 
 func (x *EditRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_downloader_v1_downloader_proto_msgTypes[0]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -110,7 +222,7 @@ func (x *EditRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EditRequest.ProtoReflect.Descriptor instead.
 func (*EditRequest) Descriptor() ([]byte, []int) {
-	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{0}
+	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *EditRequest) GetDownloadId() int64 {
@@ -135,7 +247,7 @@ type EditResponse struct {
 
 func (x *EditResponse) Reset() {
 	*x = EditResponse{}
-	mi := &file_downloader_v1_downloader_proto_msgTypes[1]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -147,7 +259,7 @@ func (x *EditResponse) String() string {
 func (*EditResponse) ProtoMessage() {}
 
 func (x *EditResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_downloader_v1_downloader_proto_msgTypes[1]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -160,7 +272,7 @@ func (x *EditResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EditResponse.ProtoReflect.Descriptor instead.
 func (*EditResponse) Descriptor() ([]byte, []int) {
-	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{1}
+	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{3}
 }
 
 type RetryRequest struct {
@@ -172,7 +284,7 @@ type RetryRequest struct {
 
 func (x *RetryRequest) Reset() {
 	*x = RetryRequest{}
-	mi := &file_downloader_v1_downloader_proto_msgTypes[2]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -184,7 +296,7 @@ func (x *RetryRequest) String() string {
 func (*RetryRequest) ProtoMessage() {}
 
 func (x *RetryRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_downloader_v1_downloader_proto_msgTypes[2]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -197,7 +309,7 @@ func (x *RetryRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RetryRequest.ProtoReflect.Descriptor instead.
 func (*RetryRequest) Descriptor() ([]byte, []int) {
-	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{2}
+	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *RetryRequest) GetId() uint64 {
@@ -215,7 +327,7 @@ type RetryResponse struct {
 
 func (x *RetryResponse) Reset() {
 	*x = RetryResponse{}
-	mi := &file_downloader_v1_downloader_proto_msgTypes[3]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -227,7 +339,7 @@ func (x *RetryResponse) String() string {
 func (*RetryResponse) ProtoMessage() {}
 
 func (x *RetryResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_downloader_v1_downloader_proto_msgTypes[3]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -240,7 +352,7 @@ func (x *RetryResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RetryResponse.ProtoReflect.Descriptor instead.
 func (*RetryResponse) Descriptor() ([]byte, []int) {
-	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{3}
+	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{5}
 }
 
 type DownloadRequest struct {
@@ -254,7 +366,7 @@ type DownloadRequest struct {
 
 func (x *DownloadRequest) Reset() {
 	*x = DownloadRequest{}
-	mi := &file_downloader_v1_downloader_proto_msgTypes[4]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -266,7 +378,7 @@ func (x *DownloadRequest) String() string {
 func (*DownloadRequest) ProtoMessage() {}
 
 func (x *DownloadRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_downloader_v1_downloader_proto_msgTypes[4]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -279,7 +391,7 @@ func (x *DownloadRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DownloadRequest.ProtoReflect.Descriptor instead.
 func (*DownloadRequest) Descriptor() ([]byte, []int) {
-	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{4}
+	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *DownloadRequest) GetName() string {
@@ -311,7 +423,7 @@ type DownloadResponse struct {
 
 func (x *DownloadResponse) Reset() {
 	*x = DownloadResponse{}
-	mi := &file_downloader_v1_downloader_proto_msgTypes[5]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -323,7 +435,7 @@ func (x *DownloadResponse) String() string {
 func (*DownloadResponse) ProtoMessage() {}
 
 func (x *DownloadResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_downloader_v1_downloader_proto_msgTypes[5]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -336,7 +448,7 @@ func (x *DownloadResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DownloadResponse.ProtoReflect.Descriptor instead.
 func (*DownloadResponse) Descriptor() ([]byte, []int) {
-	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{5}
+	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{7}
 }
 
 type ListRequest struct {
@@ -351,7 +463,7 @@ type ListRequest struct {
 
 func (x *ListRequest) Reset() {
 	*x = ListRequest{}
-	mi := &file_downloader_v1_downloader_proto_msgTypes[6]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -363,7 +475,7 @@ func (x *ListRequest) String() string {
 func (*ListRequest) ProtoMessage() {}
 
 func (x *ListRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_downloader_v1_downloader_proto_msgTypes[6]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -376,7 +488,7 @@ func (x *ListRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListRequest.ProtoReflect.Descriptor instead.
 func (*ListRequest) Descriptor() ([]byte, []int) {
-	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{6}
+	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ListRequest) GetQuery() string {
@@ -416,7 +528,7 @@ type ListResponse struct {
 
 func (x *ListResponse) Reset() {
 	*x = ListResponse{}
-	mi := &file_downloader_v1_downloader_proto_msgTypes[7]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -428,7 +540,7 @@ func (x *ListResponse) String() string {
 func (*ListResponse) ProtoMessage() {}
 
 func (x *ListResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_downloader_v1_downloader_proto_msgTypes[7]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -441,7 +553,7 @@ func (x *ListResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListResponse.ProtoReflect.Descriptor instead.
 func (*ListResponse) Descriptor() ([]byte, []int) {
-	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{7}
+	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *ListResponse) GetResult() *DownloadResult {
@@ -463,7 +575,7 @@ type BaseString struct {
 
 func (x *BaseString) Reset() {
 	*x = BaseString{}
-	mi := &file_downloader_v1_downloader_proto_msgTypes[8]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -475,7 +587,7 @@ func (x *BaseString) String() string {
 func (*BaseString) ProtoMessage() {}
 
 func (x *BaseString) ProtoReflect() protoreflect.Message {
-	mi := &file_downloader_v1_downloader_proto_msgTypes[8]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -488,7 +600,7 @@ func (x *BaseString) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BaseString.ProtoReflect.Descriptor instead.
 func (*BaseString) Descriptor() ([]byte, []int) {
-	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{8}
+	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *BaseString) GetParams() string {
@@ -535,7 +647,7 @@ type Download struct {
 
 func (x *Download) Reset() {
 	*x = Download{}
-	mi := &file_downloader_v1_downloader_proto_msgTypes[9]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -547,7 +659,7 @@ func (x *Download) String() string {
 func (*Download) ProtoMessage() {}
 
 func (x *Download) ProtoReflect() protoreflect.Message {
-	mi := &file_downloader_v1_downloader_proto_msgTypes[9]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -560,7 +672,7 @@ func (x *Download) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Download.ProtoReflect.Descriptor instead.
 func (*Download) Descriptor() ([]byte, []int) {
-	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{9}
+	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *Download) GetId() uint64 {
@@ -623,8 +735,8 @@ type DownloadProgress struct {
 	state                  protoimpl.MessageState `protogen:"open.v1"`
 	TimeLeftSecs           uint64                 `protobuf:"varint,1,opt,name=TimeLeftSecs,proto3" json:"TimeLeftSecs,omitempty"`
 	DownloadBytesPerSecond uint64                 `protobuf:"varint,2,opt,name=DownloadBytesPerSecond,proto3" json:"DownloadBytesPerSecond,omitempty"`
-	Complete               uint64                 `protobuf:"varint,3,opt,name=Complete,proto3" json:"Complete,omitempty"`
-	Left                   uint64                 `protobuf:"varint,4,opt,name=Left,proto3" json:"Left,omitempty"`
+	Total                  uint64                 `protobuf:"varint,3,opt,name=Total,proto3" json:"Total,omitempty"`
+	Complete               uint64                 `protobuf:"varint,4,opt,name=Complete,proto3" json:"Complete,omitempty"`
 	Error                  string                 `protobuf:"bytes,5,opt,name=Error,proto3" json:"Error,omitempty"`
 	unknownFields          protoimpl.UnknownFields
 	sizeCache              protoimpl.SizeCache
@@ -632,7 +744,7 @@ type DownloadProgress struct {
 
 func (x *DownloadProgress) Reset() {
 	*x = DownloadProgress{}
-	mi := &file_downloader_v1_downloader_proto_msgTypes[10]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -644,7 +756,7 @@ func (x *DownloadProgress) String() string {
 func (*DownloadProgress) ProtoMessage() {}
 
 func (x *DownloadProgress) ProtoReflect() protoreflect.Message {
-	mi := &file_downloader_v1_downloader_proto_msgTypes[10]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -657,7 +769,7 @@ func (x *DownloadProgress) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DownloadProgress.ProtoReflect.Descriptor instead.
 func (*DownloadProgress) Descriptor() ([]byte, []int) {
-	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{10}
+	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *DownloadProgress) GetTimeLeftSecs() uint64 {
@@ -674,16 +786,16 @@ func (x *DownloadProgress) GetDownloadBytesPerSecond() uint64 {
 	return 0
 }
 
-func (x *DownloadProgress) GetComplete() uint64 {
+func (x *DownloadProgress) GetTotal() uint64 {
 	if x != nil {
-		return x.Complete
+		return x.Total
 	}
 	return 0
 }
 
-func (x *DownloadProgress) GetLeft() uint64 {
+func (x *DownloadProgress) GetComplete() uint64 {
 	if x != nil {
-		return x.Left
+		return x.Complete
 	}
 	return 0
 }
@@ -707,7 +819,7 @@ type DownloadResult struct {
 
 func (x *DownloadResult) Reset() {
 	*x = DownloadResult{}
-	mi := &file_downloader_v1_downloader_proto_msgTypes[11]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -719,7 +831,7 @@ func (x *DownloadResult) String() string {
 func (*DownloadResult) ProtoMessage() {}
 
 func (x *DownloadResult) ProtoReflect() protoreflect.Message {
-	mi := &file_downloader_v1_downloader_proto_msgTypes[11]
+	mi := &file_downloader_v1_downloader_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -732,7 +844,7 @@ func (x *DownloadResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DownloadResult.ProtoReflect.Descriptor instead.
 func (*DownloadResult) Descriptor() ([]byte, []int) {
-	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{11}
+	return file_downloader_v1_downloader_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *DownloadResult) GetResults() []*Download {
@@ -767,7 +879,16 @@ var File_downloader_v1_downloader_proto protoreflect.FileDescriptor
 
 const file_downloader_v1_downloader_proto_rawDesc = "" +
 	"\n" +
-	"\x1edownloader/v1/downloader.proto\x12\rdownloader.v1\"Q\n" +
+	"\x1edownloader/v1/downloader.proto\x12\rdownloader.v1\"\x0e\n" +
+	"\fStatsRequest\"\x9f\x01\n" +
+	"\rStatsResponse\x12\x14\n" +
+	"\x05Count\x18\x01 \x01(\x03R\x05Count\x12 \n" +
+	"\vAvgTimeLeft\x18\x02 \x01(\x01R\vAvgTimeLeft\x12\x1a\n" +
+	"\bAvgSpeed\x18\x03 \x01(\x01R\bAvgSpeed\x12\x1a\n" +
+	"\bSumSpeed\x18\x04 \x01(\x01R\bSumSpeed\x12\x1e\n" +
+	"\n" +
+	"TotalBytes\x18\x05 \x01(\x04R\n" +
+	"TotalBytes\"Q\n" +
 	"\vEditRequest\x12\x1e\n" +
 	"\n" +
 	"downloadId\x18\x01 \x01(\x03R\n" +
@@ -802,12 +923,12 @@ const file_downloader_v1_downloader_proto_rawDesc = "" +
 	"\rdownload_link\x18\x03 \x01(\tR\fdownloadLink\x124\n" +
 	"\x06status\x18\x04 \x01(\x0e2\x1c.downloader.v1.DownloadStateR\x06status\x12;\n" +
 	"\bprogress\x18\x05 \x01(\v2\x1f.downloader.v1.DownloadProgressR\bprogress\x12#\n" +
-	"\rdownload_path\x18\x06 \x01(\tR\fdownloadPath\"\xb4\x01\n" +
+	"\rdownload_path\x18\x06 \x01(\tR\fdownloadPath\"\xb6\x01\n" +
 	"\x10DownloadProgress\x12\"\n" +
 	"\fTimeLeftSecs\x18\x01 \x01(\x04R\fTimeLeftSecs\x126\n" +
-	"\x16DownloadBytesPerSecond\x18\x02 \x01(\x04R\x16DownloadBytesPerSecond\x12\x1a\n" +
-	"\bComplete\x18\x03 \x01(\x04R\bComplete\x12\x12\n" +
-	"\x04Left\x18\x04 \x01(\x04R\x04Left\x12\x14\n" +
+	"\x16DownloadBytesPerSecond\x18\x02 \x01(\x04R\x16DownloadBytesPerSecond\x12\x14\n" +
+	"\x05Total\x18\x03 \x01(\x04R\x05Total\x12\x1a\n" +
+	"\bComplete\x18\x04 \x01(\x04R\bComplete\x12\x14\n" +
 	"\x05Error\x18\x05 \x01(\tR\x05Error\"\x87\x01\n" +
 	"\x0eDownloadResult\x121\n" +
 	"\aresults\x18\x01 \x03(\v2\x17.downloader.v1.DownloadR\aresults\x12\x14\n" +
@@ -818,12 +939,13 @@ const file_downloader_v1_downloader_proto_rawDesc = "" +
 	"\x15DOWNLOAD_STATE_QUEUED\x10\x00\x12\x1e\n" +
 	"\x1aDOWNLOAD_STATE_DOWNLOADING\x10\x01\x12\x18\n" +
 	"\x14DOWNLOAD_STATE_ERROR\x10\x02\x12\x1a\n" +
-	"\x16DOWNLOAD_STATE_SUCCESS\x10\x032\xaa\x02\n" +
+	"\x16DOWNLOAD_STATE_SUCCESS\x10\x032\xf0\x02\n" +
 	"\x11DownloaderService\x12D\n" +
 	"\x05Retry\x12\x1b.downloader.v1.RetryRequest\x1a\x1c.downloader.v1.RetryResponse\"\x00\x12K\n" +
 	"\bDownload\x12\x1e.downloader.v1.DownloadRequest\x1a\x1f.downloader.v1.DownloadResponse\x12?\n" +
 	"\x04List\x12\x1a.downloader.v1.ListRequest\x1a\x1b.downloader.v1.ListResponse\x12A\n" +
-	"\x04Edit\x12\x1a.downloader.v1.EditRequest\x1a\x1b.downloader.v1.EditResponse\"\x00B\xb0\x01\n" +
+	"\x04Edit\x12\x1a.downloader.v1.EditRequest\x1a\x1b.downloader.v1.EditResponse\"\x00\x12D\n" +
+	"\x05Stats\x12\x1b.downloader.v1.StatsRequest\x1a\x1c.downloader.v1.StatsResponse\"\x00B\xb0\x01\n" +
 	"\x11com.downloader.v1B\x0fDownloaderProtoP\x01Z5github.com/ra341/homework/generated/api/downloader/v1\xa2\x02\x03DXX\xaa\x02\rDownloader.V1\xca\x02\rDownloader\\V1\xe2\x02\x19Downloader\\V1\\GPBMetadata\xea\x02\x0eDownloader::V1b\x06proto3"
 
 var (
@@ -839,37 +961,41 @@ func file_downloader_v1_downloader_proto_rawDescGZIP() []byte {
 }
 
 var file_downloader_v1_downloader_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_downloader_v1_downloader_proto_msgTypes = make([]protoimpl.MessageInfo, 12)
+var file_downloader_v1_downloader_proto_msgTypes = make([]protoimpl.MessageInfo, 14)
 var file_downloader_v1_downloader_proto_goTypes = []any{
 	(DownloadState)(0),       // 0: downloader.v1.DownloadState
-	(*EditRequest)(nil),      // 1: downloader.v1.EditRequest
-	(*EditResponse)(nil),     // 2: downloader.v1.EditResponse
-	(*RetryRequest)(nil),     // 3: downloader.v1.RetryRequest
-	(*RetryResponse)(nil),    // 4: downloader.v1.RetryResponse
-	(*DownloadRequest)(nil),  // 5: downloader.v1.DownloadRequest
-	(*DownloadResponse)(nil), // 6: downloader.v1.DownloadResponse
-	(*ListRequest)(nil),      // 7: downloader.v1.ListRequest
-	(*ListResponse)(nil),     // 8: downloader.v1.ListResponse
-	(*BaseString)(nil),       // 9: downloader.v1.Base_string
-	(*Download)(nil),         // 10: downloader.v1.Download
-	(*DownloadProgress)(nil), // 11: downloader.v1.DownloadProgress
-	(*DownloadResult)(nil),   // 12: downloader.v1.DownloadResult
+	(*StatsRequest)(nil),     // 1: downloader.v1.StatsRequest
+	(*StatsResponse)(nil),    // 2: downloader.v1.StatsResponse
+	(*EditRequest)(nil),      // 3: downloader.v1.EditRequest
+	(*EditResponse)(nil),     // 4: downloader.v1.EditResponse
+	(*RetryRequest)(nil),     // 5: downloader.v1.RetryRequest
+	(*RetryResponse)(nil),    // 6: downloader.v1.RetryResponse
+	(*DownloadRequest)(nil),  // 7: downloader.v1.DownloadRequest
+	(*DownloadResponse)(nil), // 8: downloader.v1.DownloadResponse
+	(*ListRequest)(nil),      // 9: downloader.v1.ListRequest
+	(*ListResponse)(nil),     // 10: downloader.v1.ListResponse
+	(*BaseString)(nil),       // 11: downloader.v1.Base_string
+	(*Download)(nil),         // 12: downloader.v1.Download
+	(*DownloadProgress)(nil), // 13: downloader.v1.DownloadProgress
+	(*DownloadResult)(nil),   // 14: downloader.v1.DownloadResult
 }
 var file_downloader_v1_downloader_proto_depIdxs = []int32{
-	12, // 0: downloader.v1.ListResponse.result:type_name -> downloader.v1.DownloadResult
+	14, // 0: downloader.v1.ListResponse.result:type_name -> downloader.v1.DownloadResult
 	0,  // 1: downloader.v1.Download.status:type_name -> downloader.v1.DownloadState
-	11, // 2: downloader.v1.Download.progress:type_name -> downloader.v1.DownloadProgress
-	10, // 3: downloader.v1.DownloadResult.results:type_name -> downloader.v1.Download
-	3,  // 4: downloader.v1.DownloaderService.Retry:input_type -> downloader.v1.RetryRequest
-	5,  // 5: downloader.v1.DownloaderService.Download:input_type -> downloader.v1.DownloadRequest
-	7,  // 6: downloader.v1.DownloaderService.List:input_type -> downloader.v1.ListRequest
-	1,  // 7: downloader.v1.DownloaderService.Edit:input_type -> downloader.v1.EditRequest
-	4,  // 8: downloader.v1.DownloaderService.Retry:output_type -> downloader.v1.RetryResponse
-	6,  // 9: downloader.v1.DownloaderService.Download:output_type -> downloader.v1.DownloadResponse
-	8,  // 10: downloader.v1.DownloaderService.List:output_type -> downloader.v1.ListResponse
-	2,  // 11: downloader.v1.DownloaderService.Edit:output_type -> downloader.v1.EditResponse
-	8,  // [8:12] is the sub-list for method output_type
-	4,  // [4:8] is the sub-list for method input_type
+	13, // 2: downloader.v1.Download.progress:type_name -> downloader.v1.DownloadProgress
+	12, // 3: downloader.v1.DownloadResult.results:type_name -> downloader.v1.Download
+	5,  // 4: downloader.v1.DownloaderService.Retry:input_type -> downloader.v1.RetryRequest
+	7,  // 5: downloader.v1.DownloaderService.Download:input_type -> downloader.v1.DownloadRequest
+	9,  // 6: downloader.v1.DownloaderService.List:input_type -> downloader.v1.ListRequest
+	3,  // 7: downloader.v1.DownloaderService.Edit:input_type -> downloader.v1.EditRequest
+	1,  // 8: downloader.v1.DownloaderService.Stats:input_type -> downloader.v1.StatsRequest
+	6,  // 9: downloader.v1.DownloaderService.Retry:output_type -> downloader.v1.RetryResponse
+	8,  // 10: downloader.v1.DownloaderService.Download:output_type -> downloader.v1.DownloadResponse
+	10, // 11: downloader.v1.DownloaderService.List:output_type -> downloader.v1.ListResponse
+	4,  // 12: downloader.v1.DownloaderService.Edit:output_type -> downloader.v1.EditResponse
+	2,  // 13: downloader.v1.DownloaderService.Stats:output_type -> downloader.v1.StatsResponse
+	9,  // [9:14] is the sub-list for method output_type
+	4,  // [4:9] is the sub-list for method input_type
 	4,  // [4:4] is the sub-list for extension type_name
 	4,  // [4:4] is the sub-list for extension extendee
 	0,  // [0:4] is the sub-list for field type_name
@@ -886,7 +1012,7 @@ func file_downloader_v1_downloader_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_downloader_v1_downloader_proto_rawDesc), len(file_downloader_v1_downloader_proto_rawDesc)),
 			NumEnums:      1,
-			NumMessages:   12,
+			NumMessages:   14,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

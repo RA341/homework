@@ -37,4 +37,11 @@ abstract final class DownloaderService {
     downloaderv1downloader.EditRequest.new,
     downloaderv1downloader.EditResponse.new,
   );
+
+  static const stats = connect.Spec(
+    '/$name/Stats',
+    connect.StreamType.unary,
+    downloaderv1downloader.StatsRequest.new,
+    downloaderv1downloader.StatsResponse.new,
+  );
 }

@@ -72,6 +72,24 @@ func (s *StoreGorm) SetDownloadErr(id uint, errStr string) error {
 		Error
 }
 
+func (s *StoreGorm) Stats() (*DownloadStats, error) {
+	stats := &DownloadStats{}
+
+	err := s.db.Model(&Download{}).
+		Select(`
+        	COUNT(*) as count,
+        	AVG(progress_time_left_secs) as avg_time_left,
+        	AVG(progress_download_bytes_per_second) as avg_speed,
+        	SUM(progress_download_bytes_per_second) as sum_speed,
+        	SUM(progress_total) as total_bytes
+    	`).
+		Where("progress_status = ?", Downloading).
+		Scan(stats).
+		Error
+
+	return stats, err
+}
+
 func (s *StoreGorm) AddDownload(download *Download) error {
 	return s.db.Create(&download).Error
 }
