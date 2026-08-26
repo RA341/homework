@@ -11,7 +11,7 @@ target "docker-metadata-action" {
 group "default" {
   cache-from = ["type=gha"]
   cache-to   = ["type=gha,mode=max"]
-  targets    = ["core", "downloader", "omni"]
+  targets    = ["core", "scribe", "omni"]
 }
 
 group "base" {
@@ -19,7 +19,7 @@ group "base" {
 }
 
 group "all" {
-  targets = ["base-frontend", "base-yt", "base-gomod", "core", "downloader", "omni"]
+  targets = ["base-frontend", "base-yt", "base-gomod", "core", "scribe", "omni"]
 }
 
 # --- Base Targets (Intermediate / Cache-only) ---
@@ -60,10 +60,10 @@ target "core" {
   ]
 }
 
-target "downloader" {
+target "scribe" {
   inherits   = ["docker-metadata-action"]
   context    = "."
-  dockerfile = "docker/Dockerfile.downloader"
+  dockerfile = "docker/Dockerfile.scribe"
   contexts = {
     "base-gomod" = "target:base-gomod"
     "base-yt"    = "target:base-yt"
@@ -71,8 +71,8 @@ target "downloader" {
   tags = [
     for t in target.docker-metadata-action.tags :
       can(regex("^ghcr\\.io", t)) ?
-        replace(t, "${REPO_NAME}:", "${REPO_NAME}/downloader:") :
-        replace(t, "${REPO_NAME}:", "${REPO_NAME}:downloader-")
+        replace(t, "${REPO_NAME}:", "${REPO_NAME}/scribe:") :
+        replace(t, "${REPO_NAME}:", "${REPO_NAME}:scribe-")
   ]
 }
 

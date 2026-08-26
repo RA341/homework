@@ -2,7 +2,7 @@ name: hw-dev
 services:
   downloader:
     build:
-      dockerfile: docker/Dockerfile.downloader
+      dockerfile: docker/Dockerfile.scribe
       context: .
     ports:
       - "8000:8000"

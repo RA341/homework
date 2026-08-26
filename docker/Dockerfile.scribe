@@ -4,7 +4,7 @@ WORKDIR /app
 
 COPY core .
 
-RUN CGO_ENABLED=0 go build -ldflags "-s -w" -o hwd "./cmd/downloader"
+RUN CGO_ENABLED=0 go build -ldflags "-s -w" -o hwd "./cmd/scribe"
 
 FROM base-yt
 
