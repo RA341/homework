@@ -68,12 +68,12 @@ func (s *Service) Init() error {
 
 	s.downloadWorker = NewDownloadWorker(
 		s.conf.MaxDownloads,
-		s.conf.MaxDownloads, // todo add new config exitThreshold
+		s.conf.ExitThreshold, // todo add new config exitThreshold
 		s.store,
 		s,
 	)
 
-	//s.launchWorker()
+	s.launchWorker()
 
 	return nil
 }

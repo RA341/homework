@@ -57,7 +57,7 @@ func (dw *DownloadWorker) Start() {
 		go dw.worker(dw.MaxWorkers)
 	} else {
 		dw.triggerRecheck()
-		log.Info().Msg("download worker is already running")
+		log.Info().Msg("download worker is running")
 	}
 }
 
@@ -96,10 +96,10 @@ func (dw *DownloadWorker) worker(maxWorkers int) {
 	strikes := 0
 	for {
 		var done bool
-		done, strikes = dw.loop(
+		done = dw.loop(
 			&wg,
 			&downloadSem,
-			strikes,
+			&strikes,
 			dw.ExitThreshold,
 			maxWorkers,
 		)
@@ -112,14 +112,14 @@ func (dw *DownloadWorker) worker(maxWorkers int) {
 func (dw *DownloadWorker) loop(
 	wg *sync.WaitGroup,
 	downloadSem *sem.Sem,
-	strikes int,
+	strikes *int,
 	exitThreshold int,
 	queueLimit int,
-) (done bool, strikesOut int) {
+) (done bool) {
 	const waitInterval = 5 * time.Second
 
 	wgDone := make(chan struct{}, 1)
-	exitCondition := strikes > exitThreshold
+	exitCondition := *strikes > exitThreshold
 	if exitCondition {
 		go func() {
 			// in the event a retry is called, we leak go the routine,
@@ -131,28 +131,28 @@ func (dw *DownloadWorker) loop(
 
 		select {
 		case <-wgDone:
-			log.Info().Msg("exiting loop")
-			return true, strikes
+			//log.Info().Msg("exiting loop")
+			return true
 		case <-dw.triggerDownloads:
 			log.Info().Msg("trigger received starting loop again")
-			strikes = 0
-			return false, strikes
+			*strikes = 0
+			return false
 		}
 	}
 
 	queued, err := dw.downloadStore.ListQueued(queueLimit)
 	if err != nil {
 		log.Warn().Err(err).Msg("Could not load downloading items")
-		return false, strikes
+		return false
 	}
 
 	if len(queued) == 0 {
-		strikes++
+		*strikes++
 		<-time.After(waitInterval)
-		return false, strikes
+		return false
 	}
 
-	strikes = 0
+	*strikes = 0
 
 	for _, d := range queued {
 		downloadSem.Acquire()
@@ -168,5 +168,5 @@ func (dw *DownloadWorker) loop(
 		})
 	}
 
-	return false, strikes
+	return false
 }

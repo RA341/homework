@@ -14,7 +14,9 @@ type Config struct {
 
 	ProgressCheckThreshold int
 	CheckIntervalSecs      int
-	MaxDownloads           int
+
+	MaxDownloads  int
+	ExitThreshold int
 }
 
 func (c *Config) GetBrowserDir() string {
@@ -33,6 +35,10 @@ const DefaultSocket = "/tmp/hw.sock"
 
 func NewConfig(wd string) *Config {
 	c := &Config{
+		// todo load dyn
+		MaxDownloads:  5,
+		ExitThreshold: 5,
+
 		ScribeServiceUrl: pick.Pk[string]().
 			Env("HW_SERVER_URL").
 			GetOrDefault("http://localhost:9922"),
