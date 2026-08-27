@@ -38,9 +38,9 @@ func TestAuthenticationService(t *testing.T) {
 
 	// Setup authentication service
 	conf := &Config{
-		JwtSecret:            "test-jwt-secret-key-12345",
-		JwtIssuer:            "hw-test",
-		sessionExpiryInHours: 2,
+		JwtSecret: "test-jwt-secret-key-12345",
+		JwtIssuer: "hw-test",
+		JwtExpiry: 2 * time.Hour,
 	}
 	authService := NewService(conf, sessionService, usersService)
 

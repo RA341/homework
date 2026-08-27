@@ -188,15 +188,13 @@ func (s *Service) monitorDownload(down *Download) (DownloadState, error) {
 		return 0, err
 	}
 
-	checkInterval := time.Duration(s.conf.CheckIntervalSecs) * time.Second
-
 	ctx, cancelFn := context.WithCancel(context.Background())
 	s.cancelMap.Store(down.ID, cancelFn)
 	defer func() {
 		s.cancelMap.Delete(down.ID)
 	}()
 
-	tick := time.NewTicker(checkInterval)
+	tick := time.NewTicker(s.conf.CheckIntervalSecs)
 	defer tick.Stop()
 
 	strikes := 0

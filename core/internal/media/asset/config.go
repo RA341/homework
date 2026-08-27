@@ -1,5 +1,5 @@
 package asset
 
 type Config struct {
-	AssetDir string
+	AssetDir string `knob:"default=assets,env=ASSET_DIR,help=dir to store the files,"`
 }

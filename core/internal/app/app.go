@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/joho/godotenv"
 	"github.com/ra341/homework/common/database"
 	"github.com/ra341/homework/common/router"
 	"github.com/ra341/homework/internal/auth/authentication"
@@ -85,8 +86,18 @@ func (a *App) Run(opts ...Option) {
 }
 
 func (a *App) loadConfig() {
-	a.conf = Config{}
-	panic("implement me idiot")
+	config := Config{}
+	err := godotenv.Load()
+	if err != nil {
+		log.Warn().Err(err).Msg("Error loading .env file")
+	}
+
+	err = config.Load()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to load configuration")
+	}
+
+	a.conf = config
 }
 
 func (a *App) addServices() {
@@ -203,8 +214,7 @@ func (a *App) addAssetSrv() {
 }
 
 func (a *App) addBrowserSrv() {
-	//apiUrl := "http://localhost:8998"
-	//vncUrl := "http://localhost:3012/"
+
 	a.browser = browser.NewService(a.ctx, &a.conf.Browser)
 	return
 }
