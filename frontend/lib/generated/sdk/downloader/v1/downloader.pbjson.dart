@@ -31,6 +31,27 @@ final $typed_data.Uint8List downloadStateDescriptor = $convert.base64Decode(
     'NUQVRFX0RPV05MT0FESU5HEAESGAoURE9XTkxPQURfU1RBVEVfRVJST1IQAhIaChZET1dOTE9B'
     'RF9TVEFURV9TVUNDRVNTEAM=');
 
+@$core.Deprecated('Use cancelRequestDescriptor instead')
+const CancelRequest$json = {
+  '1': 'CancelRequest',
+  '2': [
+    {'1': 'id', '3': 1, '4': 1, '5': 4, '10': 'id'},
+  ],
+};
+
+/// Descriptor for `CancelRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List cancelRequestDescriptor =
+    $convert.base64Decode('Cg1DYW5jZWxSZXF1ZXN0Eg4KAmlkGAEgASgEUgJpZA==');
+
+@$core.Deprecated('Use cancelResponseDescriptor instead')
+const CancelResponse$json = {
+  '1': 'CancelResponse',
+};
+
+/// Descriptor for `CancelResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List cancelResponseDescriptor =
+    $convert.base64Decode('Cg5DYW5jZWxSZXNwb25zZQ==');
+
 @$core.Deprecated('Use statsRequestDescriptor instead')
 const StatsRequest$json = {
   '1': 'StatsRequest',
@@ -147,8 +168,16 @@ const ListResponse$json = {
   '1': 'ListResponse',
   '2': [
     {
-      '1': 'result',
+      '1': 'stats',
       '3': 1,
+      '4': 1,
+      '5': 11,
+      '6': '.downloader.v1.StatsResponse',
+      '10': 'stats'
+    },
+    {
+      '1': 'result',
+      '3': 2,
       '4': 1,
       '5': 11,
       '6': '.downloader.v1.DownloadResult',
@@ -159,8 +188,9 @@ const ListResponse$json = {
 
 /// Descriptor for `ListResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List listResponseDescriptor = $convert.base64Decode(
-    'CgxMaXN0UmVzcG9uc2USNQoGcmVzdWx0GAEgASgLMh0uZG93bmxvYWRlci52MS5Eb3dubG9hZF'
-    'Jlc3VsdFIGcmVzdWx0');
+    'CgxMaXN0UmVzcG9uc2USMgoFc3RhdHMYASABKAsyHC5kb3dubG9hZGVyLnYxLlN0YXRzUmVzcG'
+    '9uc2VSBXN0YXRzEjUKBnJlc3VsdBgCIAEoCzIdLmRvd25sb2FkZXIudjEuRG93bmxvYWRSZXN1'
+    'bHRSBnJlc3VsdA==');
 
 @$core.Deprecated('Use base_stringDescriptor instead')
 const Base_string$json = {
@@ -280,6 +310,12 @@ const $core.Map<$core.String, $core.dynamic> DownloaderServiceBase$json = {
       '3': '.downloader.v1.DownloadResponse'
     },
     {
+      '1': 'Cancel',
+      '2': '.downloader.v1.CancelRequest',
+      '3': '.downloader.v1.CancelResponse',
+      '4': {}
+    },
+    {
       '1': 'List',
       '2': '.downloader.v1.ListRequest',
       '3': '.downloader.v1.ListResponse'
@@ -306,15 +342,17 @@ const $core.Map<$core.String, $core.Map<$core.String, $core.dynamic>>
   '.downloader.v1.RetryResponse': RetryResponse$json,
   '.downloader.v1.DownloadRequest': DownloadRequest$json,
   '.downloader.v1.DownloadResponse': DownloadResponse$json,
+  '.downloader.v1.CancelRequest': CancelRequest$json,
+  '.downloader.v1.CancelResponse': CancelResponse$json,
   '.downloader.v1.ListRequest': ListRequest$json,
   '.downloader.v1.ListResponse': ListResponse$json,
+  '.downloader.v1.StatsResponse': StatsResponse$json,
   '.downloader.v1.DownloadResult': DownloadResult$json,
   '.downloader.v1.Download': Download$json,
   '.downloader.v1.DownloadProgress': DownloadProgress$json,
   '.downloader.v1.EditRequest': EditRequest$json,
   '.downloader.v1.EditResponse': EditResponse$json,
   '.downloader.v1.StatsRequest': StatsRequest$json,
-  '.downloader.v1.StatsResponse': StatsResponse$json,
 };
 
 /// Descriptor for `DownloaderService`. Decode as a `google.protobuf.ServiceDescriptorProto`.
@@ -322,7 +360,8 @@ final $typed_data.Uint8List downloaderServiceDescriptor = $convert.base64Decode(
     'ChFEb3dubG9hZGVyU2VydmljZRJECgVSZXRyeRIbLmRvd25sb2FkZXIudjEuUmV0cnlSZXF1ZX'
     'N0GhwuZG93bmxvYWRlci52MS5SZXRyeVJlc3BvbnNlIgASSwoIRG93bmxvYWQSHi5kb3dubG9h'
     'ZGVyLnYxLkRvd25sb2FkUmVxdWVzdBofLmRvd25sb2FkZXIudjEuRG93bmxvYWRSZXNwb25zZR'
-    'I/CgRMaXN0EhouZG93bmxvYWRlci52MS5MaXN0UmVxdWVzdBobLmRvd25sb2FkZXIudjEuTGlz'
-    'dFJlc3BvbnNlEkEKBEVkaXQSGi5kb3dubG9hZGVyLnYxLkVkaXRSZXF1ZXN0GhsuZG93bmxvYW'
-    'Rlci52MS5FZGl0UmVzcG9uc2UiABJECgVTdGF0cxIbLmRvd25sb2FkZXIudjEuU3RhdHNSZXF1'
-    'ZXN0GhwuZG93bmxvYWRlci52MS5TdGF0c1Jlc3BvbnNlIgA=');
+    'JHCgZDYW5jZWwSHC5kb3dubG9hZGVyLnYxLkNhbmNlbFJlcXVlc3QaHS5kb3dubG9hZGVyLnYx'
+    'LkNhbmNlbFJlc3BvbnNlIgASPwoETGlzdBIaLmRvd25sb2FkZXIudjEuTGlzdFJlcXVlc3QaGy'
+    '5kb3dubG9hZGVyLnYxLkxpc3RSZXNwb25zZRJBCgRFZGl0EhouZG93bmxvYWRlci52MS5FZGl0'
+    'UmVxdWVzdBobLmRvd25sb2FkZXIudjEuRWRpdFJlc3BvbnNlIgASRAoFU3RhdHMSGy5kb3dubG'
+    '9hZGVyLnYxLlN0YXRzUmVxdWVzdBocLmRvd25sb2FkZXIudjEuU3RhdHNSZXNwb25zZSIA');

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:homework/generated/sdk/downloader/v1/downloader.pb.dart';
 
-
 class StatusChip extends StatelessWidget {
   final DownloadState state;
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:homework/common/services/download/download.provider.stats.dart';
 import 'package:homework/common/utils/formatters.dart';
 import 'package:homework/generated/sdk/downloader/v1/downloader.pb.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
 class DownloadStatsBar extends ConsumerWidget {
   const DownloadStatsBar({super.key});
@@ -37,9 +37,7 @@ class _StatsContent extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.surfaceContainerHighest.withAlpha(100),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: theme.dividerColor.withAlpha(40),
-        ),
+        border: Border.all(color: theme.dividerColor.withAlpha(40)),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -83,17 +81,17 @@ class _StatsContent extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _StatItem(
+                icon: Icons.downloading_rounded,
+                label: 'Downloads',
+                value: '${stats.count}',
+                color: Colors.orange,
+              ),
+              _Divider(),
+              _StatItem(
                 icon: Icons.speed_rounded,
                 label: 'Total Speed',
                 value: '${formatBytes(stats.sumSpeed.toInt())}/s',
                 color: Colors.blue,
-              ),
-              _Divider(),
-              _StatItem(
-                icon: Icons.downloading_rounded,
-                label: 'Active Tasks',
-                value: '${stats.count}',
-                color: Colors.orange,
               ),
               _Divider(),
               _StatItem(

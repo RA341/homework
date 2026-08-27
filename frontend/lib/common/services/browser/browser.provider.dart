@@ -14,4 +14,3 @@ final browserVncLinkProvider = Provider<Uri>((ref) {
 
   return Uri.parse(l);
 });
-

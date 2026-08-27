@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:homework/generated/sdk/downloader/v1/downloader.pb.dart';
-import 'package:homework/pages/browse/download/download_card_buttons.dart';
-import 'package:homework/pages/browse/download/download_card_progress.dart';
+import 'package:homework/pages/browse/download/components/card_buttons.dart';
+import 'package:homework/pages/browse/download/components/card_progress.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-
 
 class DownloadCard extends ConsumerWidget {
   final Download download;

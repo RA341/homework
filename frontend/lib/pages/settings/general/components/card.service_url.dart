@@ -66,22 +66,31 @@ class CardServiceUrl extends HookConsumerWidget {
                         );
                       }
 
-                      final result = await ref.read(basePathNotifierProvider.notifier).setBasePath(text);
+                      final result = await ref
+                          .read(basePathNotifierProvider.notifier)
+                          .setBasePath(text);
                       if (context.mounted) {
                         switch (result) {
                           case Ok(:final value):
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('API Base Path updated successfully to: $value'),
+                                content: Text(
+                                  'API Base Path updated successfully to: $value',
+                                ),
                                 backgroundColor: AppColors.surfaceContainerHigh,
                                 behavior: SnackBarBehavior.floating,
                               ),
                             );
                           case Error(:final error):
-                            final errorMsg = error.toString().replaceFirst('Exception: ', '');
+                            final errorMsg = error.toString().replaceFirst(
+                              'Exception: ',
+                              '',
+                            );
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Failed to update base path: $errorMsg'),
+                                content: Text(
+                                  'Failed to update base path: $errorMsg',
+                                ),
                                 backgroundColor: Colors.redAccent,
                                 behavior: SnackBarBehavior.floating,
                               ),

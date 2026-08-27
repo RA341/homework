@@ -3,10 +3,10 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:homework/common/prefs/prefs.dart';
-import 'package:homework/common/services/upload/upload.provider.dart';
-import 'package:homework/common/utils/result.dart';
 import 'package:homework/common/services/upload/job.dart';
+import 'package:homework/common/services/upload/upload.provider.dart';
 import 'package:homework/common/services/upload/upload.provider.dto.dart';
+import 'package:homework/common/utils/result.dart';
 
 final uploadQueueProvider =
     NotifierProvider<UploadQueueNotifier, List<UploadJob>>(
@@ -132,9 +132,6 @@ class UploadQueueNotifier extends Notifier<List<UploadJob>> {
     await _saveQueue();
     _isProcessing = false;
     // Yield execution then process the next one
-    Future.delayed(
-      const Duration(milliseconds: 100),
-      () => _processNextJob(),
-    );
+    Future.delayed(const Duration(milliseconds: 100), () => _processNextJob());
   }
 }

@@ -33,17 +33,11 @@ class ContentArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (browserState.isLoading && items.isEmpty) {
-      return SkeletonLoader(
-        isGridView: isGridView,
-        isDesktop: isDesktop,
-      );
+      return SkeletonLoader(isGridView: isGridView, isDesktop: isDesktop);
     }
 
     if (browserState.errorMessage != null && items.isEmpty) {
-      return ErrorState(
-        message: browserState.errorMessage!,
-        onRetry: onRetry,
-      );
+      return ErrorState(message: browserState.errorMessage!, onRetry: onRetry);
     }
 
     if (items.isEmpty) {

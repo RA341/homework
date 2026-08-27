@@ -25,6 +25,8 @@ abstract class DownloaderServiceBase extends $pb.GeneratedService {
       $pb.ServerContext ctx, $0.RetryRequest request);
   $async.Future<$0.DownloadResponse> download(
       $pb.ServerContext ctx, $0.DownloadRequest request);
+  $async.Future<$0.CancelResponse> cancel(
+      $pb.ServerContext ctx, $0.CancelRequest request);
   $async.Future<$0.ListResponse> list(
       $pb.ServerContext ctx, $0.ListRequest request);
   $async.Future<$0.EditResponse> edit(
@@ -38,6 +40,8 @@ abstract class DownloaderServiceBase extends $pb.GeneratedService {
         return $0.RetryRequest();
       case 'Download':
         return $0.DownloadRequest();
+      case 'Cancel':
+        return $0.CancelRequest();
       case 'List':
         return $0.ListRequest();
       case 'Edit':
@@ -56,6 +60,8 @@ abstract class DownloaderServiceBase extends $pb.GeneratedService {
         return retry(ctx, request as $0.RetryRequest);
       case 'Download':
         return download(ctx, request as $0.DownloadRequest);
+      case 'Cancel':
+        return cancel(ctx, request as $0.CancelRequest);
       case 'List':
         return list(ctx, request as $0.ListRequest);
       case 'Edit':

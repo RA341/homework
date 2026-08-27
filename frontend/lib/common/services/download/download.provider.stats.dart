@@ -8,8 +8,8 @@ import 'package:homework/generated/sdk/downloader/v1/downloader.pb.dart';
 
 final downloadStatsProvider =
     AsyncNotifierProvider<DownloadStatsProvider, StatsResponse>(
-  DownloadStatsProvider.new,
-);
+      DownloadStatsProvider.new,
+    );
 
 class DownloadStatsProvider extends AsyncNotifier<StatsResponse> {
   DownloadStatsProvider();

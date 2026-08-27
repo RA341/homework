@@ -22,6 +22,103 @@ export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
 export 'downloader.pbenum.dart';
 
+class CancelRequest extends $pb.GeneratedMessage {
+  factory CancelRequest({
+    $fixnum.Int64? id,
+  }) {
+    final result = create();
+    if (id != null) result.id = id;
+    return result;
+  }
+
+  CancelRequest._();
+
+  factory CancelRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory CancelRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'CancelRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'downloader.v1'),
+      createEmptyInstance: create)
+    ..a<$fixnum.Int64>(1, _omitFieldNames ? '' : 'id', $pb.PbFieldType.OU6,
+        defaultOrMaker: $fixnum.Int64.ZERO)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  CancelRequest clone() => CancelRequest()..mergeFromMessage(this);
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  CancelRequest copyWith(void Function(CancelRequest) updates) =>
+      super.copyWith((message) => updates(message as CancelRequest))
+          as CancelRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static CancelRequest create() => CancelRequest._();
+  @$core.override
+  CancelRequest createEmptyInstance() => create();
+  static $pb.PbList<CancelRequest> createRepeated() =>
+      $pb.PbList<CancelRequest>();
+  @$core.pragma('dart2js:noInline')
+  static CancelRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<CancelRequest>(create);
+  static CancelRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $fixnum.Int64 get id => $_getI64(0);
+  @$pb.TagNumber(1)
+  set id($fixnum.Int64 value) => $_setInt64(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => $_clearField(1);
+}
+
+class CancelResponse extends $pb.GeneratedMessage {
+  factory CancelResponse() => create();
+
+  CancelResponse._();
+
+  factory CancelResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory CancelResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'CancelResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'downloader.v1'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  CancelResponse clone() => CancelResponse()..mergeFromMessage(this);
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  CancelResponse copyWith(void Function(CancelResponse) updates) =>
+      super.copyWith((message) => updates(message as CancelResponse))
+          as CancelResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static CancelResponse create() => CancelResponse._();
+  @$core.override
+  CancelResponse createEmptyInstance() => create();
+  static $pb.PbList<CancelResponse> createRepeated() =>
+      $pb.PbList<CancelResponse>();
+  @$core.pragma('dart2js:noInline')
+  static CancelResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<CancelResponse>(create);
+  static CancelResponse? _defaultInstance;
+}
+
 class StatsRequest extends $pb.GeneratedMessage {
   factory StatsRequest() => create();
 
@@ -590,9 +687,11 @@ class ListRequest extends $pb.GeneratedMessage {
 
 class ListResponse extends $pb.GeneratedMessage {
   factory ListResponse({
+    StatsResponse? stats,
     DownloadResult? result,
   }) {
     final result$ = create();
+    if (stats != null) result$.stats = stats;
     if (result != null) result$.result = result;
     return result$;
   }
@@ -610,7 +709,9 @@ class ListResponse extends $pb.GeneratedMessage {
       _omitMessageNames ? '' : 'ListResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'downloader.v1'),
       createEmptyInstance: create)
-    ..aOM<DownloadResult>(1, _omitFieldNames ? '' : 'result',
+    ..aOM<StatsResponse>(1, _omitFieldNames ? '' : 'stats',
+        subBuilder: StatsResponse.create)
+    ..aOM<DownloadResult>(2, _omitFieldNames ? '' : 'result',
         subBuilder: DownloadResult.create)
     ..hasRequiredFields = false;
 
@@ -636,15 +737,26 @@ class ListResponse extends $pb.GeneratedMessage {
   static ListResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
-  DownloadResult get result => $_getN(0);
+  StatsResponse get stats => $_getN(0);
   @$pb.TagNumber(1)
-  set result(DownloadResult value) => $_setField(1, value);
+  set stats(StatsResponse value) => $_setField(1, value);
   @$pb.TagNumber(1)
-  $core.bool hasResult() => $_has(0);
+  $core.bool hasStats() => $_has(0);
   @$pb.TagNumber(1)
-  void clearResult() => $_clearField(1);
+  void clearStats() => $_clearField(1);
   @$pb.TagNumber(1)
-  DownloadResult ensureResult() => $_ensure(0);
+  StatsResponse ensureStats() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  DownloadResult get result => $_getN(1);
+  @$pb.TagNumber(2)
+  set result(DownloadResult value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasResult() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearResult() => $_clearField(2);
+  @$pb.TagNumber(2)
+  DownloadResult ensureResult() => $_ensure(1);
 }
 
 class Base_string extends $pb.GeneratedMessage {
@@ -1099,6 +1211,10 @@ class DownloaderServiceApi {
           $pb.ClientContext? ctx, DownloadRequest request) =>
       _client.invoke<DownloadResponse>(
           ctx, 'DownloaderService', 'Download', request, DownloadResponse());
+  $async.Future<CancelResponse> cancel(
+          $pb.ClientContext? ctx, CancelRequest request) =>
+      _client.invoke<CancelResponse>(
+          ctx, 'DownloaderService', 'Cancel', request, CancelResponse());
   $async.Future<ListResponse> list(
           $pb.ClientContext? ctx, ListRequest request) =>
       _client.invoke<ListResponse>(

@@ -7,11 +7,7 @@ class BrowseLayout extends StatelessWidget {
   final int activeTab;
   final Widget child;
 
-  const BrowseLayout({
-    super.key,
-    required this.activeTab,
-    required this.child,
-  });
+  const BrowseLayout({super.key, required this.activeTab, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -49,14 +45,13 @@ class BrowseLayout extends StatelessWidget {
             ],
           ),
         ),
-        Expanded(
-          child: child,
-        ),
+        Expanded(child: child),
       ],
     );
   }
 
-  Widget _buildTab(BuildContext context, {
+  Widget _buildTab(
+    BuildContext context, {
     required String title,
     required IconData icon,
     required int index,
@@ -86,14 +81,18 @@ class BrowseLayout extends StatelessWidget {
             Icon(
               icon,
               size: 18,
-              color: isActive ? AppColors.primary : AppColors.onSurfaceVariant.withAlpha(160),
+              color: isActive
+                  ? AppColors.primary
+                  : AppColors.onSurfaceVariant.withAlpha(160),
             ),
             const SizedBox(width: 8),
             Text(
               title,
               style: AppTypography.bodySm.copyWith(
                 fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-                color: isActive ? AppColors.onSurface : AppColors.onSurfaceVariant.withAlpha(200),
+                color: isActive
+                    ? AppColors.onSurface
+                    : AppColors.onSurfaceVariant.withAlpha(200),
               ),
             ),
           ],

@@ -24,6 +24,13 @@ abstract final class DownloaderService {
     downloaderv1downloader.DownloadResponse.new,
   );
 
+  static const cancel = connect.Spec(
+    '/$name/Cancel',
+    connect.StreamType.unary,
+    downloaderv1downloader.CancelRequest.new,
+    downloaderv1downloader.CancelResponse.new,
+  );
+
   static const list = connect.Spec(
     '/$name/List',
     connect.StreamType.unary,
