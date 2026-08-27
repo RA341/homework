@@ -10,6 +10,7 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/olekukonko/tablewriter/renderer"
 	"github.com/olekukonko/tablewriter/tw"
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -31,6 +32,22 @@ var (
 type Printer struct {
 	Elements []ElementWithVal
 	prefixer Prefixer
+}
+
+func PrettyPrint(conf any, prefixer Prefixer) {
+	p := Printer{
+		prefixer: prefixer,
+	}
+	k := Knob{
+		functor: p.loadElements,
+	}
+
+	err := k.walkStruct(conf, "")
+	if err != nil {
+		log.Warn().Err(err).Msg("error walking struct")
+	}
+
+	p.Print()
 }
 
 type ElementWithVal struct {

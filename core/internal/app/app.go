@@ -65,12 +65,12 @@ type App struct {
 }
 
 func (a *App) Run(opts ...Option) {
-	a.conf.Server.Port = 9911
 	a.ctx = context.Background()
 	for _, opt := range opts {
 		opt(a)
 	}
 
+	PrintHeader()
 	a.loadConfig()
 
 	mux := http.NewServeMux()

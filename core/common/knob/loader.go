@@ -12,6 +12,21 @@ type Loader struct {
 	Prefixer Prefixer
 }
 
+func LoadConfig(conf any, prefixer Prefixer) error {
+	l := &Loader{Prefixer: prefixer}
+
+	k := Knob{
+		functor: l.assignValue,
+	}
+
+	err := k.walkStruct(conf, "")
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (k *Loader) assignValue(rv reflect.Value, element *Element, tagValue string) error {
 	strValue, err := k.readValues(element, tagValue)
 	if err != nil {

@@ -6,8 +6,6 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
-
-	"github.com/rs/zerolog/log"
 )
 
 type Functor func(rv reflect.Value, element *Element, tagValue string) error
@@ -23,37 +21,6 @@ type Element struct {
 
 type Knob struct {
 	functor Functor
-}
-
-func LoadConfig(conf any, prefixer Prefixer) error {
-	l := &Loader{Prefixer: prefixer}
-
-	k := Knob{
-		functor: l.assignValue,
-	}
-
-	err := k.walkStruct(conf, "")
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func PrettyPrint(conf any, prefixer Prefixer) {
-	p := Printer{
-		prefixer: prefixer,
-	}
-	k := Knob{
-		functor: p.loadElements,
-	}
-
-	err := k.walkStruct(conf, "")
-	if err != nil {
-		log.Warn().Err(err).Msg("error walking struct")
-	}
-
-	p.Print()
 }
 
 // walkStruct recursively visits every field of a struct (or pointer to struct),
@@ -90,14 +57,10 @@ func (k *Knob) walkValue(rv reflect.Value, sf *reflect.StructField, path string)
 			}
 
 			if !fv.CanInterface() { // unexported field
-				fmt.Printf("%s = <unexported>\n", fieldPath)
+				//fmt.Printf("%s = <unexported>\n", fieldPath)
 				continue
 			}
 
-			//jsonTag := field.Tag.Get("json")         // "name" or "" if absent
-			//validateTag := field.Tag.Get("validate") // "required" or ""
-
-			//fmt.Printf("field=%s json=%q validate=%q\n", field.Name, jsonTag, validateTag)
 			err = k.walkValue(fv, &field, fieldPath)
 			if err != nil {
 				return err
