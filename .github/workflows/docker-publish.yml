@@ -60,7 +60,7 @@ jobs:
         uses: docker/bake-action@v7
         with:
           files: |
-            ./docker/docker-bake.hcl
+            ./build/docker-bake.hcl
             cwd://${{ steps.meta.outputs.bake-file }}
           targets: default
           push: true
