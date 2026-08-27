@@ -20,7 +20,7 @@ func NewHandlerHttp(srv *Service) (string, http.Handler) {
 
 	mux := http.NewServeMux()
 
-	serviceHost, err := url.Parse(srv.vncUrl)
+	serviceHost, err := url.Parse(srv.config.VncUrl)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to parse service URL")
 	}

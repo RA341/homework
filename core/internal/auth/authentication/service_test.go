@@ -25,16 +25,24 @@ func TestAuthenticationService(t *testing.T) {
 
 	// Setup users service
 	usersStore := users.NewStore(db)
-	usersService, _ := users.NewService(usersStore)
+	usersService, _ := users.NewService(usersStore, &users.Config{
+		DefaultUser:     "test",
+		DefaultPassword: "test",
+	})
 
 	// Setup session service
 	sessionStore := session.NewStore(db)
-	sessionService := session.NewService(sessionStore, 24*time.Hour)
+	sessionService := session.NewService(sessionStore, &session.Config{
+		SessionExpiry: 24 * time.Hour,
+	})
 
 	// Setup authentication service
-	secretStr := "test-jwt-secret-key-12345"
-	secret := []byte(secretStr)
-	authService := NewService(secretStr, sessionService, usersService)
+	conf := &Config{
+		JwtSecret:            "test-jwt-secret-key-12345",
+		JwtIssuer:            "hw-test",
+		sessionExpiryInHours: 2,
+	}
+	authService := NewService(conf, sessionService, usersService)
 
 	// Pre-create a test user
 	username := "bob"
@@ -72,8 +80,8 @@ func TestAuthenticationService(t *testing.T) {
 		}
 
 		// Verify JWT token claims
-		token, err := jwt.Parse(sessionToken.Value, func(tok *jwt.Token) (interface{}, error) {
-			return secret, nil
+		token, err := jwt.Parse(sessionToken.Value, func(tok *jwt.Token) (any, error) {
+			return conf.JwtSecret, nil
 		})
 		if err != nil {
 			t.Fatalf("failed to parse JWT token: %v", err)
@@ -126,8 +134,8 @@ func TestAuthenticationService(t *testing.T) {
 		}
 
 		// Verify new JWT token claims
-		token, err := jwt.Parse(newSessionToken.Value, func(tok *jwt.Token) (interface{}, error) {
-			return secret, nil
+		token, err := jwt.Parse(newSessionToken.Value, func(tok *jwt.Token) (any, error) {
+			return conf.JwtSecret, nil
 		})
 		if err != nil {
 			t.Fatalf("failed to parse new JWT token: %v", err)

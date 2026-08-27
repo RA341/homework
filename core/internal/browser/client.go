@@ -19,15 +19,19 @@ type Response struct {
 	Errors    []string `json:"errors,omitempty"`
 }
 
-type ChromtrolClient struct {
-	BaseURL string
-	HTTP    *http.Client
+type ClientConfig interface {
+	BaseUrl() string
 }
 
-func NewClient(baseURL string) *ChromtrolClient {
+type ChromtrolClient struct {
+	conf ClientConfig
+	HTTP *http.Client
+}
+
+func NewClient(conf ClientConfig) *ChromtrolClient {
 	return &ChromtrolClient{
-		BaseURL: baseURL,
-		HTTP:    &http.Client{Timeout: 3 * time.Second},
+		conf: conf,
+		HTTP: &http.Client{Timeout: 3 * time.Second},
 	}
 }
 
@@ -44,7 +48,7 @@ func (c *ChromtrolClient) Status(ctx context.Context) (*Response, int, error) {
 }
 
 func (c *ChromtrolClient) do(ctx context.Context, method, path string) (*Response, int, error) {
-	req, err := http.NewRequestWithContext(ctx, method, c.BaseURL+path, nil)
+	req, err := http.NewRequestWithContext(ctx, method, c.conf.BaseUrl()+path, nil)
 	if err != nil {
 		return nil, 0, err
 	}

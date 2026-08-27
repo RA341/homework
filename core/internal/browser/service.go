@@ -8,20 +8,20 @@ import (
 )
 
 type Service struct {
+	config *Config
 	ctx    context.Context
 	cli    *ChromtrolClient
-	vncUrl string
 
 	healthStatus string
 	triggerChan  chan struct{}
 }
 
-func NewService(ctx context.Context, baseurl, vncUrl string) *Service {
-	cli := NewClient(baseurl)
+func NewService(ctx context.Context, config *Config) *Service {
+	cli := NewClient(config)
 	s := &Service{
+		config:      config,
 		ctx:         ctx,
 		cli:         cli,
-		vncUrl:      vncUrl,
 		triggerChan: make(chan struct{}, 1),
 	}
 
@@ -47,7 +47,7 @@ func (s *Service) TriggerCheck() {
 }
 
 func (s *Service) StartHealthCheckWorker() {
-	checkTimer := time.NewTicker(5 * time.Minute)
+	checkTimer := time.NewTicker(s.config.HealthCheckInterval)
 
 	for {
 		select {

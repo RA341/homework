@@ -30,11 +30,10 @@ func TestServiceDownloads(t *testing.T) {
 
 	// 3. Initialize Config
 	conf := &Config{
-		SocketPath:             DefaultSocket,
-		DownloadsDir:           "/tmp/downloads",
-		ProgressCheckThreshold: 5,
-		CheckIntervalSecs:      1,
-		MaxDownloads:           20,
+		DownloadsDir:       "/tmp/downloads",
+		CheckThreshold:     5,
+		CheckIntervalSecs:  1,
+		WorkerMaxDownloads: 20,
 	}
 
 	// 4. Initialize Service

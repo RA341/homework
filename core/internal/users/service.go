@@ -9,12 +9,14 @@ import (
 )
 
 type Service struct {
+	conf *Config
 	Store
 }
 
-func NewService(store Store) (*Service, error) {
+func NewService(store Store, conf *Config) (*Service, error) {
 	s := &Service{
 		Store: store,
+		conf:  conf,
 	}
 	err := s.Init()
 
@@ -36,10 +38,7 @@ func (s *Service) ensureDefaultUser() error {
 		return nil
 	}
 
-	const defaultUser = "admin"
-	const defaultPassword = "hwisnice"
-
-	err = s.Create(defaultUser, defaultPassword)
+	err = s.Create(s.conf.DefaultUser, s.conf.DefaultPassword)
 	if err != nil {
 		return err
 	}

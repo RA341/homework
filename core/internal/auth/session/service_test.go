@@ -22,7 +22,10 @@ func TestSessionService(t *testing.T) {
 	}
 
 	store := NewStore(db)
-	service := NewService(store, 1*time.Hour)
+	conf := &Config{
+		SessionExpiry: 1 * time.Hour,
+	}
+	service := NewService(store, conf)
 
 	userID := uint64(12345)
 

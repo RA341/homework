@@ -16,19 +16,18 @@ import (
 )
 
 type Service struct {
+	conf  *Config
 	store Store
-
-	AssetFolder string
 
 	Sem              sem.Sem
 	IsScannerRunning bool
 }
 
-func NewService(store Store, AssetFolder string) (*Service, error) {
+func NewService(store Store, conf *Config) (*Service, error) {
 	s := &Service{
-		store:       store,
-		AssetFolder: AssetFolder,
-		Sem:         sem.New(1),
+		store: store,
+		conf:  conf,
+		Sem:   sem.New(1),
 	}
 
 	err := s.Init()
@@ -36,12 +35,12 @@ func NewService(store Store, AssetFolder string) (*Service, error) {
 }
 
 func (s *Service) Init() error {
-	abs, err := filepath.Abs(s.AssetFolder)
+	abs, err := filepath.Abs(s.conf.AssetDir)
 	if err != nil {
 		return err
 	}
 
-	s.AssetFolder = abs
+	s.conf.AssetDir = abs
 	// todo put in scheduled task
 	//s.StartScan()
 
@@ -204,7 +203,7 @@ func (s *Service) Finalize(assetId uint, downloadFolder string) error {
 	}
 
 	assetFolderId := uuid.NewV7()
-	finalFolder := filepath.Join(s.AssetFolder, assetFolderId.String())
+	finalFolder := filepath.Join(s.conf.AssetDir, assetFolderId.String())
 
 	err = os.MkdirAll(finalFolder, 0750)
 	if err != nil {

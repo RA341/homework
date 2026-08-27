@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/ra341/homework/common/database"
 	"github.com/ra341/homework/common/router"
@@ -45,11 +44,12 @@ func init() {
 }
 
 type App struct {
-	ctx  context.Context
-	ui   http.Handler
-	port int
+	ctx context.Context
+	ui  http.Handler
 
-	db      *gorm.DB
+	conf Config
+	db   *gorm.DB
+
 	content *content.Service
 	asset   *asset.Service
 	media   *media.Service
@@ -64,11 +64,13 @@ type App struct {
 }
 
 func (a *App) Run(opts ...Option) {
-	a.port = 9911
+	a.conf.Server.Port = 9911
 	a.ctx = context.Background()
 	for _, opt := range opts {
 		opt(a)
 	}
+
+	a.loadConfig()
 
 	mux := http.NewServeMux()
 	a.addServices()
@@ -78,8 +80,13 @@ func (a *App) Run(opts ...Option) {
 	//allowedOrigins := []string{"https://beacon.pro.radn.dev"}
 	//finalMux := api.WithCors(mux, allowedOrigins)
 
-	log.Info().Int("port", a.port).Msg("Starting homework server...")
-	router.RunServer(a.ctx, a.port, mux)
+	log.Info().Int("port", a.conf.Server.Port).Msg("Starting homework server...")
+	router.RunServer(a.ctx, a.conf.Server.Port, mux)
+}
+
+func (a *App) loadConfig() {
+	a.conf = Config{}
+	panic("implement me idiot")
 }
 
 func (a *App) addServices() {
@@ -99,15 +106,14 @@ func (a *App) addServices() {
 }
 
 func (a *App) addAuthSrv() {
-	jwtSecret := "test-secret-change-me"
-	a.auth = authentication.NewService(jwtSecret, a.session, a.user)
+	a.auth = authentication.NewService(&a.conf.Auth, a.session, a.user)
 }
 
 func (a *App) addUserSrv() {
 	var err error
 
 	userStore := users.NewStore(a.db)
-	a.user, err = users.NewService(userStore)
+	a.user, err = users.NewService(userStore, &a.conf.Users)
 	if err != nil {
 		log.Warn().Err(err).Msg("could not init user service")
 	}
@@ -115,8 +121,7 @@ func (a *App) addUserSrv() {
 
 func (a *App) addSessionSrv() {
 	sessionDb := session.NewStore(a.db)
-	sessionExpiry := time.Hour * 24 * 7
-	a.session = session.NewService(sessionDb, sessionExpiry)
+	a.session = session.NewService(sessionDb, &a.conf.Session)
 }
 
 func (a *App) initAppDataDir() (workingDir string, dataDir string) {
@@ -139,12 +144,11 @@ func (a *App) initAppDataDir() (workingDir string, dataDir string) {
 func (a *App) addMediaSrv() {
 	var err error
 
-	const uploadFolder = "temp"
 	a.media, err = media.NewService(
+		&a.conf.Media,
 		a.content,
 		a.asset,
 		a.downloads,
-		uploadFolder,
 	)
 	if err != nil {
 		log.Fatal().Err(err).Msg("could not create media service")
@@ -160,17 +164,16 @@ func (a *App) addDownloadsSrv(dir string) {
 	//	log.Fatal().Err(err).Msg("could not create downloader client")
 	//}
 
-	config := downloads.NewConfig(dir)
 	downloadDb := downloads.NewStoreGorm(a.db)
 
-	scribeCli, err := a.scribeCliFactory(config)
+	scribeCli, err := a.scribeCliFactory(&a.conf.Downloads)
 	if err != nil {
 		log.Fatal().Err(err).Msg("could not load scribe client")
 		return
 	}
 
 	a.downloads, err = downloads.NewService(
-		config,
+		&a.conf.Downloads,
 		downloadDb,
 		scribeCli,
 		a.asset,
@@ -189,9 +192,10 @@ func (a *App) addContentSrv() {
 func (a *App) addAssetSrv() {
 	var err error
 
+	//assetFolder := "assets"
+
 	assetStore := asset.NewStore(a.db)
-	assetFolder := "assets"
-	a.asset, err = asset.NewService(assetStore, assetFolder)
+	a.asset, err = asset.NewService(assetStore, &a.conf.Assets)
 	if err != nil {
 		log.Fatal().Msg("error initializing asset service")
 	}
@@ -199,9 +203,9 @@ func (a *App) addAssetSrv() {
 }
 
 func (a *App) addBrowserSrv() {
-	apiUrl := "http://localhost:8998"
-	vncUrl := "http://localhost:3012/"
-	a.browser = browser.NewService(a.ctx, apiUrl, vncUrl)
+	//apiUrl := "http://localhost:8998"
+	//vncUrl := "http://localhost:3012/"
+	a.browser = browser.NewService(a.ctx, &a.conf.Browser)
 	return
 }
 

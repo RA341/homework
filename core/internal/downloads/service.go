@@ -52,8 +52,8 @@ func NewService(
 }
 
 func (s *Service) Init() error {
-	if s.conf.MaxDownloads == 0 {
-		s.conf.MaxDownloads = 5
+	if s.conf.WorkerMaxDownloads == 0 {
+		s.conf.WorkerMaxDownloads = 5
 	}
 	if s.conf.CheckIntervalSecs == 0 {
 		s.conf.CheckIntervalSecs = 5
@@ -70,8 +70,8 @@ func (s *Service) Init() error {
 	s.conf.DownloadsDir = abs
 
 	s.downloadWorker = NewDownloadWorker(
-		s.conf.MaxDownloads,
-		s.conf.ExitThreshold, // todo add new config exitThreshold
+		s.conf.WorkerMaxDownloads,
+		s.conf.WorkerExitThreshold, // todo add new config exitThreshold
 		s.store,
 		s,
 	)
@@ -210,7 +210,7 @@ func (s *Service) monitorDownload(down *Download) (DownloadState, error) {
 			}
 			return Canceled, fmt.Errorf("download cancelled by user")
 		case <-tick.C:
-			if strikes > s.conf.ProgressCheckThreshold {
+			if strikes > s.conf.CheckThreshold {
 				return Failed, fmt.Errorf("could not get progress after %d tries, please check logs", strikes)
 			}
 

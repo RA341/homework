@@ -17,10 +17,6 @@ func WithUI(ui http.Handler) Option {
 	return func(s *App) { s.ui = ui }
 }
 
-func WithPort(port int) Option {
-	return func(s *App) { s.port = port }
-}
-
 func WithScribeCli(cli scribe.ClientFactory) Option {
 	return func(app *App) {
 		app.scribeCliFactory = cli
