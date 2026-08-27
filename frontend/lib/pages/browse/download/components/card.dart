@@ -52,11 +52,10 @@ class DownloadCard extends ConsumerWidget {
                 ],
               ),
             ],
-            if (download.status ==
-                DownloadState.DOWNLOAD_STATE_DOWNLOADING) ...[
+            if (download.status == DownloadState.Downloading) ...[
               DownloadProgressDisplay(progress: download.progress),
             ],
-            if (download.status == DownloadState.DOWNLOAD_STATE_ERROR &&
+            if (download.status == DownloadState.Error &&
                 download.progress.error.isNotEmpty)
               ...displayError(context),
           ],

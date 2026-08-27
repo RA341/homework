@@ -69,7 +69,7 @@ func (s *InMemoryDownloadStore) AllComplete() *Download {
 	defer s.mu.Unlock()
 
 	for _, d := range s.downloads {
-		if d.Status != Complete {
+		if d.Progress.Status != Complete {
 			return &d
 		}
 	}
@@ -87,8 +87,9 @@ func (s *InMemoryDownloadStore) Add(count int) {
 			AssetID:      id + 1,
 			Name:         fmt.Sprintf("asset-%d.bin", id),
 			DownloadLink: fmt.Sprintf("https://example.com/downloads/%d", id),
-			Status:       Queued,
-			Progress:     Progress{},
+			Progress: Progress{
+				Status: Queued,
+			},
 		})
 	}
 }
@@ -99,7 +100,7 @@ func (s *InMemoryDownloadStore) ListQueued(limit int) ([]Download, error) {
 
 	result := make([]Download, 0, limit)
 	for _, d := range s.downloads {
-		if d.Status == Queued {
+		if d.Progress.Status == Queued {
 			result = append(result, d)
 			if len(result) == limit {
 				break
@@ -117,7 +118,7 @@ func (s *InMemoryDownloadStore) SetStatus(id uint, state DownloadState) error {
 	if int(id) >= len(s.downloads) {
 		return fmt.Errorf("download id %d out of range", id)
 	}
-	s.downloads[id].Status = state
+	s.downloads[id].Progress.Status = state
 	return nil
 }
 

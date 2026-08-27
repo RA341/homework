@@ -95,14 +95,7 @@ func (dw *DownloadWorker) worker(maxWorkers int) {
 
 	strikes := 0
 	for {
-		var done bool
-		done = dw.loop(
-			&wg,
-			&downloadSem,
-			&strikes,
-			dw.ExitThreshold,
-			maxWorkers,
-		)
+		done := dw.loop(&wg, &downloadSem, &strikes, dw.ExitThreshold, maxWorkers)
 		if done {
 			return
 		}

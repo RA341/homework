@@ -4,6 +4,7 @@ import 'package:homework/common/services/download/download.provider.dart';
 import 'package:homework/common/utils/result.dart';
 import 'package:homework/generated/sdk/downloader/v1/downloader.pb.dart';
 import 'package:homework/pages/browse/download/components/card_status.dart';
+import 'package:homework/pages/browse/download/components/dialog_cancel.dart';
 import 'package:homework/pages/browse/download/components/dialog_edit.dart';
 import 'package:homework/pages/browse/download/components/dialog_start_browser.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -30,6 +31,7 @@ class DownloadActionButtons extends ConsumerWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ),
+        StatusChip(state: download.status),
         IconButton(
           icon: Icon(Icons.edit),
           onPressed: () {
@@ -69,7 +71,15 @@ class DownloadActionButtons extends ConsumerWidget {
           },
           icon: Icon(Icons.refresh),
         ),
-        StatusChip(state: download.status),
+        IconButton(
+          icon: Icon(Icons.cancel),
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (context) => CancelDownloadDialog(download: download),
+            );
+          },
+        ),
       ],
     );
   }

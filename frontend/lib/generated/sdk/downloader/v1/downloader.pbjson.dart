@@ -18,18 +18,19 @@ import 'dart:typed_data' as $typed_data;
 const DownloadState$json = {
   '1': 'DownloadState',
   '2': [
-    {'1': 'DOWNLOAD_STATE_QUEUED', '2': 0},
-    {'1': 'DOWNLOAD_STATE_DOWNLOADING', '2': 1},
-    {'1': 'DOWNLOAD_STATE_ERROR', '2': 2},
-    {'1': 'DOWNLOAD_STATE_SUCCESS', '2': 3},
+    {'1': 'Queued', '2': 0},
+    {'1': 'Downloading', '2': 1},
+    {'1': 'Error', '2': 2},
+    {'1': 'Complete', '2': 3},
+    {'1': 'Failed', '2': 4},
+    {'1': 'Canceled', '2': 5},
   ],
 };
 
 /// Descriptor for `DownloadState`. Decode as a `google.protobuf.EnumDescriptorProto`.
 final $typed_data.Uint8List downloadStateDescriptor = $convert.base64Decode(
-    'Cg1Eb3dubG9hZFN0YXRlEhkKFURPV05MT0FEX1NUQVRFX1FVRVVFRBAAEh4KGkRPV05MT0FEX1'
-    'NUQVRFX0RPV05MT0FESU5HEAESGAoURE9XTkxPQURfU1RBVEVfRVJST1IQAhIaChZET1dOTE9B'
-    'RF9TVEFURV9TVUNDRVNTEAM=');
+    'Cg1Eb3dubG9hZFN0YXRlEgoKBlF1ZXVlZBAAEg8KC0Rvd25sb2FkaW5nEAESCQoFRXJyb3IQAh'
+    'IMCghDb21wbGV0ZRADEgoKBkZhaWxlZBAEEgwKCENhbmNlbGVkEAU=');
 
 @$core.Deprecated('Use cancelRequestDescriptor instead')
 const CancelRequest$json = {

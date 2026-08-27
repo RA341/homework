@@ -1,12 +1,14 @@
 package downloads
 
 import (
+	"context"
 	"crypto/sha1"
 	"fmt"
 	"os"
 	"path/filepath"
 	"time"
 
+	"github.com/ra341/homework/common/sm"
 	"github.com/rs/zerolog/log"
 )
 
@@ -27,6 +29,7 @@ type Service struct {
 	asset AssetFinalizer
 	cli   DownloadClient
 
+	cancelMap      sm.Map[uint, context.CancelFunc]
 	downloadWorker *DownloadWorker
 }
 
@@ -104,12 +107,8 @@ func (s *Service) Edit(id int64, link string) error {
 }
 
 func (s *Service) Retry(id uint) error {
-	err := s.store.SetStatus(id, Queued)
-	if err != nil {
-		return err
-	}
-
-	err = s.store.SetProgress(id, &Progress{
+	err := s.store.SetProgress(id, &Progress{
+		Status:                 Queued,
 		TimeLeftSecs:           0,
 		DownloadBytesPerSecond: 0,
 		Total:                  0,
@@ -117,11 +116,21 @@ func (s *Service) Retry(id uint) error {
 		Error:                  "",
 	})
 	if err != nil {
-		log.Warn().Err(err).Msg("Could not clear old progress while retrying")
+		return err
 	}
 
 	s.launchWorker()
 
+	return nil
+}
+
+func (s *Service) Cancel(id uint) error {
+	cancelFn, ok := s.cancelMap.Load(id)
+	if !ok {
+		return fmt.Errorf("download not found, are you sure its downloading")
+	}
+
+	cancelFn()
 	return nil
 }
 
@@ -181,6 +190,12 @@ func (s *Service) monitorDownload(down *Download) (DownloadState, error) {
 
 	checkInterval := time.Duration(s.conf.CheckIntervalSecs) * time.Second
 
+	ctx, cancelFn := context.WithCancel(context.Background())
+	s.cancelMap.Store(down.ID, cancelFn)
+	defer func() {
+		s.cancelMap.Delete(down.ID)
+	}()
+
 	tick := time.NewTicker(checkInterval)
 	defer tick.Stop()
 
@@ -188,6 +203,12 @@ func (s *Service) monitorDownload(down *Download) (DownloadState, error) {
 
 	for {
 		select {
+		case <-ctx.Done():
+			err = s.cli.Cancel(downloadId)
+			if err != nil {
+				log.Warn().Err(err).Msg("error while canceling download")
+			}
+			return Canceled, fmt.Errorf("download cancelled by user")
 		case <-tick.C:
 			if strikes > s.conf.ProgressCheckThreshold {
 				return Failed, fmt.Errorf("could not get progress after %d tries, please check logs", strikes)
@@ -219,76 +240,12 @@ func (s *Service) monitorDownload(down *Download) (DownloadState, error) {
 	}
 }
 
-func (s *Service) setErr(msg *Download, err error) {
-	err2 := s.store.SetDownloadErr(msg.ID, err.Error())
-	if err2 != nil {
-		log.Warn().Err(err2).Uint("id", msg.ID).
+func (s *Service) setErr(msg *Download, downloadErr error) {
+	err := s.store.SetDownloadErr(msg.ID, downloadErr.Error())
+	if err != nil {
+		log.Warn().
+			Err(err).
+			Uint("id", msg.ID).
 			Msg("Could not set error status for download")
 	}
 }
-
-//func (s *Service) launchWorker() {
-//	ok := s.workerLock.TryAcquire()
-//	if ok {
-//		log.Info().Msg("launched download worker")
-//		go s.worker()
-//	} else {
-//		log.Info().Msg("download worker is already running")
-//	}
-//}
-
-//func (s *Service) worker() {
-//	s.workerRunning = true
-//	defer func() {
-//		s.workerLock.Release()
-//		s.workerRunning = false
-//	}()
-//
-//	downloadSem := sem.New(s.conf.MaxDownloads)
-//	wg := sync.WaitGroup{}
-//
-//	strikes := 0
-//	const exitThreshold = 2
-//
-//	for {
-//		if strikes >= exitThreshold {
-//			log.Info().Int("strikes", strikes).Msg("no additional queued items found, exiting worker")
-//			return
-//		}
-//
-//		queued, err := s.store.ListQueued(s.conf.MaxDownloads)
-//		if err != nil {
-//			log.Warn().Err(err).Msg("Could not load downloading items")
-//			return
-//		}
-//
-//		l := len(queued)
-//		if l == 0 {
-//			log.Info().
-//				Int("strikes", strikes+1).
-//				Msg("waiting for existing downloads to complete")
-//			wg.Wait()
-//
-//			strikes++
-//			<-time.After(time.Second)
-//			continue
-//		}
-//
-//		log.Debug().Int("Count", l).Msg("Found queued items")
-//		strikes = 0
-//
-//		for _, d := range queued {
-//			downloadSem.Acquire()
-//			err = s.store.SetStatus(d.ID, Downloading)
-//			if err != nil {
-//				log.Warn().Err(err).Any("download", d).Msg("Could not set status to downloading, skipping...")
-//				continue
-//			}
-//
-//			wg.Go(func() {
-//				defer downloadSem.Release()
-//				s.download(&d)
-//			})
-//		}
-//	}
-//}

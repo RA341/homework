@@ -43,6 +43,15 @@ func (h *Handler) Stats(ctx context.Context, c *connect.Request[v1.StatsRequest]
 	}), nil
 }
 
+func (h *Handler) Cancel(ctx context.Context, c *connect.Request[v1.CancelRequest]) (*connect.Response[v1.CancelResponse], error) {
+	err := h.srv.Cancel(uint(c.Msg.Id))
+	if err != nil {
+		return nil, err
+	}
+
+	return connect.NewResponse(&v1.CancelResponse{}), err
+}
+
 func (h *Handler) Edit(ctx context.Context, c *connect.Request[v1.EditRequest]) (*connect.Response[v1.EditResponse], error) {
 	err := h.srv.Edit(c.Msg.DownloadId, c.Msg.DownloadLink)
 	if err != nil {

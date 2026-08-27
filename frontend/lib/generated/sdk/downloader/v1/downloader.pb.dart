@@ -891,7 +891,7 @@ class Download extends $pb.GeneratedMessage {
     ..aOS(2, _omitFieldNames ? '' : 'name')
     ..aOS(3, _omitFieldNames ? '' : 'downloadLink')
     ..e<DownloadState>(4, _omitFieldNames ? '' : 'status', $pb.PbFieldType.OE,
-        defaultOrMaker: DownloadState.DOWNLOAD_STATE_QUEUED,
+        defaultOrMaker: DownloadState.Queued,
         valueOf: DownloadState.valueOf,
         enumValues: DownloadState.values)
     ..aOM<DownloadProgress>(5, _omitFieldNames ? '' : 'progress',

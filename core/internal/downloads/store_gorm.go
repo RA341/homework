@@ -10,18 +10,6 @@ type StoreGorm struct {
 	db *gorm.DB
 }
 
-func (s *StoreGorm) Get(id uint) (Download, error) {
-	return Download{}, fmt.Errorf("not implemented idiot")
-}
-
-func (s *StoreGorm) SetStatus(id uint, status DownloadState) error {
-	return s.db.
-		Model(&Download{}).
-		Where("id = ?", id).
-		Update("status", status).
-		Error
-}
-
 func NewStoreGorm(db *gorm.DB) Store {
 	return &StoreGorm{
 		db: db,
@@ -42,12 +30,24 @@ func (s *StoreGorm) List(query string, after string, before string, limit uint) 
 func (s *StoreGorm) ListQueued(limit int) ([]Download, error) {
 	var downloads []Download
 	err := s.db.
-		Where("status = ?", Queued).
+		Where("progress_status = ?", Queued).
 		Limit(limit).
 		Find(&downloads).
 		Error
 
 	return downloads, err
+}
+
+func (s *StoreGorm) Get(id uint) (Download, error) {
+	return Download{}, fmt.Errorf("not implemented idiot")
+}
+
+func (s *StoreGorm) SetStatus(id uint, status DownloadState) error {
+	return s.db.
+		Model(&Download{}).
+		Where("id = ?", id).
+		Update("progress_status", status).
+		Error
 }
 
 func (s *StoreGorm) EditLink(id int64, link string) error {
@@ -65,8 +65,7 @@ func (s *StoreGorm) SetDownloadErr(id uint, errStr string) error {
 		Where("id = ?", id).
 		Updates(Download{
 			Progress: Progress{
-				Error:  errStr,
-				Status: Error,
+				Error: errStr,
 			},
 		}).
 		Error
@@ -97,8 +96,13 @@ func (s *StoreGorm) AddDownload(download *Download) error {
 func (s *StoreGorm) SetProgress(id uint, status *Progress) error {
 	return s.db.Model(&Download{}).
 		Where("id = ?", id).
-		Updates(
-			Download{Progress: *status},
-		).
+		Updates(map[string]any{
+			"progress_status":                    status.Status,
+			"progress_error":                     status.Error,
+			"progress_time_left_secs":            status.TimeLeftSecs,
+			"progress_download_bytes_per_second": status.DownloadBytesPerSecond,
+			"progress_completed":                 status.Completed,
+			"progress_total":                     status.Total,
+		}).
 		Error
 }

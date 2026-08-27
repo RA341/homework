@@ -85,9 +85,9 @@ func TestServiceDownloads(t *testing.T) {
 	}
 
 	for _, d := range downloads {
-		t.Logf("Download ID: %d, Name: %s, Status: %v, Error: %s", d.ID, d.Name, d.Status, d.Progress.Error)
-		if d.Status != Complete && d.Status != Error {
-			t.Errorf("download %d (%s) has invalid status: %v", d.ID, d.Name, d.Status)
+		t.Logf("Download ID: %d, Name: %s, Status: %v, Error: %s", d.ID, d.Name, d.Progress.Status, d.Progress.Error)
+		if d.Progress.Status != Complete && d.Progress.Status != Error {
+			t.Errorf("download %d (%s) has invalid status: %v", d.ID, d.Name, d.Progress.Status)
 		}
 	}
 }
@@ -95,6 +95,21 @@ func TestServiceDownloads(t *testing.T) {
 type TestDownloader struct {
 	mu        sync.Mutex
 	downloads map[string]downloadInfo
+}
+
+func (t *TestDownloader) Download(video string) (downloadId string, err error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (t *TestDownloader) Cancel(id string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (t *TestDownloader) Progress(id string) (*Progress, error) {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (t *TestDownloader) download(video string) (downloadId string, err error) {

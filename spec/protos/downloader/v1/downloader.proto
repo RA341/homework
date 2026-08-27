@@ -8,12 +8,19 @@ option go_package = "github.com/ra341/homework/generated/api/downloader/v1";
 service DownloaderService {
   rpc Retry(RetryRequest) returns (RetryResponse) {}
   rpc Download (DownloadRequest) returns (DownloadResponse);
+  rpc Cancel(CancelRequest) returns (CancelResponse) {}
+
   rpc List (ListRequest) returns (ListResponse);
   rpc Edit(EditRequest) returns (EditResponse) {}
+
   rpc Stats(StatsRequest) returns (StatsResponse) {}
-
-
 }
+
+message CancelRequest {
+  uint64 id = 1;
+}
+
+message CancelResponse {}
 
 message StatsRequest {}
 
@@ -61,10 +68,12 @@ message ListResponse {
 }
 
 enum DownloadState {
-  DOWNLOAD_STATE_QUEUED = 0;
-  DOWNLOAD_STATE_DOWNLOADING = 1;
-  DOWNLOAD_STATE_ERROR = 2;
-  DOWNLOAD_STATE_SUCCESS = 3;
+  Queued = 0;
+  Downloading = 1;
+  Error = 2;
+  Complete = 3;
+  Failed = 4;
+  Canceled = 5;
 }
 
 message Base_string {

@@ -13,6 +13,11 @@ type TestStore struct {
 	nextID    uint
 }
 
+func (s *TestStore) Stats() (*DownloadStats, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (s *TestStore) SetProgress(id uint, status *Progress) error {
 	//TODO implement me
 	panic("implement me")
@@ -36,7 +41,7 @@ func (s *TestStore) ListQueued(limit int) ([]Download, error) {
 
 	var result []Download
 	for _, d := range s.downloads {
-		if d.Status == Queued {
+		if d.Progress.Status == Queued {
 			result = append(result, d)
 		}
 	}
@@ -111,7 +116,7 @@ func (s *TestStore) SetDownloadErr(id uint, errStr string) error {
 	if !exists {
 		return fmt.Errorf("download not found")
 	}
-	d.Status = Error
+	d.Progress.Status = Error
 	d.Progress.Error = errStr
 	d.UpdatedAt = time.Now()
 	s.downloads[id] = d
@@ -126,7 +131,7 @@ func (s *TestStore) SetStatus(id uint, state DownloadState) error {
 	if !exists {
 		return fmt.Errorf("download not found")
 	}
-	d.Status = state
+	d.Progress.Status = state
 	d.UpdatedAt = time.Now()
 	s.downloads[id] = d
 	return nil

@@ -14,32 +14,33 @@ class StatusChip extends StatelessWidget {
     IconData icon;
 
     switch (state) {
-      case DownloadState.DOWNLOAD_STATE_QUEUED:
+      case DownloadState.Queued:
         backgroundColor = Colors.grey.shade100;
         textColor = Colors.grey.shade800;
-        label = 'Queued';
         icon = Icons.hourglass_empty;
-      case DownloadState.DOWNLOAD_STATE_DOWNLOADING:
+      case DownloadState.Downloading:
         backgroundColor = Colors.blue.shade50;
         textColor = Colors.blue.shade700;
-        label = 'Downloading';
         icon = Icons.downloading;
-      case DownloadState.DOWNLOAD_STATE_SUCCESS:
+      case DownloadState.Complete:
         backgroundColor = Colors.green.shade50;
         textColor = Colors.green.shade700;
-        label = 'Success';
         icon = Icons.check_circle_outline;
-      case DownloadState.DOWNLOAD_STATE_ERROR:
+      case DownloadState.Error:
         backgroundColor = Colors.red.shade50;
         textColor = Colors.red.shade700;
-        label = 'Error';
+        icon = Icons.error_outline;
+      case DownloadState.Canceled:
+        backgroundColor = Colors.yellow.shade50;
+        textColor = Colors.yellow.shade900;
         icon = Icons.error_outline;
       default:
         backgroundColor = Colors.grey.shade100;
         textColor = Colors.grey.shade800;
-        label = 'Unknown';
         icon = Icons.help_outline;
     }
+
+    label = state.toString();
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
