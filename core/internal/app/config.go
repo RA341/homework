@@ -1,10 +1,7 @@
 package app
 
 import (
-	"encoding/json"
-	"fmt"
-	"log"
-
+	"github.com/ra341/homework/common/knob"
 	"github.com/ra341/homework/internal/auth/authentication"
 	"github.com/ra341/homework/internal/auth/session"
 	"github.com/ra341/homework/internal/browser"
@@ -16,6 +13,7 @@ import (
 
 type ServerConfig struct {
 	Port int `knob:"default=9911,env=PORT,help=default port for server"`
+	//Cors []string `knob:"default=Cors,env=CORS_CONFIG,help=cors string"`
 }
 
 type Config struct {
@@ -32,17 +30,13 @@ type Config struct {
 }
 
 func (c *Config) Load() error {
-	k := Knob{prefixer: func(s string) string {
-		return s
-	}}
-
-	err := k.WalkStruct(c, "")
+	prefixer := knob.NewPrefixer("")
+	err := knob.LoadConfig(c, prefixer)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
-	b, _ := json.MarshalIndent(c, "", "  ")
-	fmt.Println(string(b))
+	knob.PrettyPrint(c, prefixer)
 
-	return fmt.Errorf("implement me idiot")
+	return nil
 }
