@@ -2,7 +2,7 @@ default:
    just --list
 
 dk:
-     docker buildx bake -f docker/docker-bake.hcl
+     docker buildx bake -f build/docker-bake.hcl
 
 dkr:
     just dk

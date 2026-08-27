@@ -26,19 +26,19 @@ group "all" {
 
 target "base-frontend" {
   context    = "."
-  dockerfile = "docker/Dockerfile.base.frontend"
+  dockerfile = "build/Dockerfile.base.frontend"
   output     = ["type=cacheonly"]
 }
 
 target "base-yt" {
   context    = "."
-  dockerfile = "docker/Dockerfile.base.yt"
+  dockerfile = "build/Dockerfile.base.yt"
   output     = ["type=cacheonly"]
 }
 
 target "base-gomod" {
   context    = "."
-  dockerfile = "docker/Dockerfile.base.gomod"
+  dockerfile = "build/Dockerfile.base.gomod"
   output     = ["type=cacheonly"]
 }
 
@@ -47,7 +47,7 @@ target "base-gomod" {
 target "core" {
   inherits   = ["docker-metadata-action"]
   context    = "."
-  dockerfile = "docker/Dockerfile.core"
+  dockerfile = "build/Dockerfile.core"
   contexts = {
     "base-gomod"    = "target:base-gomod"
     "base-frontend" = "target:base-frontend"
@@ -63,7 +63,7 @@ target "core" {
 target "scribe" {
   inherits   = ["docker-metadata-action"]
   context    = "."
-  dockerfile = "docker/Dockerfile.scribe"
+  dockerfile = "build/Dockerfile.scribe"
   contexts = {
     "base-gomod" = "target:base-gomod"
     "base-yt"    = "target:base-yt"
@@ -79,7 +79,7 @@ target "scribe" {
 target "omni" {
   inherits   = ["docker-metadata-action"]
   context    = "."
-  dockerfile = "docker/Dockerfile.omni"
+  dockerfile = "build/Dockerfile.omni"
   contexts = {
     "base-gomod"    = "target:base-gomod"
     "base-yt"       = "target:base-yt"

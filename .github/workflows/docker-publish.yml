@@ -9,7 +9,7 @@ on:
       - '.github/workflows/docker-publish.yml'
       - 'core/**'
       - 'frontend/**'
-      - 'docker/**'
+      - 'build/**'
   workflow_dispatch:
 
 permissions:

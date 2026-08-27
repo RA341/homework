@@ -14,6 +14,6 @@ COPY --from=builder /app/hwlite /usr/bin/hwlite
 
 COPY --from=base-frontend /build/build/web web
 
-COPY docker/entrypoint.sh entrypoint.sh
+COPY build/entrypoint.sh entrypoint.sh
 
 ENTRYPOINT ["hwlite"]
