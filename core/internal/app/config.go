@@ -16,6 +16,9 @@ type ServerConfig struct {
 	//Cors []string `knob:"default=Cors,env=CORS_CONFIG,help=cors string"`
 }
 
+type DataConfig struct {
+}
+
 type Config struct {
 	Server ServerConfig
 
@@ -30,7 +33,7 @@ type Config struct {
 }
 
 func (c *Config) Load() error {
-	prefixer := knob.NewPrefixer("")
+	prefixer := knob.NewPrefixer("HW_")
 	err := knob.LoadConfig(c, prefixer)
 	if err != nil {
 		return err

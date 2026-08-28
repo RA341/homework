@@ -3,28 +3,34 @@ package knob
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strconv"
 	"time"
 )
 
 type Loader struct {
-	Prefixer Prefixer
+	Prefixer   Prefixer
+	workingDir string
 }
 
 func LoadConfig(conf any, prefixer Prefixer) error {
-	l := &Loader{Prefixer: prefixer}
+	workingDir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+
+	l := &Loader{
+		Prefixer:   prefixer,
+		workingDir: workingDir,
+	}
 
 	k := Knob{
 		functor: l.assignValue,
 	}
 
-	err := k.walkStruct(conf, "")
-	if err != nil {
-		return err
-	}
-
-	return nil
+	err = k.walkStruct(conf, "")
+	return err
 }
 
 func (k *Loader) assignValue(rv reflect.Value, element *Element, tagValue string) error {
@@ -89,6 +95,15 @@ func (k *Loader) readValues(element *Element, tagValue string) (string, error) {
 		}
 
 		strValue = element.Default
+	}
+
+	if element.IsFilePath && !filepath.IsAbs(strValue) {
+		strValue = filepath.Join(k.workingDir, strValue)
+
+		err := os.MkdirAll(strValue, os.ModePerm)
+		if err != nil {
+			return "", err
+		}
 	}
 
 	return strValue, nil

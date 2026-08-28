@@ -76,12 +76,12 @@ func migrate(ctx context.Context, dbPath string) error {
 	}
 	defer fu.CloseCloser(provider)
 
-	res, err := provider.Up(ctx)
+	_, err = provider.Up(ctx)
 	if err != nil {
 		return fmt.Errorf("could not run migration: %w", err)
 	}
 
-	log.Debug().Any("res", res).Msg("ran migrations")
+	//log.Debug().Any("res", res).Msg("ran migrations")
 
 	return nil
 }

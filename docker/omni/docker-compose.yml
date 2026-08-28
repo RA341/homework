@@ -10,14 +10,22 @@ services:
     environment:
       - PUID=1000
       - PGID=1000
+      - HW_JWT_SECRET=somehighentroupesecret
+      - HW_CHROMTROL_URL=http://browser:8080
+      - HW_CHROMTROL_VNC_URL=http://browser:3000
     volumes:
       - ./test/appdata:/data
-      - ./test/browser:/config
+      - ./test/browser:/browser
+      - ./test/assets:/assets
+      - ./test/downloads:/downloads
     restart: unless-stopped
+    depends_on:
+      browser:
+        condition: service_started
 
   browser:
-    image: ghcr.io/ra341/chromtrol:latest
     container_name: browser
+    image: ghcr.io/ra341/chromtrol:latest
     security_opt:
       # Prevents Chromium from crashing in Docker
       - seccomp:unconfined
@@ -25,10 +33,6 @@ services:
       - PUID=1000
       - PGID=1000
     #      - CHROME_CLI=--remote-debugging-port=9222 --remote-debugging-address=0.0.0.0
-    ports:
-      - "8998:8080" # control plane
-      - "3012:3000" # Web UI
-    #      - "9222:9222"
     volumes:
       # This volume holds the browser profile and SQLite databases
       - ./test/browser:/config

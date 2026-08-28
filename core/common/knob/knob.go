@@ -11,12 +11,13 @@ import (
 type Functor func(rv reflect.Value, element *Element, tagValue string) error
 
 type Element struct {
-	Default  string
-	Env      string
-	Required bool
-	Help     string
-	Secret   bool
-	Path     string
+	Default    string
+	Env        string
+	Required   bool
+	Help       string
+	Secret     bool
+	Path       string
+	IsFilePath bool
 }
 
 type Knob struct {
@@ -128,6 +129,9 @@ func (k *Knob) parseTag(tagValue string, ke *Element) error {
 		case "secret":
 			parseBool, _ := strconv.ParseBool(val)
 			ke.Secret = parseBool
+		case "filepath":
+			parseBool, _ := strconv.ParseBool(val)
+			ke.IsFilePath = parseBool
 		default:
 			return fmt.Errorf("unsupported key %s", key)
 		}
