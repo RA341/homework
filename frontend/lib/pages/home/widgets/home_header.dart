@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:homework/+route.dart';
 import 'package:homework/components/theme/design_system.dart';
+import 'package:homework/pages/home/content_browser_provider.dart';
 
-class HomeHeader extends StatelessWidget {
-  final int filteredCount;
-  final int totalCount;
-
-  const HomeHeader({
-    super.key,
-    required this.filteredCount,
-    required this.totalCount,
-  });
+class HomeHeader extends ConsumerWidget {
+  const HomeHeader({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final contentListState = ref.watch(contentListProvider).value;
+
+    final filteredCount = contentListState?.filteredItems.length ?? 0;
+    final totalCount = contentListState?.items.length ?? 0;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -21,7 +21,7 @@ class HomeHeader extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Content Hub',
+              'Content',
               style: AppTypography.headlineLg.copyWith(
                 color: AppColors.onSurface,
                 fontWeight: FontWeight.bold,

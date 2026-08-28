@@ -1,24 +1,53 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:homework/components/theme/design_system.dart';
+import 'package:homework/pages/home/content_browser_provider.dart';
+import 'package:hooks_riverpod/hooks_riverpod.dart';
 
-class SearchFilterBar extends StatelessWidget {
-  final TextEditingController searchController;
-  final bool isGridView;
-  final ValueChanged<bool> onLayoutChanged;
-  final String selectedFilterType;
-  final ValueChanged<String> onFilterTypeChanged;
-
-  const SearchFilterBar({
-    super.key,
-    required this.searchController,
-    required this.isGridView,
-    required this.onLayoutChanged,
-    required this.selectedFilterType,
-    required this.onFilterTypeChanged,
-  });
+class SearchFilterBar extends HookConsumerWidget {
+  const SearchFilterBar({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final browserAsync = ref.watch(contentListProvider);
+    final browserState = browserAsync.value;
+
+    final searchController = useTextEditingController(
+      text: browserState?.query ?? '',
+    );
+
+    // Sync controller text if query was reset externally (e.g. clear search button)
+    useEffect(() {
+      if (browserState != null &&
+          searchController.text != browserState.query &&
+          browserState.query.isEmpty &&
+          searchController.text.isNotEmpty) {
+        searchController.text = '';
+      }
+      return null;
+    }, [browserState?.query]);
+
+    // Handle debounced search query update
+    useEffect(() {
+      Timer? debounceTimer;
+      void listener() {
+        debounceTimer?.cancel();
+        debounceTimer = Timer(const Duration(milliseconds: 500), () {
+          ref
+              .read(contentListProvider.notifier)
+              .setQuery(searchController.text);
+        });
+      }
+
+      searchController.addListener(listener);
+      return () {
+        searchController.removeListener(listener);
+        debounceTimer?.cancel();
+      };
+    }, [searchController]);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -57,6 +86,9 @@ class SearchFilterBar extends StatelessWidget {
                                 ),
                                 onPressed: () {
                                   searchController.clear();
+                                  ref
+                                      .read(contentListProvider.notifier)
+                                      .setQuery('');
                                   FocusScope.of(context).unfocus();
                                 },
                               )
@@ -81,10 +113,15 @@ class SearchFilterBar extends StatelessWidget {
               child: Row(
                 children: [
                   _buildLayoutToggle(
+                    ref: ref,
                     icon: Icons.grid_view_rounded,
                     isGrid: true,
                   ),
-                  _buildLayoutToggle(icon: Icons.list_rounded, isGrid: false),
+                  _buildLayoutToggle(
+                    ref: ref,
+                    icon: Icons.list_rounded,
+                    isGrid: false,
+                  ),
                 ],
               ),
             ),
@@ -95,18 +132,20 @@ class SearchFilterBar extends StatelessWidget {
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: Row(
-            children: ['All', 'Video', 'Image', 'Subtitle', 'Audio'].map((
-              type,
-            ) {
-              final isSelected = selectedFilterType == type;
+            children: ContentFilterType.values.map((filterType) {
+              final isSelected =
+                  (browserState?.filterType ?? ContentFilterType.all) ==
+                  filterType;
               return Padding(
                 padding: const EdgeInsets.only(right: AppSpacing.base),
                 child: ChoiceChip(
-                  label: Text(type),
+                  label: Text(filterType.label),
                   selected: isSelected,
                   onSelected: (selected) {
                     if (selected) {
-                      onFilterTypeChanged(type);
+                      ref
+                          .read(contentListProvider.notifier)
+                          .setFilterType(filterType);
                     }
                   },
                   backgroundColor: AppColors.level1,
@@ -138,11 +177,16 @@ class SearchFilterBar extends StatelessWidget {
     );
   }
 
-  Widget _buildLayoutToggle({required IconData icon, required bool isGrid}) {
+  Widget _buildLayoutToggle({
+    required WidgetRef ref,
+    required IconData icon,
+    required bool isGrid,
+  }) {
+    final isGridView = ref.watch(isGridViewProvider);
     final isSelected = isGridView == isGrid;
     return IconButton(
       icon: Icon(icon),
-      onPressed: () => onLayoutChanged(isGrid),
+      onPressed: () => ref.read(isGridViewProvider.notifier).setGridView(isGrid),
       color: isSelected
           ? AppColors.primary
           : AppColors.onSurfaceVariant.withValues(alpha: 0.6),

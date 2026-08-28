@@ -5,109 +5,189 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:homework/common/services/content/content.provider.dart';
 import 'package:homework/generated/sdk/content/v1/content.pb.dart';
 
-final contentBrowserProvider =
-    NotifierProvider<ContentBrowserNotifier, ContentBrowserState>(
-      ContentBrowserNotifier.new,
-      isAutoDispose: true,
+enum ContentFilterType {
+  all('All'),
+  video('Video'),
+  image('Image'),
+  subtitle('Subtitle'),
+  audio('Audio');
+
+  final String label;
+
+  const ContentFilterType(this.label);
+}
+
+final isGridViewProvider = NotifierProvider<IsGridViewNotifier, bool>(
+  IsGridViewNotifier.new,
+);
+
+class IsGridViewNotifier extends Notifier<bool> {
+  @override
+  bool build() => true;
+
+  void toggle() => state = !state;
+  void setGridView(bool isGrid) => state = isGrid;
+}
+
+final contentListProvider =
+    AsyncNotifierProvider<ContentListNotifier, ContentListState>(
+      ContentListNotifier.new,
     );
 
-// Notifier that handles querying and pagination for ContentServiceClient
-class ContentBrowserNotifier extends Notifier<ContentBrowserState> {
+// Notifier that handles querying, filtering, and pagination for ContentServiceClient
+class ContentListNotifier extends AsyncNotifier<ContentListState> {
   @override
-  ContentBrowserState build() {
-    Future.microtask(() => loadNextPage(reset: true));
-    return ContentBrowserState(
-      items: [],
-      isLoading: true,
+  Future<ContentListState> build() async {
+    final client = ref.read(contentApiProvider);
+    const limit = 20;
+
+    final request = ListRequest(query: '', limit: Int64(limit), after: null);
+
+    final response = await client.list(request);
+    final hasMore =
+        response.after != Int64.ZERO && response.results.length >= limit;
+
+    return ContentListState(
+      items: response.results,
       query: '',
-      limit: 20,
-      hasMore: true,
+      filterType: ContentFilterType.all,
+      limit: limit,
+      after: response.after,
+      hasMore: hasMore,
     );
   }
 
   Future<void> loadNextPage({bool reset = false}) async {
-    if (state.isLoading && !reset && state.items.isNotEmpty) return;
+    final currentState = state.value;
+    if (state.isLoading && !reset) return;
 
-    state = state.copyWith(isLoading: true, errorMessage: null);
+    if (reset) {
+      state = const AsyncLoading();
+    }
 
-    try {
+    state = await AsyncValue.guard(() async {
       final client = ref.read(contentApiProvider);
+      final query = reset
+          ? (currentState?.query ?? '')
+          : (currentState?.query ?? '');
+      final limit = currentState?.limit ?? 20;
+      final nextAfter = reset ? null : currentState?.after;
 
-      final nextAfter = reset ? null : state.after;
       final request = ListRequest(
-        query: state.query,
-        limit: Int64(state.limit),
+        query: query,
+        limit: Int64(limit),
         after: nextAfter,
       );
 
       final response = await client.list(request);
 
       final newItems = response.results;
-      final updatedItems = reset ? newItems : [...state.items, ...newItems];
+      final updatedItems = reset || currentState == null
+          ? newItems
+          : [...currentState.items, ...newItems];
 
-      // If server returned after > 0 and results matching the limit, we assume more exist
       final hasMore =
-          response.after != Int64.ZERO &&
-          response.results.length >= state.limit;
+          response.after != Int64.ZERO && response.results.length >= limit;
 
-      state = state.copyWith(
+      return ContentListState(
         items: updatedItems,
-        isLoading: false,
+        query: query,
+        filterType: currentState?.filterType ?? ContentFilterType.all,
+        limit: limit,
         after: response.after,
         hasMore: hasMore,
       );
-    } catch (e) {
-      final err = e.toString().replaceFirst('Exception: ', '');
-      state = state.copyWith(isLoading: false, errorMessage: err);
-    }
+    });
   }
 
-  void setQuery(String newQuery) {
-    if (state.query == newQuery) return;
-    state = state.copyWith(
-      query: newQuery,
-      items: [],
-      after: null,
-      hasMore: true,
-    );
-    loadNextPage(reset: true);
+  Future<void> setQuery(String newQuery) async {
+    final trimmed = newQuery.trim();
+    final currentState = state.value;
+    if (currentState != null && currentState.query == trimmed) return;
+
+    state = const AsyncLoading();
+
+    state = await AsyncValue.guard(() async {
+      final client = ref.read(contentApiProvider);
+      const limit = 20;
+
+      final request = ListRequest(
+        query: trimmed,
+        limit: Int64(limit),
+        after: null,
+      );
+
+      final response = await client.list(request);
+      final hasMore =
+          response.after != Int64.ZERO && response.results.length >= limit;
+
+      return ContentListState(
+        items: response.results,
+        query: trimmed,
+        filterType: currentState?.filterType ?? ContentFilterType.all,
+        limit: limit,
+        after: response.after,
+        hasMore: hasMore,
+      );
+    });
+  }
+
+  void setFilterType(ContentFilterType filterType) {
+    final currentState = state.value;
+    if (currentState == null || currentState.filterType == filterType) return;
+    state = AsyncData(currentState.copyWith(filterType: filterType));
   }
 }
 
 // State model for the content browser page
-class ContentBrowserState {
+class ContentListState {
   final List<Content> items;
-  final bool isLoading;
-  final String? errorMessage;
   final String query;
+  final ContentFilterType filterType;
   final int limit;
   final Int64? after;
   final bool hasMore;
 
-  ContentBrowserState({
+  ContentListState({
     required this.items,
-    required this.isLoading,
-    this.errorMessage,
     required this.query,
+    required this.filterType,
     required this.limit,
     this.after,
     required this.hasMore,
   });
 
-  ContentBrowserState copyWith({
+  List<Content> get filteredItems {
+    if (filterType == ContentFilterType.all) return items;
+    return items.where((item) {
+      final type = item.type.toLowerCase();
+      switch (filterType) {
+        case ContentFilterType.all:
+          return true;
+        case ContentFilterType.video:
+          return type.contains('video');
+        case ContentFilterType.image:
+          return type.contains('image');
+        case ContentFilterType.subtitle:
+          return type.contains('subtitle') || type.contains('sub');
+        case ContentFilterType.audio:
+          return type.contains('audio');
+      }
+    }).toList();
+  }
+
+  ContentListState copyWith({
     List<Content>? items,
-    bool? isLoading,
-    String? errorMessage,
     String? query,
+    ContentFilterType? filterType,
     int? limit,
     Int64? after,
     bool? hasMore,
   }) {
-    return ContentBrowserState(
+    return ContentListState(
       items: items ?? this.items,
-      isLoading: isLoading ?? this.isLoading,
-      errorMessage: errorMessage ?? this.errorMessage,
       query: query ?? this.query,
+      filterType: filterType ?? this.filterType,
       limit: limit ?? this.limit,
       after: after ?? this.after,
       hasMore: hasMore ?? this.hasMore,

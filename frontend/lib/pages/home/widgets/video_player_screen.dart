@@ -24,8 +24,9 @@ class VideoLayout extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentItem = useState(initialItem);
 
-    final browserState = ref.watch(contentBrowserProvider);
-    final videoRecommendations = browserState.items.where((item) {
+    final browserAsync = ref.watch(contentListProvider);
+    final browserItems = browserAsync.value?.items ?? [];
+    final videoRecommendations = browserItems.where((item) {
       return item.type.toLowerCase().contains('video') &&
           item.id != currentItem.value.id;
     }).toList();
