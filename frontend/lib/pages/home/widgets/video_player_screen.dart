@@ -3,7 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:homework/common/services/asset/asset.provider.dart';
 import 'package:homework/components/theme/design_system.dart';
 import 'package:homework/generated/sdk/content/v1/content.pb.dart';
-import 'package:homework/pages/home/content_browser_provider.dart';
+import 'package:homework/pages/home/provider.content.list.dart';
 import 'package:homework/pages/home/provider.video.dart';
 import 'package:homework/pages/home/utils.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';

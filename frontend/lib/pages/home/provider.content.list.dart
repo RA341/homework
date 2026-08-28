@@ -17,17 +17,6 @@ enum ContentFilterType {
   const ContentFilterType(this.label);
 }
 
-final isGridViewProvider = NotifierProvider<IsGridViewNotifier, bool>(
-  IsGridViewNotifier.new,
-);
-
-class IsGridViewNotifier extends Notifier<bool> {
-  @override
-  bool build() => true;
-
-  void toggle() => state = !state;
-  void setGridView(bool isGrid) => state = isGrid;
-}
 
 final contentListProvider =
     AsyncNotifierProvider<ContentListNotifier, ContentListState>(

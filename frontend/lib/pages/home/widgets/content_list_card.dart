@@ -132,25 +132,6 @@ class _ContentListTileState extends State<ContentListTile> {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 6,
-                                  vertical: 1,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.level0,
-                                  borderRadius: AppShapes.radiusSm,
-                                ),
-                                child: Text(
-                                  'ID: ${widget.item.id}',
-                                  style: AppTypography.labelMd.copyWith(
-                                    color: AppColors.onSurfaceVariant
-                                        .withValues(alpha: 0.8),
-                                    fontSize: 9.5,
-                                  ),
-                                ),
-                              ),
                             ],
                           ),
                         ],

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:homework/+route.dart';
 import 'package:homework/components/theme/design_system.dart';
-import 'package:homework/pages/home/content_browser_provider.dart';
+import 'package:homework/pages/home/provider.content.list.dart';
 
 class HomeHeader extends ConsumerWidget {
   const HomeHeader({super.key});

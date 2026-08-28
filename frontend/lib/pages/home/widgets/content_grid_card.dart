@@ -3,17 +3,17 @@ import 'package:homework/components/theme/design_system.dart';
 import 'package:homework/generated/sdk/content/v1/content.pb.dart';
 import 'package:homework/pages/home/utils.dart';
 
-class ContentCard extends StatefulWidget {
+class ContentGridCard extends StatefulWidget {
   final Content item;
   final VoidCallback? onTap;
 
-  const ContentCard({super.key, required this.item, this.onTap});
+  const ContentGridCard({super.key, required this.item, this.onTap});
 
   @override
-  State<ContentCard> createState() => _ContentCardState();
+  State<ContentGridCard> createState() => _ContentGridCardState();
 }
 
-class _ContentCardState extends State<ContentCard> {
+class _ContentGridCardState extends State<ContentGridCard> {
   bool _isHovered = false;
 
   @override

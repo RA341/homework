@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:homework/components/theme/design_system.dart';
-import 'package:homework/pages/home/content_browser_provider.dart';
+import 'package:homework/pages/home/provider.content.list.dart';
 import 'package:homework/pages/home/widgets/content_area.dart';
 import 'package:homework/pages/home/widgets/home_header.dart';
-import 'package:homework/pages/home/widgets/search_filter_bar.dart';
+import 'package:homework/pages/home/widgets/content_area_search.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

@@ -3,9 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:homework/common/services/asset/asset.provider.dart';
 import 'package:homework/components/theme/design_system.dart';
 import 'package:homework/generated/sdk/content/v1/content.pb.dart';
-import 'package:homework/pages/home/content_browser_provider.dart';
-import 'package:homework/pages/home/widgets/content_card.dart';
-import 'package:homework/pages/home/widgets/content_list_tile.dart';
+import 'package:homework/pages/home/provider.content.gridview.dart';
+import 'package:homework/pages/home/provider.content.list.dart';
+import 'package:homework/pages/home/widgets/content_grid_card.dart';
+import 'package:homework/pages/home/widgets/content_list_card.dart';
 import 'package:homework/pages/home/widgets/empty_state.dart';
 import 'package:homework/pages/home/widgets/error_state.dart';
 import 'package:homework/pages/home/widgets/skeleton_loader.dart';
@@ -64,7 +65,7 @@ class ContentList extends ConsumerWidget {
                         childAspectRatio: 1.5,
                       ),
                       itemCount: items.length,
-                      itemBuilder: (context, index) => ContentCard(
+                      itemBuilder: (context, index) => ContentGridCard(
                         item: items[index],
                         onTap: () => _onItemTap(context, ref, items[index]),
                       ),
