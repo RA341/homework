@@ -32,7 +32,7 @@ dependencies:
   google_fonts: ^8.2.1
   shared_preferences: ^2.5.5
   url_launcher: ^6.3.2
-  file_picker: ^12.1.0
+  file_picker: ^12.1.1
 
   # media
   media_kit: ^1.2.6
@@ -57,7 +57,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
-  go_router_builder: ^4.4.0
+  go_router_builder: ^4.4.1
   # freezed needs 2.15.1
   build_runner: ^2.16.0
   freezed: ^4.0.0
