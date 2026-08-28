@@ -4,7 +4,7 @@ services:
   hw:
     container_name: homework
 #    image: ghcr.io/ra341/homework/omni:latest
-    image: homework:omni-latest
+    image: ra341/homework:omni-latest
     ports:
       - "9911:9911"
     environment:
