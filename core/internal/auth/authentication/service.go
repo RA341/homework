@@ -10,16 +10,10 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type Token struct {
-	Value  string
-	Expiry int64
-}
-
 type Service struct {
-	session       *session.Service
-	user          *users.Service
-	sessionExpiry time.Duration
-	conf          *Config
+	session *session.Service
+	user    *users.Service
+	conf    *Config
 }
 
 func NewService(conf *Config, session *session.Service, user *users.Service) *Service {
@@ -83,7 +77,7 @@ type UserClaims struct {
 
 func (s *Service) generateJWT(userID uint64) (Token, error) {
 	now := time.Now()
-	exp := now.Add(s.sessionExpiry)
+	exp := now.Add(s.conf.JwtExpiry)
 	expUnix := exp.Unix()
 
 	claims := UserClaims{
@@ -94,7 +88,7 @@ func (s *Service) generateJWT(userID uint64) (Token, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(s.conf.JwtIssuer)
+	tokenString, err := token.SignedString(s.conf.GetJwtSecret())
 	if err != nil {
 		return Token{}, err
 	}
@@ -122,7 +116,7 @@ func (s *Service) verifyJwt(sessionToken string) (*jwt.Token, error) {
 		if _, ok := tok.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", tok.Header["alg"])
 		}
-		return s.conf.JwtIssuer, nil
+		return s.conf.GetJwtSecret(), nil
 	})
 
 	return token, err
