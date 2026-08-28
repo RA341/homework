@@ -42,6 +42,23 @@ extension type DownloaderServiceClient (connect.Transport _transport) {
     );
   }
 
+  Future<downloaderv1downloader.CancelResponse> cancel(
+    downloaderv1downloader.CancelRequest input, {
+    connect.Headers? headers,
+    connect.AbortSignal? signal,
+    Function(connect.Headers)? onHeader,
+    Function(connect.Headers)? onTrailer,
+  }) {
+    return connect.Client(_transport).unary(
+      specs.DownloaderService.cancel,
+      input,
+      signal: signal,
+      headers: headers,
+      onHeader: onHeader,
+      onTrailer: onTrailer,
+    );
+  }
+
   Future<downloaderv1downloader.ListResponse> list(
     downloaderv1downloader.ListRequest input, {
     connect.Headers? headers,
@@ -68,6 +85,23 @@ extension type DownloaderServiceClient (connect.Transport _transport) {
   }) {
     return connect.Client(_transport).unary(
       specs.DownloaderService.edit,
+      input,
+      signal: signal,
+      headers: headers,
+      onHeader: onHeader,
+      onTrailer: onTrailer,
+    );
+  }
+
+  Future<downloaderv1downloader.StatsResponse> stats(
+    downloaderv1downloader.StatsRequest input, {
+    connect.Headers? headers,
+    connect.AbortSignal? signal,
+    Function(connect.Headers)? onHeader,
+    Function(connect.Headers)? onTrailer,
+  }) {
+    return connect.Client(_transport).unary(
+      specs.DownloaderService.stats,
       input,
       signal: signal,
       headers: headers,

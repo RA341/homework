@@ -1,7 +1,6 @@
 package authentication
 
 import (
-	"crypto/rand"
 	"fmt"
 	"time"
 
@@ -11,47 +10,20 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type Token struct {
-	Value  string
-	Expiry int64
-}
-
 type Service struct {
-	session       *session.Service
-	user          *users.Service
-	jwtSecret     []byte
-	Issuer        string
-	sessionExpiry time.Duration
+	session *session.Service
+	user    *users.Service
+	conf    *Config
 }
 
-func NewService(jwtSecret string, session *session.Service, user *users.Service) *Service {
+func NewService(conf *Config, session *session.Service, user *users.Service) *Service {
 	s := &Service{
-		session:   session,
-		user:      user,
-		jwtSecret: []byte(jwtSecret),
-		// todo load from config
-		sessionExpiry: time.Hour * 2,
+		session: session,
+		user:    user,
+		conf:    conf,
 	}
-	s.Init()
 
 	return s
-}
-
-func (s *Service) Init() {
-	if len(s.jwtSecret) == 0 {
-		log.Warn().Msg("please set the JWT secret. A random secret has been assigned, and sessions will be invalidated on server restart if not set")
-
-		secret := make([]byte, 32)
-		_, err := rand.Read(secret)
-
-		if err != nil {
-			s.jwtSecret = []byte("fallback-jwt-secret-key-change-me")
-		} else {
-			s.jwtSecret = secret
-		}
-	}
-
-	s.Issuer = "HW-issuer"
 }
 
 func (s *Service) Login(username, pass string) (Token, Token, error) {
@@ -105,18 +77,18 @@ type UserClaims struct {
 
 func (s *Service) generateJWT(userID uint64) (Token, error) {
 	now := time.Now()
-	exp := now.Add(s.sessionExpiry)
+	exp := now.Add(s.conf.JwtExpiry)
 	expUnix := exp.Unix()
 
 	claims := UserClaims{
 		UserID:    userID,
 		ExpiresAt: jwt.NewNumericDate(exp),
 		IssuedAt:  jwt.NewNumericDate(now),
-		Issuer:    s.Issuer,
+		Issuer:    s.conf.JwtIssuer,
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(s.jwtSecret)
+	tokenString, err := token.SignedString(s.conf.GetJwtSecret())
 	if err != nil {
 		return Token{}, err
 	}
@@ -144,7 +116,7 @@ func (s *Service) verifyJwt(sessionToken string) (*jwt.Token, error) {
 		if _, ok := tok.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", tok.Header["alg"])
 		}
-		return s.jwtSecret, nil
+		return s.conf.GetJwtSecret(), nil
 	})
 
 	return token, err

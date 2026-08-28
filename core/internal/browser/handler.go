@@ -19,7 +19,7 @@ func NewHandler(srv *Service) (string, http.Handler) {
 }
 
 func (h *Handler) Start(ctx context.Context, c *connect.Request[v1.StartRequest]) (*connect.Response[v1.StartResponse], error) {
-	_, _, err := h.srv.cli.Start()
+	_, _, err := h.srv.cli.Start(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +28,7 @@ func (h *Handler) Start(ctx context.Context, c *connect.Request[v1.StartRequest]
 }
 
 func (h *Handler) Stop(ctx context.Context, c *connect.Request[v1.StopRequest]) (*connect.Response[v1.StopResponse], error) {
-	_, _, err := h.srv.cli.Stop()
+	_, _, err := h.srv.cli.Stop(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -37,7 +37,7 @@ func (h *Handler) Stop(ctx context.Context, c *connect.Request[v1.StopRequest]) 
 }
 
 func (h *Handler) Status(ctx context.Context, c *connect.Request[v1.StatusRequest]) (*connect.Response[v1.StatusResponse], error) {
-	_, _, err := h.srv.cli.Status()
+	_, _, err := h.srv.cli.Status(ctx)
 	if err != nil {
 		return nil, err
 	}

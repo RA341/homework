@@ -13,14 +13,16 @@ class BrowseRoute extends GoRouteData with $BrowseRoute {
   }
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => const SizedBox.shrink();
+  Widget build(BuildContext context, GoRouterState state) =>
+      const SizedBox.shrink();
 }
 
 class DownloadRoute extends GoRouteData with $DownloadRoute {
   const DownloadRoute();
 
   @override
-  Widget build(BuildContext context, GoRouterState state) => const DownloadPage();
+  Widget build(BuildContext context, GoRouterState state) =>
+      const DownloadPage();
 }
 
 class UploadRoute extends GoRouteData with $UploadRoute {

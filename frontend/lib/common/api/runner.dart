@@ -1,12 +1,12 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:homework/common/utils/result.dart';
 
-Future<ErrorResult<T>> runReq<T>(Future<T> Function() runner,) async {
+Future<ErrorResult<T>> runReq<T>(Future<T> Function() runner) async {
   try {
     final value = await runner();
     return Ok(value);
   } catch (e) {
-     return Error(e.toString());
+    return Error(e.toString());
   }
 }
 

@@ -10,7 +10,8 @@ class SettingsBrowserPage extends ConsumerStatefulWidget {
   const SettingsBrowserPage({super.key});
 
   @override
-  ConsumerState<SettingsBrowserPage> createState() => _SettingsBrowserPageState();
+  ConsumerState<SettingsBrowserPage> createState() =>
+      _SettingsBrowserPageState();
 }
 
 class _SettingsBrowserPageState extends ConsumerState<SettingsBrowserPage> {

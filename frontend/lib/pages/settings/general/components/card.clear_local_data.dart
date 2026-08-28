@@ -30,35 +30,34 @@ class CardClearLocalData extends ConsumerWidget {
                     backgroundColor: AppColors.error,
                     foregroundColor: AppColors.onError,
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 8),
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                   ),
                   onPressed: () async {
                     final confirm = await showDialog<bool>(
                       context: context,
-                      builder: (context) =>
-                          AlertDialog(
-                            backgroundColor: AppColors.level2,
-                            title: const Text('Clear Local Data'),
-                            content: const Text(
-                              'Are you sure you want to clear all local data? '
-                                  'This will reset your API base path and remove your authentication token.',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () =>
-                                    Navigator.of(context).pop(false),
-                                child: const Text('Cancel'),
-                              ),
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                  foregroundColor: AppColors.error,
-                                ),
-                                onPressed: () =>
-                                    Navigator.of(context).pop(true),
-                                child: const Text('Clear'),
-                              ),
-                            ],
+                      builder: (context) => AlertDialog(
+                        backgroundColor: AppColors.level2,
+                        title: const Text('Clear Local Data'),
+                        content: const Text(
+                          'Are you sure you want to clear all local data? '
+                          'This will reset your API base path and remove your authentication token.',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: const Text('Cancel'),
                           ),
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.error,
+                            ),
+                            onPressed: () => Navigator.of(context).pop(true),
+                            child: const Text('Clear'),
+                          ),
+                        ],
+                      ),
                     );
 
                     if (confirm == true && context.mounted) {

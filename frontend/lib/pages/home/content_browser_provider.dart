@@ -5,14 +5,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:homework/common/services/content/content.provider.dart';
 import 'package:homework/generated/sdk/content/v1/content.pb.dart';
 
-final contentBrowserProvider = NotifierProvider<
-    ContentBrowserNotifier,
-    ContentBrowserState
->(
-  ContentBrowserNotifier.new,
-  isAutoDispose: true,
-);
-
+final contentBrowserProvider =
+    NotifierProvider<ContentBrowserNotifier, ContentBrowserState>(
+      ContentBrowserNotifier.new,
+      isAutoDispose: true,
+    );
 
 // Notifier that handles querying and pagination for ContentServiceClient
 class ContentBrowserNotifier extends Notifier<ContentBrowserState> {
@@ -51,7 +48,7 @@ class ContentBrowserNotifier extends Notifier<ContentBrowserState> {
       // If server returned after > 0 and results matching the limit, we assume more exist
       final hasMore =
           response.after != Int64.ZERO &&
-              response.results.length >= state.limit;
+          response.results.length >= state.limit;
 
       state = state.copyWith(
         items: updatedItems,

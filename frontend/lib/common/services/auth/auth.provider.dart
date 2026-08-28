@@ -6,5 +6,3 @@ final authApiProvider = Provider<AuthServiceClient>((ref) {
   final transport = ref.watch(publicTransportProvider);
   return AuthServiceClient(transport);
 });
-
-

@@ -35,6 +35,7 @@ class HomePage extends HookConsumerWidget {
               .setQuery(searchController.text.trim());
         });
       }
+
       searchController.addListener(listener);
       return () {
         searchController.removeListener(listener);
@@ -112,10 +113,12 @@ class HomePage extends HookConsumerWidget {
                     onItemTap: (item) {
                       final type = item.type.toLowerCase();
                       if (type.contains('video')) {
-                        final videoUrl = ref.read(assetServiceProvider).load(
-                          contentId: item.id.toInt(),
-                          assetRole: 'Main',
-                        );
+                        final videoUrl = ref
+                            .read(assetServiceProvider)
+                            .load(
+                              contentId: item.id.toInt(),
+                              assetRole: 'Main',
+                            );
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => VideoLayout(
@@ -137,7 +140,9 @@ class HomePage extends HookConsumerWidget {
                                 Expanded(
                                   child: Text(
                                     'Unimplemented media format: ${item.type}',
-                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
                               ],

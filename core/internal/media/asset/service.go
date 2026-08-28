@@ -8,26 +8,26 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/google/uuid"
+	"uuid"
+
 	"github.com/ra341/homework/common/fu"
 	"github.com/ra341/homework/common/sem"
 	"github.com/rs/zerolog/log"
 )
 
 type Service struct {
+	conf  *Config
 	store Store
-
-	AssetFolder string
 
 	Sem              sem.Sem
 	IsScannerRunning bool
 }
 
-func NewService(store Store, AssetFolder string) (*Service, error) {
+func NewService(store Store, conf *Config) (*Service, error) {
 	s := &Service{
-		store:       store,
-		AssetFolder: AssetFolder,
-		Sem:         sem.New(1),
+		store: store,
+		conf:  conf,
+		Sem:   sem.New(1),
 	}
 
 	err := s.Init()
@@ -35,12 +35,12 @@ func NewService(store Store, AssetFolder string) (*Service, error) {
 }
 
 func (s *Service) Init() error {
-	abs, err := filepath.Abs(s.AssetFolder)
+	abs, err := filepath.Abs(s.conf.AssetDir)
 	if err != nil {
 		return err
 	}
 
-	s.AssetFolder = abs
+	s.conf.AssetDir = abs
 	// todo put in scheduled task
 	//s.StartScan()
 
@@ -84,11 +84,7 @@ func (s *Service) Create(contentId uint, c *CreateAsset) (Asset, error) {
 		return Asset{}, err
 	}
 
-	folderId, err := uuid.NewV7()
-	if err != nil {
-		return Asset{}, err
-	}
-
+	folderId := uuid.NewV7()
 	c.Filepath = filepath.Join(abs, folderId.String())
 	return s.store.Create(contentId, c.AssetType, c.AssetRole, c.Filepath)
 }
@@ -206,11 +202,8 @@ func (s *Service) Finalize(assetId uint, downloadFolder string) error {
 		return err
 	}
 
-	assetFolderId, err := uuid.NewUUID()
-	if err != nil {
-		return err
-	}
-	finalFolder := filepath.Join(s.AssetFolder, assetFolderId.String())
+	assetFolderId := uuid.NewV7()
+	finalFolder := filepath.Join(s.conf.AssetDir, assetFolderId.String())
 
 	err = os.MkdirAll(finalFolder, 0750)
 	if err != nil {

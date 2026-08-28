@@ -2,7 +2,7 @@ default:
    just --list
 
 dk:
-    docker build . -f Dockerfile.core -t homework/api:dev
+     docker buildx bake -f build/docker-bake.hcl
 
 dkr:
     just dk
@@ -10,6 +10,10 @@ dkr:
 
 dkd:
     docker build . -f Dockerfile.downloader -t homework/downloader:dev
+
+[working-directory("core")]
+mig name:
+    atlas migrate diff {{ name }} --env local
 
 dkdr:
     just dkd

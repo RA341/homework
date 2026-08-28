@@ -2,10 +2,10 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:homework/common/api/runner.dart';
-import 'package:homework/common/api/transport.provider.dart';
-import 'package:homework/common/utils/result.dart';
 import 'package:homework/common/api/token.provider.dart';
+import 'package:homework/common/api/transport.provider.dart';
 import 'package:homework/common/services/users/user.state.dart';
+import 'package:homework/common/utils/result.dart';
 import 'package:homework/generated/sdk/user/v1/user.connect.client.dart';
 import 'package:homework/generated/sdk/user/v1/user.pb.dart';
 

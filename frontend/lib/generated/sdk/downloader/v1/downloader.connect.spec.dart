@@ -24,6 +24,13 @@ abstract final class DownloaderService {
     downloaderv1downloader.DownloadResponse.new,
   );
 
+  static const cancel = connect.Spec(
+    '/$name/Cancel',
+    connect.StreamType.unary,
+    downloaderv1downloader.CancelRequest.new,
+    downloaderv1downloader.CancelResponse.new,
+  );
+
   static const list = connect.Spec(
     '/$name/List',
     connect.StreamType.unary,
@@ -36,5 +43,12 @@ abstract final class DownloaderService {
     connect.StreamType.unary,
     downloaderv1downloader.EditRequest.new,
     downloaderv1downloader.EditResponse.new,
+  );
+
+  static const stats = connect.Spec(
+    '/$name/Stats',
+    connect.StreamType.unary,
+    downloaderv1downloader.StatsRequest.new,
+    downloaderv1downloader.StatsResponse.new,
   );
 }

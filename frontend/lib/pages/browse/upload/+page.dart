@@ -2,8 +2,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:homework/common/services/upload/upload.provider.dto.dart';
-import 'package:homework/components/theme/design_system.dart';
 import 'package:homework/common/services/upload/upload_queue_provider.dart';
+import 'package:homework/components/theme/design_system.dart';
 import 'package:homework/pages/browse/+layout.dart';
 
 class UploadPage extends ConsumerStatefulWidget {
@@ -37,7 +37,9 @@ class _UploadPageState extends ConsumerState<UploadPage> {
     if (bytes <= 0) return '0 B';
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    if (bytes < 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    if (bytes < 1024 * 1024 * 1024) {
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    }
     return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
   }
 
@@ -45,11 +47,27 @@ class _UploadPageState extends ConsumerState<UploadPage> {
     final parts = fileName.split('.');
     if (parts.length < 2) return null;
     final ext = parts.last.toLowerCase();
-    
-    if (const ['mp4', 'mkv', 'avi', 'mov', 'webm', 'flv', 'm4v'].contains(ext)) {
+
+    if (const [
+      'mp4',
+      'mkv',
+      'avi',
+      'mov',
+      'webm',
+      'flv',
+      'm4v',
+    ].contains(ext)) {
       return 'Video';
     }
-    if (const ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'].contains(ext)) {
+    if (const [
+      'jpg',
+      'jpeg',
+      'png',
+      'gif',
+      'webp',
+      'svg',
+      'bmp',
+    ].contains(ext)) {
       return 'Image';
     }
     if (const ['srt', 'vtt', 'ass', 'sub'].contains(ext)) {
@@ -106,7 +124,8 @@ class _UploadPageState extends ConsumerState<UploadPage> {
             final nameLower = file.name.toLowerCase();
             if (nameLower.contains('thumbnail')) {
               _selectedAssetRole = 'Thumbnail';
-            } else if (nameLower.contains('backdrop') || nameLower.contains('fanart')) {
+            } else if (nameLower.contains('backdrop') ||
+                nameLower.contains('fanart')) {
               _selectedAssetRole = 'Backdrop';
             } else if (nameLower.contains('poster')) {
               _selectedAssetRole = 'Poster';
@@ -160,19 +179,21 @@ class _UploadPageState extends ConsumerState<UploadPage> {
     }
 
     final desc = _descController.text.trim();
-    
+
     // Add job to provider queue
-    ref.read(uploadQueueProvider.notifier).addJob(
-      UploadDto(
-        title: title,
-        desc: desc,
-        filePath: _selectedFilePath!,
-        fileName: _selectedFileName!,
-        assetType: _selectedAssetType,
-        assetRole: _selectedAssetRole,
-        contentType: _selectedContentType,
-      ),
-    );
+    ref
+        .read(uploadQueueProvider.notifier)
+        .addJob(
+          UploadDto(
+            title: title,
+            desc: desc,
+            filePath: _selectedFilePath!,
+            fileName: _selectedFileName!,
+            assetType: _selectedAssetType,
+            assetRole: _selectedAssetRole,
+            contentType: _selectedContentType,
+          ),
+        );
 
     // Reset selection form
     _clearSelectedFile();
@@ -265,7 +286,9 @@ class _UploadPageState extends ConsumerState<UploadPage> {
                                 Text(
                                   'Supports Video, Image, Subtitle & Audio',
                                   style: AppTypography.bodySm.copyWith(
-                                    color: AppColors.onSurfaceVariant.withAlpha(150),
+                                    color: AppColors.onSurfaceVariant.withAlpha(
+                                      150,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -274,7 +297,9 @@ class _UploadPageState extends ConsumerState<UploadPage> {
                         )
                       else
                         Container(
-                          padding: const EdgeInsets.all(AppSpacing.gutter / 1.5),
+                          padding: const EdgeInsets.all(
+                            AppSpacing.gutter / 1.5,
+                          ),
                           decoration: BoxDecoration(
                             color: AppColors.level0.withAlpha(120),
                             borderRadius: AppShapes.radiusMd,
@@ -360,7 +385,9 @@ class _UploadPageState extends ConsumerState<UploadPage> {
                       Wrap(
                         spacing: AppSpacing.base,
                         runSpacing: AppSpacing.base,
-                        children: ['Video', 'Image', 'Subtitle', 'Audio'].map((type) {
+                        children: ['Video', 'Image', 'Subtitle', 'Audio'].map((
+                          type,
+                        ) {
                           final isSelected = _selectedAssetType == type;
                           return InkWell(
                             onTap: () {
@@ -413,44 +440,53 @@ class _UploadPageState extends ConsumerState<UploadPage> {
                       Wrap(
                         spacing: AppSpacing.base,
                         runSpacing: AppSpacing.base,
-                        children: ['Unknown', 'Movie', 'Series', 'Episode', 'Video', 'Image', 'Gallery'].map((type) {
-                          final isSelected = _selectedContentType == type;
-                          return InkWell(
-                            onTap: () {
-                              setState(() {
-                                _selectedContentType = type;
-                              });
-                            },
-                            borderRadius: AppShapes.radiusDefault,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? AppColors.primary
-                                    : AppColors.level0,
+                        children:
+                            [
+                              'Unknown',
+                              'Movie',
+                              'Series',
+                              'Episode',
+                              'Video',
+                              'Image',
+                              'Gallery',
+                            ].map((type) {
+                              final isSelected = _selectedContentType == type;
+                              return InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    _selectedContentType = type;
+                                  });
+                                },
                                 borderRadius: AppShapes.radiusDefault,
-                                border: Border.all(
-                                  color: isSelected
-                                      ? AppColors.primary
-                                      : AppColors.outlineVariant,
-                                  width: 1.0,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 10,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? AppColors.primary
+                                        : AppColors.level0,
+                                    borderRadius: AppShapes.radiusDefault,
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? AppColors.primary
+                                          : AppColors.outlineVariant,
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    type,
+                                    style: AppTypography.labelMd.copyWith(
+                                      color: isSelected
+                                          ? AppColors.onPrimary
+                                          : AppColors.onSurfaceVariant,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              child: Text(
-                                type,
-                                style: AppTypography.labelMd.copyWith(
-                                  color: isSelected
-                                      ? AppColors.onPrimary
-                                      : AppColors.onSurfaceVariant,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                              );
+                            }).toList(),
                       ),
                       const SizedBox(height: AppSpacing.base * 3),
 
@@ -466,52 +502,53 @@ class _UploadPageState extends ConsumerState<UploadPage> {
                       Wrap(
                         spacing: AppSpacing.base,
                         runSpacing: AppSpacing.base,
-                        children: [
-                          {'display': 'Main Role', 'value': 'Main'},
-                          {'display': 'Thumbnail', 'value': 'Thumbnail'},
-                          {'display': 'Backdrop', 'value': 'Backdrop'},
-                          {'display': 'Trailer', 'value': 'Trailer'},
-                          {'display': 'Poster', 'value': 'Poster'},
-                        ].map((role) {
-                          final value = role['value']!;
-                          final display = role['display']!;
-                          final isSelected = _selectedAssetRole == value;
-                          return InkWell(
-                            onTap: () {
-                              setState(() {
-                                _selectedAssetRole = value;
-                              });
-                            },
-                            borderRadius: AppShapes.radiusDefault,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 10,
-                              ),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? AppColors.primary
-                                    : AppColors.level0,
+                        children:
+                            [
+                              {'display': 'Main Role', 'value': 'Main'},
+                              {'display': 'Thumbnail', 'value': 'Thumbnail'},
+                              {'display': 'Backdrop', 'value': 'Backdrop'},
+                              {'display': 'Trailer', 'value': 'Trailer'},
+                              {'display': 'Poster', 'value': 'Poster'},
+                            ].map((role) {
+                              final value = role['value']!;
+                              final display = role['display']!;
+                              final isSelected = _selectedAssetRole == value;
+                              return InkWell(
+                                onTap: () {
+                                  setState(() {
+                                    _selectedAssetRole = value;
+                                  });
+                                },
                                 borderRadius: AppShapes.radiusDefault,
-                                border: Border.all(
-                                  color: isSelected
-                                      ? AppColors.primary
-                                      : AppColors.outlineVariant,
-                                  width: 1.0,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 10,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? AppColors.primary
+                                        : AppColors.level0,
+                                    borderRadius: AppShapes.radiusDefault,
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? AppColors.primary
+                                          : AppColors.outlineVariant,
+                                      width: 1.0,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    display,
+                                    style: AppTypography.labelMd.copyWith(
+                                      color: isSelected
+                                          ? AppColors.onPrimary
+                                          : AppColors.onSurfaceVariant,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
-                              ),
-                              child: Text(
-                                display,
-                                style: AppTypography.labelMd.copyWith(
-                                  color: isSelected
-                                      ? AppColors.onPrimary
-                                      : AppColors.onSurfaceVariant,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                              );
+                            }).toList(),
                       ),
                       const SizedBox(height: AppSpacing.base * 4),
 
@@ -568,7 +605,9 @@ class _UploadPageState extends ConsumerState<UploadPage> {
     }
 
     Widget buildQueuePane() {
-      final activeCount = queue.where((j) => j.status == 'uploading' || j.status == 'pending').length;
+      final activeCount = queue
+          .where((j) => j.status == 'uploading' || j.status == 'pending')
+          .length;
 
       return Container(
         padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base),
@@ -590,7 +629,10 @@ class _UploadPageState extends ConsumerState<UploadPage> {
                     onPressed: () {
                       ref.read(uploadQueueProvider.notifier).clearCompleted();
                     },
-                    icon: const Icon(Icons.cleaning_services_outlined, size: 16),
+                    icon: const Icon(
+                      Icons.cleaning_services_outlined,
+                      size: 16,
+                    ),
                     label: const Text('Clear Done'),
                     style: TextButton.styleFrom(
                       foregroundColor: AppColors.onSurfaceVariant,
@@ -648,7 +690,8 @@ class _UploadPageState extends ConsumerState<UploadPage> {
 
                   if (isUploading) {
                     statusColor = AppColors.primary;
-                    statusText = 'Uploading ${(job.progress * 100).toStringAsFixed(0)}%';
+                    statusText =
+                        'Uploading ${(job.progress * 100).toStringAsFixed(0)}%';
                     statusIcon = Icons.sync;
                   } else if (isFailed) {
                     statusColor = AppColors.error;
@@ -704,7 +747,8 @@ class _UploadPageState extends ConsumerState<UploadPage> {
                                     Text(
                                       job.dto.fileName,
                                       style: AppTypography.labelMd.copyWith(
-                                        color: AppColors.onSurfaceVariant.withAlpha(150),
+                                        color: AppColors.onSurfaceVariant
+                                            .withAlpha(150),
                                         fontSize: 11,
                                       ),
                                       maxLines: 1,
@@ -722,7 +766,9 @@ class _UploadPageState extends ConsumerState<UploadPage> {
                                   color: AppColors.onSurfaceVariant,
                                 ),
                                 onPressed: () {
-                                  ref.read(uploadQueueProvider.notifier).removeJob(job.id);
+                                  ref
+                                      .read(uploadQueueProvider.notifier)
+                                      .removeJob(job.id);
                                 },
                                 tooltip: 'Cancel job',
                               ),
@@ -735,7 +781,9 @@ class _UploadPageState extends ConsumerState<UploadPage> {
                               child: LinearProgressIndicator(
                                 value: job.progress,
                                 backgroundColor: AppColors.level0,
-                                valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+                                valueColor: const AlwaysStoppedAnimation<Color>(
+                                  AppColors.primary,
+                                ),
                               ),
                             ),
                           ],
@@ -768,11 +816,18 @@ class _UploadPageState extends ConsumerState<UploadPage> {
                                       width: 12,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 1.5,
-                                        valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              AppColors.primary,
+                                            ),
                                       ),
                                     )
                                   else
-                                    Icon(statusIcon, color: statusColor, size: 14),
+                                    Icon(
+                                      statusIcon,
+                                      color: statusColor,
+                                      size: 14,
+                                    ),
                                   const SizedBox(width: 6),
                                   Text(
                                     statusText,
@@ -786,15 +841,21 @@ class _UploadPageState extends ConsumerState<UploadPage> {
                               if (isFailed)
                                 TextButton.icon(
                                   onPressed: () {
-                                    ref.read(uploadQueueProvider.notifier).retryJob(job.id);
+                                    ref
+                                        .read(uploadQueueProvider.notifier)
+                                        .retryJob(job.id);
                                   },
-                                  icon: const Icon(Icons.replay_rounded, size: 14),
+                                  icon: const Icon(
+                                    Icons.replay_rounded,
+                                    size: 14,
+                                  ),
                                   label: const Text('Retry'),
                                   style: TextButton.styleFrom(
                                     foregroundColor: AppColors.primary,
                                     padding: EdgeInsets.zero,
                                     minimumSize: const Size(50, 30),
-                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
                                   ),
                                 ),
                             ],
@@ -819,15 +880,9 @@ class _UploadPageState extends ConsumerState<UploadPage> {
               ? Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      flex: 5,
-                      child: buildFormPane(),
-                    ),
+                    Expanded(flex: 5, child: buildFormPane()),
                     const SizedBox(width: AppSpacing.gutter),
-                    Expanded(
-                      flex: 7,
-                      child: buildQueuePane(),
-                    ),
+                    Expanded(flex: 7, child: buildQueuePane()),
                   ],
                 )
               : Column(

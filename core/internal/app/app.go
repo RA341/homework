@@ -1,160 +1,248 @@
 package app
 
 import (
+	"context"
 	"net/http"
 	"os"
 	"path/filepath"
-	"time"
 
-	"github.com/ra341/homework/common/database"
+	"github.com/joho/godotenv"
 	"github.com/ra341/homework/common/router"
 	"github.com/ra341/homework/internal/auth/authentication"
 	"github.com/ra341/homework/internal/auth/session"
 	"github.com/ra341/homework/internal/browser"
-	"github.com/ra341/homework/internal/downloader"
+	"github.com/ra341/homework/internal/database"
+	"github.com/ra341/homework/internal/downloads"
 	"github.com/ra341/homework/internal/media"
 	"github.com/ra341/homework/internal/media/asset"
 	"github.com/ra341/homework/internal/media/content"
 	"github.com/ra341/homework/internal/users"
-
+	"github.com/ra341/homework/scribe"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"gorm.io/gorm"
 )
 
 func init() {
-	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"})
+	//zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
+	//	short := file
+	//
+	//
+	//
+	//	filepath.Base()
+	//	// keep last 2 path segments: package dir + filename
+	//	if idx := strings.LastIndexByte(file, '/'); idx != -1 {
+	//		if idx2 := strings.LastIndexByte(file[:idx], '/'); idx2 != -1 {
+	//			short = file[idx2+1:]
+	//		}
+	//	}
+	//	return short + ":" + strconv.Itoa(line)
+	//}
+
+	log.Logger = log.With().Caller().Logger().Output(
+		zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "15:04:05"},
+	)
 }
 
 type App struct {
-	db *gorm.DB
+	ctx context.Context
+	ui  http.Handler
 
-	content   *content.Service
-	asset     *asset.Service
-	media     *media.Service
-	downloads *downloader.Service
-	browser   *browser.Service
-	Auth      *authentication.Service
-	Session   *session.Service
-	User      *users.Service
+	conf Config
+	db   *gorm.DB
+
+	content *content.Service
+	asset   *asset.Service
+	media   *media.Service
+
+	downloads        *downloads.Service
+	scribeCliFactory scribe.ClientFactory
+
+	browser *browser.Service
+	user    *users.Service
+	auth    *authentication.Service
+	session *session.Service
 }
 
-func (a *App) RegisterServices() {
-	dir, err := os.Getwd()
+func (a *App) Run(opts ...Option) {
+	a.ctx = context.Background()
+	for _, opt := range opts {
+		opt(a)
+	}
+
+	PrintHeader()
+	a.loadConfig()
+
+	mux := http.NewServeMux()
+	a.addServices()
+	a.addHandlers(mux)
+
+	//mux.Handle("/", server.base.UIHandler)
+	//allowedOrigins := []string{"https://beacon.pro.radn.dev"}
+	//finalMux := api.WithCors(mux, allowedOrigins)
+
+	log.Info().Int("port", a.conf.Server.Port).Msg("Starting homework server...")
+	router.RunServer(a.ctx, a.conf.Server.Port, mux)
+}
+
+func (a *App) loadConfig() {
+	config := Config{}
+	err := godotenv.Load()
+	if err != nil {
+		log.Warn().Err(err).Msg("Error loading .env file")
+	}
+
+	err = config.Load()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to load configuration")
+	}
+
+	a.conf = config
+}
+
+func (a *App) addServices() {
+	workingDir, dataDir := a.initAppDataDir()
+
+	a.initDB(dataDir)
+
+	a.addAssetSrv()
+	a.addContentSrv()
+	a.addBrowserSrv()
+	a.addDownloadsSrv(workingDir)
+	a.addMediaSrv()
+
+	a.addSessionSrv()
+	a.addUserSrv()
+	a.addAuthSrv()
+}
+
+func (a *App) addAuthSrv() {
+	a.auth = authentication.NewService(&a.conf.Auth, a.session, a.user)
+}
+
+func (a *App) addUserSrv() {
+	var err error
+
+	userStore := users.NewStore(a.db)
+	a.user, err = users.NewService(userStore, &a.conf.Users)
+	if err != nil {
+		log.Warn().Err(err).Msg("could not init user service")
+	}
+}
+
+func (a *App) addSessionSrv() {
+	sessionDb := session.NewStore(a.db)
+	a.session = session.NewService(sessionDb, &a.conf.Session)
+}
+
+func (a *App) initAppDataDir() (workingDir string, dataDir string) {
+	var err error
+
+	workingDir, err = os.Getwd()
 	if err != nil {
 		log.Fatal().Err(err).Msg("could not get working directory")
 	}
 
-	dataPath := filepath.Join(dir, "data")
-	err = os.MkdirAll(dataPath, 0755)
+	dataDir = filepath.Join(workingDir, "data")
+	err = os.MkdirAll(dataDir, 0755)
 	if err != nil {
-		log.Fatal().Err(err).Str("path", dataPath).Msg("could make data dir")
+		log.Fatal().Err(err).Str("path", dataDir).Msg("could make data dir")
 	}
 
-	a.InitDB(dataPath)
+	return workingDir, dataDir
+}
 
-	assetStore := asset.NewStore(a.db)
-	assetFolder := "assets"
-	a.asset, err = asset.NewService(assetStore, assetFolder)
+func (a *App) addMediaSrv() {
+	var err error
+
+	a.media, err = media.NewService(
+		&a.conf.Media,
+		a.content,
+		a.asset,
+		a.downloads,
+	)
 	if err != nil {
-		log.Fatal().Msg("error initializing asset service")
+		log.Fatal().Err(err).Msg("could not create media service")
+	}
+}
+
+func (a *App) addDownloadsSrv(dir string) {
+	var err error
+
+	//browserData := "browser"
+	//downloaderCli, err := scribe.NewClient(browserData, config.DownloadsDir)
+	//if err != nil {
+	//	log.Fatal().Err(err).Msg("could not create downloader client")
+	//}
+
+	downloadDb := downloads.NewStoreGorm(a.db)
+
+	scribeCli, err := a.scribeCliFactory(&a.conf.Downloads)
+	if err != nil {
+		log.Fatal().Err(err).Msg("could not load scribe client")
+		return
 	}
 
-	contentStore := content.NewStore(a.db)
-	a.content = content.NewService(contentStore)
-
-	apiUrl := "http://localhost:8998"
-	vncUrl := "http://localhost:3012/"
-	a.browser, err = browser.NewService(apiUrl, vncUrl)
-	if err != nil {
-		log.Warn().Err(err).Msg("could not create chromtrol client")
-	}
-
-	config := downloader.NewConfig(dir)
-	log.Debug().Any("val", config).Msg("config")
-
-	pyDownloader, err := downloader.NewPyClient(config.ServerUrl)
-	if err != nil {
-		log.Warn().Err(err).Msg("could not create ping downloader")
-		// todo handle gracefully
-		//log.Fatal().Err(err).Msg("could not create py downloader")
-	}
-
-	downloadDb := downloader.NewStoreGorm(a.db)
-	a.downloads, err = downloader.NewService(config, downloadDb, pyDownloader, a.asset)
+	a.downloads, err = downloads.NewService(
+		&a.conf.Downloads,
+		downloadDb,
+		scribeCli,
+		a.asset,
+	)
 	if err != nil {
 		// todo handle gracefully
 		log.Fatal().Err(err).Msg("could not create downloads service")
 	}
-
-	const uploadFolder = "temp"
-	a.media, err = media.NewService(a.content, a.asset, a.downloads, uploadFolder)
-	if err != nil {
-		log.Fatal().Err(err).Msg("could not create media service")
-	}
-
-	sessionDb := session.NewStore(a.db)
-	sessionExpiry := time.Hour * 24 * 7
-	a.Session = session.NewService(sessionDb, sessionExpiry)
-
-	userStore := users.NewStore(a.db)
-	a.User, err = users.NewService(userStore)
-	if err != nil {
-		log.Warn().Err(err).Msg("could not init user service")
-	}
-
-	jwtSecret := "test-secret-change-me"
-	a.Auth = authentication.NewService(jwtSecret, a.Session, a.User)
 }
 
-func (a *App) InitDB(dataPath string) {
+func (a *App) addContentSrv() {
+	contentStore := content.NewStore(a.db)
+	a.content = content.NewService(contentStore)
+}
+
+func (a *App) addAssetSrv() {
+	var err error
+
+	//assetFolder := "assets"
+	assetStore := asset.NewStore(a.db)
+	a.asset, err = asset.NewService(assetStore, &a.conf.Assets)
+	if err != nil {
+		log.Fatal().Msg("error initializing asset service")
+	}
+	return
+}
+
+func (a *App) addBrowserSrv() {
+	a.browser = browser.NewService(a.ctx, &a.conf.Browser)
+	return
+}
+
+func (a *App) initDB(dataPath string) {
 	dbPath := filepath.Join(dataPath, "hw.db")
-	db, err := database.InitDB(dbPath)
+	db, err := database.InitDB(a.ctx, dbPath)
 	if err != nil {
 		log.Fatal().Err(err).Str("path", dbPath).Msg("could not init database")
-	}
-
-	models := []any{
-		&asset.Asset{},
-		&content.Content{},
-		&downloader.Download{},
-		&users.User{},
-		&session.Session{},
-	}
-
-	err = db.AutoMigrate(models...)
-	if err != nil {
-		log.Fatal().Err(err).Msg("could auto migrate models database")
 	}
 
 	a.db = db
 }
 
-func (a *App) RegisterHandlers(r *http.ServeMux) {
+func (a *App) addHandlers(r *http.ServeMux) {
 	ro := router.Router{ParentMux: r}
 
 	const ApiPrefix = "/api"
 	apiMux := http.NewServeMux()
-	a.registerApiHandlers(apiMux)
+	a.addApiHandlers(apiMux)
 
-	logger := loggerMiddleware(false)
+	logger := router.LoggerMiddleware(false)
 
 	ro.AddRouter(ApiPrefix, logger(apiMux))
 
-	const uiPrefix = "/"
-	uiMux := http.NewServeMux()
-	a.registerUIHandler(uiMux)
-	ro.AddRouter(uiPrefix, uiMux)
+	a.addUIHandler(r)
+
 }
 
-func (a *App) registerUIHandler(r *http.ServeMux) {
-	// todo
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte("No ui set fuck off"))
-	})
-}
-
-func (a *App) registerApiHandlers(r *http.ServeMux) {
+func (a *App) addApiHandlers(r *http.ServeMux) {
 	rou := router.Router{ParentMux: r}
 
 	const publicPrefix = "/public"
@@ -165,7 +253,7 @@ func (a *App) registerApiHandlers(r *http.ServeMux) {
 	const protectedPrefix = "/protected"
 	protectedMux := http.NewServeMux()
 	a.addProtectedHandlers(protectedMux)
-	authM := authentication.NewAuthMiddleware(a.Auth)
+	authM := authentication.NewAuthMiddleware(a.auth)
 	rou.AddRouter(protectedPrefix, authM(protectedMux))
 }
 
@@ -181,17 +269,17 @@ func (a *App) addProtectedHandlers(mux *http.ServeMux) {
 	rou.AddRouter(asset.NewHandlerHttp(a.asset))
 
 	// connect rpc should not strip the prefix
-	rou.AddHandler(users.NewHandler(a.User))
+	rou.AddHandler(users.NewHandler(a.user))
 	rou.AddHandler(browser.NewHandler(a.browser))
 	rou.AddHandler(media.NewHandler(a.media))
-	rou.AddHandler(downloader.NewHandler(a.downloads))
+	rou.AddHandler(downloads.NewHandler(a.downloads))
 	rou.AddHandler(content.NewHandler(a.content))
 }
 
 func (a *App) addPublicHandlers(mux *http.ServeMux) {
 	rou := router.Router{ParentMux: mux}
 
-	rou.AddHandler(authentication.NewHandler(a.Auth))
+	rou.AddHandler(authentication.NewHandler(a.auth))
 	rou.AddRouter(browser.NewHandlerHttp(a.browser))
 
 	mux.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
@@ -199,16 +287,13 @@ func (a *App) addPublicHandlers(mux *http.ServeMux) {
 	})
 }
 
-func loggerMiddleware(enable bool) func(http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		if !enable {
-			return next
-		}
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			log.Info().Str("method", r.Method).
-				Str("path", r.URL.Path).
-				Msg("request started")
-			next.ServeHTTP(w, r)
+func (a *App) addUIHandler(r *http.ServeMux) {
+	if a.ui == nil {
+		r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			_, _ = w.Write([]byte("No ui set fuck off"))
 		})
+		return
 	}
+
+	r.Handle("/", a.ui)
 }

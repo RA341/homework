@@ -3,16 +3,16 @@ import 'dart:async';
 import 'package:fixnum/fixnum.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:homework/common/api/runner.dart';
-import 'package:homework/common/utils/result.dart';
 import 'package:homework/common/services/download/download.provider.dart';
+import 'package:homework/common/utils/result.dart';
 import 'package:homework/generated/sdk/downloader/v1/downloader.pb.dart';
 
 typedef ListParams = ({String? params, int? after, int? before, int? limit});
 
 final downloadListProvider =
-AsyncNotifierProvider<DownloadListProvider, ListResponse>(
-  DownloadListProvider.new,
-);
+    AsyncNotifierProvider<DownloadListProvider, ListResponse>(
+      DownloadListProvider.new,
+    );
 
 class DownloadListProvider extends AsyncNotifier<ListResponse> {
   DownloadListProvider();
@@ -53,10 +53,10 @@ class DownloadListProvider extends AsyncNotifier<ListResponse> {
     }
 
     final ListParams nextParams = (
-    params: _params.params,
-    after: resultDownload.after,
-    before: null,
-    limit: _params.limit,
+      params: _params.params,
+      after: resultDownload.after,
+      before: null,
+      limit: _params.limit,
     );
 
     state = const AsyncValue.loading();
@@ -92,10 +92,10 @@ class DownloadListProvider extends AsyncNotifier<ListResponse> {
     }
 
     final ListParams prevParams = (
-    params: _params.params,
-    after: null,
-    before: resultDownload.before,
-    limit: _params.limit,
+      params: _params.params,
+      after: null,
+      before: resultDownload.before,
+      limit: _params.limit,
     );
 
     state = const AsyncValue.loading();
@@ -110,10 +110,10 @@ class DownloadListProvider extends AsyncNotifier<ListResponse> {
 
   Future<void> refresh() async {
     final ListParams resetParams = (
-    params: _params.params,
-    after: null,
-    before: null,
-    limit: _params.limit,
+      params: _params.params,
+      after: null,
+      before: null,
+      limit: _params.limit,
     );
 
     state = const AsyncValue.loading();
@@ -141,13 +141,12 @@ class DownloadListProvider extends AsyncNotifier<ListResponse> {
     }
   }
 
-
   Future<void> search(String? query) async {
     final ListParams searchParams = (
-    params: query,
-    after: null,
-    before: null,
-    limit: _params.limit,
+      params: query,
+      after: null,
+      before: null,
+      limit: _params.limit,
     );
 
     state = const AsyncValue.loading();
@@ -163,10 +162,10 @@ class DownloadListProvider extends AsyncNotifier<ListResponse> {
 
   Future<void> updateLimit(int? newLimit) async {
     final ListParams newParams = (
-    params: _params.params,
-    after: null,
-    before: null,
-    limit: newLimit,
+      params: _params.params,
+      after: null,
+      before: null,
+      limit: newLimit,
     );
 
     state = const AsyncValue.loading();

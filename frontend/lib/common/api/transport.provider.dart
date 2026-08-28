@@ -31,8 +31,6 @@ final publicTransportProvider = Provider<protocol.Transport>((ref) {
     codec: const JsonCodec(),
     httpClient: createHttpClient(),
     statusParser: const StatusParser(),
-    interceptors: [
-      timeoutInterceptor(requestTimeout),
-    ],
+    interceptors: [timeoutInterceptor(requestTimeout)],
   );
 });

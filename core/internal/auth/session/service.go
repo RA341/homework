@@ -13,17 +13,14 @@ var (
 )
 
 type Service struct {
-	store         Store
-	defaultExpiry time.Duration
+	store Store
+	conf  *Config
 }
 
-func NewService(store Store, defaultExpiry time.Duration) *Service {
-	if defaultExpiry <= 0 {
-		defaultExpiry = 24 * time.Hour
-	}
+func NewService(store Store, conf *Config) *Service {
 	return &Service{
-		store:         store,
-		defaultExpiry: defaultExpiry,
+		store: store,
+		conf:  conf,
 	}
 }
 
@@ -33,7 +30,7 @@ func NewService(store Store, defaultExpiry time.Duration) *Service {
 func (s *Service) Create(userID uint64, expiry time.Duration) (sess *Session, rawRefresh string, err error) {
 	exp := expiry
 	if exp == 0 {
-		exp = s.defaultExpiry
+		exp = s.conf.SessionExpiry
 	}
 
 	rawToken, hashedToken, err := s.generateToken()
@@ -96,7 +93,7 @@ func (s *Service) Refresh(rawRefreshToken string, newExpiry time.Duration) (sess
 
 	exp := newExpiry
 	if exp == 0 {
-		exp = s.defaultExpiry
+		exp = s.conf.SessionExpiry
 	}
 
 	newRawToken, newHashedToken, err := s.generateToken()

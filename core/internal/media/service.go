@@ -15,7 +15,7 @@ type Downloader interface {
 }
 
 type Service struct {
-	MediaFolder string
+	conf *Config
 
 	content    *content.Service
 	asset      *asset.Service
@@ -23,16 +23,16 @@ type Service struct {
 }
 
 func NewService(
+	conf *Config,
 	contentService *content.Service,
 	assetService *asset.Service,
 	downloader Downloader,
-	MediaFolder string,
 ) (*Service, error) {
 	s := &Service{
-		content:     contentService,
-		asset:       assetService,
-		downloader:  downloader,
-		MediaFolder: MediaFolder,
+		content:    contentService,
+		asset:      assetService,
+		downloader: downloader,
+		conf:       conf,
 	}
 
 	err := s.Init()
@@ -41,7 +41,7 @@ func NewService(
 }
 
 func (s *Service) Init() error {
-	abs, err := filepath.Abs(s.MediaFolder)
+	abs, err := filepath.Abs(s.conf.UploadDir)
 	if err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func (s *Service) Init() error {
 }
 
 func (s *Service) CreateAndUpload(uploadMedia *CreateUploadMedia) (err error) {
-	var uploadPath = filepath.Join(s.MediaFolder, filepath.Clean(uploadMedia.media.Asset.Filepath))
+	var uploadPath = filepath.Join(s.conf.UploadDir, filepath.Clean(uploadMedia.media.Asset.Filepath))
 
 	saveFile, err := os.OpenFile(uploadPath, os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {

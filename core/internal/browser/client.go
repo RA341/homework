@@ -1,6 +1,7 @@
 package browser
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -18,32 +19,36 @@ type Response struct {
 	Errors    []string `json:"errors,omitempty"`
 }
 
-type ChromtrolClient struct {
-	BaseURL string
-	HTTP    *http.Client
+type ClientConfig interface {
+	BaseUrl() string
 }
 
-func NewClient(baseURL string) *ChromtrolClient {
+type ChromtrolClient struct {
+	conf ClientConfig
+	HTTP *http.Client
+}
+
+func NewClient(conf ClientConfig) *ChromtrolClient {
 	return &ChromtrolClient{
-		BaseURL: baseURL,
-		HTTP:    &http.Client{Timeout: 3 * time.Second},
+		conf: conf,
+		HTTP: &http.Client{Timeout: 3 * time.Second},
 	}
 }
 
-func (c *ChromtrolClient) Start() (*Response, int, error) {
-	return c.do(http.MethodPost, "/start")
+func (c *ChromtrolClient) Start(ctx context.Context) (*Response, int, error) {
+	return c.do(ctx, http.MethodPost, "/start")
 }
 
-func (c *ChromtrolClient) Stop() (*Response, int, error) {
-	return c.do(http.MethodPost, "/stop")
+func (c *ChromtrolClient) Stop(ctx context.Context) (*Response, int, error) {
+	return c.do(ctx, http.MethodPost, "/stop")
 }
 
-func (c *ChromtrolClient) Status() (*Response, int, error) {
-	return c.do(http.MethodGet, "/status")
+func (c *ChromtrolClient) Status(ctx context.Context) (*Response, int, error) {
+	return c.do(ctx, http.MethodGet, "/status")
 }
 
-func (c *ChromtrolClient) do(method, path string) (*Response, int, error) {
-	req, err := http.NewRequest(method, c.BaseURL+path, nil)
+func (c *ChromtrolClient) do(ctx context.Context, method, path string) (*Response, int, error) {
+	req, err := http.NewRequestWithContext(ctx, method, c.conf.BaseUrl()+path, nil)
 	if err != nil {
 		return nil, 0, err
 	}

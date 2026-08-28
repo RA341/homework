@@ -15,24 +15,30 @@ import 'dart:core' as $core;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 class DownloadState extends $pb.ProtobufEnum {
-  static const DownloadState DOWNLOAD_STATE_QUEUED =
-      DownloadState._(0, _omitEnumNames ? '' : 'DOWNLOAD_STATE_QUEUED');
-  static const DownloadState DOWNLOAD_STATE_DOWNLOADING =
-      DownloadState._(1, _omitEnumNames ? '' : 'DOWNLOAD_STATE_DOWNLOADING');
-  static const DownloadState DOWNLOAD_STATE_ERROR =
-      DownloadState._(2, _omitEnumNames ? '' : 'DOWNLOAD_STATE_ERROR');
-  static const DownloadState DOWNLOAD_STATE_SUCCESS =
-      DownloadState._(3, _omitEnumNames ? '' : 'DOWNLOAD_STATE_SUCCESS');
+  static const DownloadState Queued =
+      DownloadState._(0, _omitEnumNames ? '' : 'Queued');
+  static const DownloadState Downloading =
+      DownloadState._(1, _omitEnumNames ? '' : 'Downloading');
+  static const DownloadState Error =
+      DownloadState._(2, _omitEnumNames ? '' : 'Error');
+  static const DownloadState Complete =
+      DownloadState._(3, _omitEnumNames ? '' : 'Complete');
+  static const DownloadState Failed =
+      DownloadState._(4, _omitEnumNames ? '' : 'Failed');
+  static const DownloadState Canceled =
+      DownloadState._(5, _omitEnumNames ? '' : 'Canceled');
 
   static const $core.List<DownloadState> values = <DownloadState>[
-    DOWNLOAD_STATE_QUEUED,
-    DOWNLOAD_STATE_DOWNLOADING,
-    DOWNLOAD_STATE_ERROR,
-    DOWNLOAD_STATE_SUCCESS,
+    Queued,
+    Downloading,
+    Error,
+    Complete,
+    Failed,
+    Canceled,
   ];
 
   static final $core.List<DownloadState?> _byValue =
-      $pb.ProtobufEnum.$_initByValueList(values, 3);
+      $pb.ProtobufEnum.$_initByValueList(values, 5);
   static DownloadState? valueOf($core.int value) =>
       value < 0 || value >= _byValue.length ? null : _byValue[value];
 

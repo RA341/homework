@@ -1,0 +1,23 @@
+FROM base-gomod AS builder
+
+WORKDIR /app
+
+COPY core .
+
+RUN CGO_ENABLED=1 go build -ldflags "-s -w" -o hwomni "./cmd/omni"
+
+FROM base-yt
+
+WORKDIR /app
+
+COPY --from=builder /app/hwomni /usr/bin/hwomni
+
+COPY --from=base-frontend /build/build/web web
+
+COPY build/entrypoint.sh entrypoint.sh
+
+ENV HW_DOWNLOAD_DIR=/downloads
+ENV HW_BROWSER_DIR=/browser
+ENV HW_ASSET_DIR=/assets
+
+ENTRYPOINT ["./entrypoint.sh", "hwomni"]

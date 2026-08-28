@@ -1,0 +1,38 @@
+# Compose example for omni variant
+name: homework-omni
+services:
+  hw:
+    container_name: homework
+#    image: ghcr.io/ra341/homework/omni:latest
+    image: homework:omni-latest
+    ports:
+      - "9911:9911"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - HW_JWT_SECRET=somehighentroupesecret
+      - HW_CHROMTROL_URL=http://browser:8080
+      - HW_CHROMTROL_VNC_URL=http://browser:3000
+    volumes:
+      - ./test/appdata:/data
+      - ./test/browser:/browser
+      - ./test/assets:/assets
+      - ./test/downloads:/downloads
+    restart: unless-stopped
+    depends_on:
+      browser:
+        condition: service_started
+
+  browser:
+    container_name: browser
+    image: ghcr.io/ra341/chromtrol:latest
+    security_opt:
+      # Prevents Chromium from crashing in Docker
+      - seccomp:unconfined
+    environment:
+      - PUID=1000
+      - PGID=1000
+    #      - CHROME_CLI=--remote-debugging-port=9222 --remote-debugging-address=0.0.0.0
+    volumes:
+      # This volume holds the browser profile and SQLite databases
+      - ./test/browser:/config

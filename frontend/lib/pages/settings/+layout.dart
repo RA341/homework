@@ -6,10 +6,7 @@ import 'package:homework/pages/settings/nav.items.dart';
 class SettingsLayout extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
 
-  const SettingsLayout({
-    super.key,
-    required this.navigationShell,
-  });
+  const SettingsLayout({super.key, required this.navigationShell});
 
   @override
   Widget build(BuildContext context) {
@@ -42,9 +39,7 @@ class SettingsLayout extends StatelessWidget {
               ],
             ),
           ),
-          Expanded(
-            child: navigationShell,
-          ),
+          Expanded(child: navigationShell),
         ],
       ),
     );
@@ -91,14 +86,18 @@ class _SettingsTab extends StatelessWidget {
             Icon(
               tab.icon,
               size: 18,
-              color: isActive ? AppColors.primary : AppColors.onSurfaceVariant.withAlpha(160),
+              color: isActive
+                  ? AppColors.primary
+                  : AppColors.onSurfaceVariant.withAlpha(160),
             ),
             const SizedBox(width: 8),
             Text(
               tab.title,
               style: AppTypography.bodySm.copyWith(
                 fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-                color: isActive ? AppColors.onSurface : AppColors.onSurfaceVariant.withAlpha(200),
+                color: isActive
+                    ? AppColors.onSurface
+                    : AppColors.onSurfaceVariant.withAlpha(200),
               ),
             ),
           ],

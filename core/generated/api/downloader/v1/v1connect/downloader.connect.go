@@ -40,18 +40,25 @@ const (
 	// DownloaderServiceDownloadProcedure is the fully-qualified name of the DownloaderService's
 	// Download RPC.
 	DownloaderServiceDownloadProcedure = "/downloader.v1.DownloaderService/Download"
+	// DownloaderServiceCancelProcedure is the fully-qualified name of the DownloaderService's Cancel
+	// RPC.
+	DownloaderServiceCancelProcedure = "/downloader.v1.DownloaderService/Cancel"
 	// DownloaderServiceListProcedure is the fully-qualified name of the DownloaderService's List RPC.
 	DownloaderServiceListProcedure = "/downloader.v1.DownloaderService/List"
 	// DownloaderServiceEditProcedure is the fully-qualified name of the DownloaderService's Edit RPC.
 	DownloaderServiceEditProcedure = "/downloader.v1.DownloaderService/Edit"
+	// DownloaderServiceStatsProcedure is the fully-qualified name of the DownloaderService's Stats RPC.
+	DownloaderServiceStatsProcedure = "/downloader.v1.DownloaderService/Stats"
 )
 
 // DownloaderServiceClient is a client for the downloader.v1.DownloaderService service.
 type DownloaderServiceClient interface {
 	Retry(context.Context, *connect.Request[v1.RetryRequest]) (*connect.Response[v1.RetryResponse], error)
 	Download(context.Context, *connect.Request[v1.DownloadRequest]) (*connect.Response[v1.DownloadResponse], error)
+	Cancel(context.Context, *connect.Request[v1.CancelRequest]) (*connect.Response[v1.CancelResponse], error)
 	List(context.Context, *connect.Request[v1.ListRequest]) (*connect.Response[v1.ListResponse], error)
 	Edit(context.Context, *connect.Request[v1.EditRequest]) (*connect.Response[v1.EditResponse], error)
+	Stats(context.Context, *connect.Request[v1.StatsRequest]) (*connect.Response[v1.StatsResponse], error)
 }
 
 // NewDownloaderServiceClient constructs a client for the downloader.v1.DownloaderService service.
@@ -77,6 +84,12 @@ func NewDownloaderServiceClient(httpClient connect.HTTPClient, baseURL string, o
 			connect.WithSchema(downloaderServiceMethods.ByName("Download")),
 			connect.WithClientOptions(opts...),
 		),
+		cancel: connect.NewClient[v1.CancelRequest, v1.CancelResponse](
+			httpClient,
+			baseURL+DownloaderServiceCancelProcedure,
+			connect.WithSchema(downloaderServiceMethods.ByName("Cancel")),
+			connect.WithClientOptions(opts...),
+		),
 		list: connect.NewClient[v1.ListRequest, v1.ListResponse](
 			httpClient,
 			baseURL+DownloaderServiceListProcedure,
@@ -89,6 +102,12 @@ func NewDownloaderServiceClient(httpClient connect.HTTPClient, baseURL string, o
 			connect.WithSchema(downloaderServiceMethods.ByName("Edit")),
 			connect.WithClientOptions(opts...),
 		),
+		stats: connect.NewClient[v1.StatsRequest, v1.StatsResponse](
+			httpClient,
+			baseURL+DownloaderServiceStatsProcedure,
+			connect.WithSchema(downloaderServiceMethods.ByName("Stats")),
+			connect.WithClientOptions(opts...),
+		),
 	}
 }
 
@@ -96,8 +115,10 @@ func NewDownloaderServiceClient(httpClient connect.HTTPClient, baseURL string, o
 type downloaderServiceClient struct {
 	retry    *connect.Client[v1.RetryRequest, v1.RetryResponse]
 	download *connect.Client[v1.DownloadRequest, v1.DownloadResponse]
+	cancel   *connect.Client[v1.CancelRequest, v1.CancelResponse]
 	list     *connect.Client[v1.ListRequest, v1.ListResponse]
 	edit     *connect.Client[v1.EditRequest, v1.EditResponse]
+	stats    *connect.Client[v1.StatsRequest, v1.StatsResponse]
 }
 
 // Retry calls downloader.v1.DownloaderService.Retry.
@@ -110,6 +131,11 @@ func (c *downloaderServiceClient) Download(ctx context.Context, req *connect.Req
 	return c.download.CallUnary(ctx, req)
 }
 
+// Cancel calls downloader.v1.DownloaderService.Cancel.
+func (c *downloaderServiceClient) Cancel(ctx context.Context, req *connect.Request[v1.CancelRequest]) (*connect.Response[v1.CancelResponse], error) {
+	return c.cancel.CallUnary(ctx, req)
+}
+
 // List calls downloader.v1.DownloaderService.List.
 func (c *downloaderServiceClient) List(ctx context.Context, req *connect.Request[v1.ListRequest]) (*connect.Response[v1.ListResponse], error) {
 	return c.list.CallUnary(ctx, req)
@@ -120,12 +146,19 @@ func (c *downloaderServiceClient) Edit(ctx context.Context, req *connect.Request
 	return c.edit.CallUnary(ctx, req)
 }
 
+// Stats calls downloader.v1.DownloaderService.Stats.
+func (c *downloaderServiceClient) Stats(ctx context.Context, req *connect.Request[v1.StatsRequest]) (*connect.Response[v1.StatsResponse], error) {
+	return c.stats.CallUnary(ctx, req)
+}
+
 // DownloaderServiceHandler is an implementation of the downloader.v1.DownloaderService service.
 type DownloaderServiceHandler interface {
 	Retry(context.Context, *connect.Request[v1.RetryRequest]) (*connect.Response[v1.RetryResponse], error)
 	Download(context.Context, *connect.Request[v1.DownloadRequest]) (*connect.Response[v1.DownloadResponse], error)
+	Cancel(context.Context, *connect.Request[v1.CancelRequest]) (*connect.Response[v1.CancelResponse], error)
 	List(context.Context, *connect.Request[v1.ListRequest]) (*connect.Response[v1.ListResponse], error)
 	Edit(context.Context, *connect.Request[v1.EditRequest]) (*connect.Response[v1.EditResponse], error)
+	Stats(context.Context, *connect.Request[v1.StatsRequest]) (*connect.Response[v1.StatsResponse], error)
 }
 
 // NewDownloaderServiceHandler builds an HTTP handler from the service implementation. It returns
@@ -147,6 +180,12 @@ func NewDownloaderServiceHandler(svc DownloaderServiceHandler, opts ...connect.H
 		connect.WithSchema(downloaderServiceMethods.ByName("Download")),
 		connect.WithHandlerOptions(opts...),
 	)
+	downloaderServiceCancelHandler := connect.NewUnaryHandler(
+		DownloaderServiceCancelProcedure,
+		svc.Cancel,
+		connect.WithSchema(downloaderServiceMethods.ByName("Cancel")),
+		connect.WithHandlerOptions(opts...),
+	)
 	downloaderServiceListHandler := connect.NewUnaryHandler(
 		DownloaderServiceListProcedure,
 		svc.List,
@@ -159,16 +198,26 @@ func NewDownloaderServiceHandler(svc DownloaderServiceHandler, opts ...connect.H
 		connect.WithSchema(downloaderServiceMethods.ByName("Edit")),
 		connect.WithHandlerOptions(opts...),
 	)
+	downloaderServiceStatsHandler := connect.NewUnaryHandler(
+		DownloaderServiceStatsProcedure,
+		svc.Stats,
+		connect.WithSchema(downloaderServiceMethods.ByName("Stats")),
+		connect.WithHandlerOptions(opts...),
+	)
 	return "/downloader.v1.DownloaderService/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case DownloaderServiceRetryProcedure:
 			downloaderServiceRetryHandler.ServeHTTP(w, r)
 		case DownloaderServiceDownloadProcedure:
 			downloaderServiceDownloadHandler.ServeHTTP(w, r)
+		case DownloaderServiceCancelProcedure:
+			downloaderServiceCancelHandler.ServeHTTP(w, r)
 		case DownloaderServiceListProcedure:
 			downloaderServiceListHandler.ServeHTTP(w, r)
 		case DownloaderServiceEditProcedure:
 			downloaderServiceEditHandler.ServeHTTP(w, r)
+		case DownloaderServiceStatsProcedure:
+			downloaderServiceStatsHandler.ServeHTTP(w, r)
 		default:
 			http.NotFound(w, r)
 		}
@@ -186,10 +235,18 @@ func (UnimplementedDownloaderServiceHandler) Download(context.Context, *connect.
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("downloader.v1.DownloaderService.Download is not implemented"))
 }
 
+func (UnimplementedDownloaderServiceHandler) Cancel(context.Context, *connect.Request[v1.CancelRequest]) (*connect.Response[v1.CancelResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("downloader.v1.DownloaderService.Cancel is not implemented"))
+}
+
 func (UnimplementedDownloaderServiceHandler) List(context.Context, *connect.Request[v1.ListRequest]) (*connect.Response[v1.ListResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("downloader.v1.DownloaderService.List is not implemented"))
 }
 
 func (UnimplementedDownloaderServiceHandler) Edit(context.Context, *connect.Request[v1.EditRequest]) (*connect.Response[v1.EditResponse], error) {
 	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("downloader.v1.DownloaderService.Edit is not implemented"))
+}
+
+func (UnimplementedDownloaderServiceHandler) Stats(context.Context, *connect.Request[v1.StatsRequest]) (*connect.Response[v1.StatsResponse], error) {
+	return nil, connect.NewError(connect.CodeUnimplemented, errors.New("downloader.v1.DownloaderService.Stats is not implemented"))
 }
