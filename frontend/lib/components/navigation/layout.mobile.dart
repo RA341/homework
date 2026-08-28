@@ -10,9 +10,11 @@ class BottomNavigation extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final location = GoRouterState.of(context).uri.path;
-    final activeIndex = navItems.indexWhere((item) =>
-        location == item.route.path ||
-        (item.route.path != '/' && location.startsWith(item.route.path)));
+    final activeIndex = navItems.indexWhere(
+      (item) =>
+          location == item.route.path ||
+          (item.route.path != '/' && location.startsWith(item.route.path)),
+    );
     final selectedIndex = activeIndex != -1 ? activeIndex : 0;
 
     return NavigationBar(

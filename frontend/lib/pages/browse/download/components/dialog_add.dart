@@ -16,9 +16,7 @@ class AddDownloadDialog extends HookConsumerWidget {
     final media = ref.watch(mediaApiProvider);
 
     final nameField = useTextEditingController();
-    final descField = useTextEditingController();
     final downloadLinkField = useTextEditingController();
-    final filepathField = useTextEditingController();
 
     final contentType = useState<ContentType>(ContentType.CONTENT_TYPE_VIDEO);
     final assetType = useState<AssetType>(AssetType.ASSET_TYPE_VIDEO);
@@ -39,11 +37,9 @@ class AddDownloadDialog extends HookConsumerWidget {
         media: CreateMedia(
           content: CreateContent(
             title: nameField.text,
-            desc: descField.text,
             contentType: contentType.value,
           ),
           asset: CreateAsset(
-            filepath: filepathField.text,
             assetType: assetType.value,
             assetRole: assetRole.value,
           ),
@@ -108,20 +104,6 @@ class AddDownloadDialog extends HookConsumerWidget {
                   onChanged: (_) => clearError(),
                 ),
                 const SizedBox(height: AppSpacing.base * 2.5),
-                TextField(
-                  controller: descField,
-                  maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: 'Description',
-                    hintText: 'Enter a short description',
-                    prefixIcon: Icon(
-                      Icons.description_rounded,
-                      color: AppColors.outline,
-                    ),
-                  ),
-                  onChanged: (_) => clearError(),
-                ),
-                const SizedBox(height: AppSpacing.base * 2.5),
                 DropdownButtonFormField<ContentType>(
                   initialValue: contentType.value,
                   decoration: const InputDecoration(
@@ -153,19 +135,6 @@ class AddDownloadDialog extends HookConsumerWidget {
                     hintText: 'e.g., https://example.com/file.mp4',
                     prefixIcon: Icon(
                       Icons.link_rounded,
-                      color: AppColors.outline,
-                    ),
-                  ),
-                  onChanged: (_) => clearError(),
-                ),
-                const SizedBox(height: AppSpacing.base * 2.5),
-                TextField(
-                  controller: filepathField,
-                  decoration: const InputDecoration(
-                    labelText: 'Download Path',
-                    hintText: 'e.g., downloads/file.mp4',
-                    prefixIcon: Icon(
-                      Icons.folder_open_rounded,
                       color: AppColors.outline,
                     ),
                   ),
