@@ -7,11 +7,11 @@ import (
 	"path/filepath"
 
 	"github.com/joho/godotenv"
-	"github.com/ra341/homework/common/database"
 	"github.com/ra341/homework/common/router"
 	"github.com/ra341/homework/internal/auth/authentication"
 	"github.com/ra341/homework/internal/auth/session"
 	"github.com/ra341/homework/internal/browser"
+	"github.com/ra341/homework/internal/database"
 	"github.com/ra341/homework/internal/downloads"
 	"github.com/ra341/homework/internal/media"
 	"github.com/ra341/homework/internal/media/asset"
@@ -204,7 +204,6 @@ func (a *App) addAssetSrv() {
 	var err error
 
 	//assetFolder := "assets"
-
 	assetStore := asset.NewStore(a.db)
 	a.asset, err = asset.NewService(assetStore, &a.conf.Assets)
 	if err != nil {
@@ -214,29 +213,15 @@ func (a *App) addAssetSrv() {
 }
 
 func (a *App) addBrowserSrv() {
-
 	a.browser = browser.NewService(a.ctx, &a.conf.Browser)
 	return
 }
 
 func (a *App) initDB(dataPath string) {
 	dbPath := filepath.Join(dataPath, "hw.db")
-	db, err := database.InitDB(dbPath)
+	db, err := database.InitDB(a.ctx, dbPath)
 	if err != nil {
 		log.Fatal().Err(err).Str("path", dbPath).Msg("could not init database")
-	}
-
-	models := []any{
-		&asset.Asset{},
-		&content.Content{},
-		&downloads.Download{},
-		&users.User{},
-		&session.Session{},
-	}
-
-	err = db.AutoMigrate(models...)
-	if err != nil {
-		log.Fatal().Err(err).Msg("could auto migrate models database")
 	}
 
 	a.db = db

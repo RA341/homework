@@ -80,7 +80,6 @@ func (p *Printer) Print() {
 			Columns: []renderer.Tint{
 				{FG: renderer.Colors{color.FgHiCyan, color.Bold}},  // Key
 				{FG: renderer.Colors{color.FgGreen, color.Bold}},   // Value
-				{FG: renderer.Colors{color.FgYellow, color.Bold}},  // Default
 				{FG: renderer.Colors{color.FgMagenta, color.Bold}}, // Env
 				{FG: renderer.Colors{color.FgHiWhite, color.Bold}}, // Help
 			},
@@ -89,7 +88,6 @@ func (p *Printer) Print() {
 			Columns: []renderer.Tint{
 				{FG: renderer.Colors{color.FgHiCyan}},  // Key
 				{FG: renderer.Colors{color.FgGreen}},   // Value
-				{FG: renderer.Colors{color.FgYellow}},  // Default
 				{FG: renderer.Colors{color.FgMagenta}}, // Env
 				{FG: renderer.Colors{color.FgHiWhite}}, // Help
 			},
@@ -109,7 +107,7 @@ func (p *Printer) Print() {
 	)
 
 	// Headers are passed as plain text; renderer applies the colors
-	table.Header([]string{"Key", "Value", "Default", "Env", "Help"})
+	table.Header([]string{"Key", "Value", "Env", "Help"})
 
 	lastParent := ""
 	for _, e := range p.Elements {
@@ -119,7 +117,6 @@ func (p *Printer) Print() {
 		if parent != lastParent {
 			_ = table.Append([]string{
 				sectionBg.Sprint(" " + parent),
-				sectionBg.Sprint("======="),
 				sectionBg.Sprint("======="),
 				sectionBg.Sprint("======="),
 				sectionBg.Sprint("======="),
@@ -140,7 +137,6 @@ func (p *Printer) Print() {
 		_ = table.Append([]string{
 			key,
 			val,
-			e.Default,
 			p.prefixer(e.Env),
 			e.Help,
 		})

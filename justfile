@@ -11,6 +11,10 @@ dkr:
 dkd:
     docker build . -f Dockerfile.downloader -t homework/downloader:dev
 
+[working-directory("core")]
+mig name:
+    atlas migrate diff {{ name }} --env local
+
 dkdr:
     just dkd
     docker run --rm -p 8000:8000 -v ./.build:/home/ra341/Dev/go/homework/.build homework/downloader:dev
