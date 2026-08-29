@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
 # Use provided PUID/PGID or default to 1000
 USER_ID=${PUID:-1000}
@@ -19,16 +19,24 @@ if ! getent passwd hwuser >/dev/null; then
     useradd -u "$USER_ID" -g "$GROUP_ID" -m -s /bin/bash hwuser
 fi
 
-# Ensure /app and /app/config are owned by the hwuser user
-# This is necessary for sqlite and downloads to work correctly
-mkdir -p /app
-chown -R hwuser:hwuser /app
+ENV_VARS=("HW_DOWNLOAD_DIR" "HW_BROWSER_DIR" "HW_ASSET_DIR" "HW_DATABASE_DIR" "HW_UPLOAD_DIR")
+
+for var_name in "${ENV_VARS[@]}"; do
+    # Resolve the indirect variable reference
+    target_path="${!var_name:-}"
+
+    # Only run if the variable is defined and non-empty
+    if [[ -n "$target_path" ]]; then
+        mkdir -p "$target_path"
+        chown -R "$USER_ID:$GROUP_ID" "$target_path"
+        # Alternatively: chown -R hwuser:hwuser "$target_path"
+    fi
+done
 
 # If running as root (default Docker behavior), drop privileges using gosu
 if [ "$(id -u)" = '0' ]; then
-    echo "Dropping privileges to hwuser user..."
     exec gosu hwuser "$BINARY"
 fi
 
-# Otherwise just run directly (e.g. if --user was passed to docker run) sd
+# Otherwise just run directly (e.g. if --user was passed to docker run)
 exec "$BINARY"

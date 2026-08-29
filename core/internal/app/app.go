@@ -2,9 +2,13 @@ package app
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 
+	"github.com/ra341/homework/common/fu"
 	"github.com/ra341/homework/common/router"
 	"github.com/ra341/homework/internal/auth/authentication"
 	"github.com/ra341/homework/internal/auth/session"
@@ -44,9 +48,10 @@ func init() {
 }
 
 type App struct {
-	mux *http.ServeMux
-	ctx context.Context
-	ui  http.Handler
+	mux   *http.ServeMux
+	ctx   context.Context
+	ui    http.Handler
+	uiDir *os.Root
 
 	conf Config
 	db   *database.Database
@@ -65,7 +70,10 @@ type App struct {
 }
 
 func (a *App) Run(opts ...Option) {
-	a.ctx = context.Background()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	a.ctx = ctx
+
 	for _, opt := range opts {
 		opt(a)
 	}
@@ -77,14 +85,16 @@ func (a *App) Run(opts ...Option) {
 	a.addServices()
 	a.addHandlers(a.mux)
 
+	defer a.close()
+
 	log.Info().Int("port", a.conf.Server.Port).Msg("Starting homework server...")
 	router.RunServer(a.ctx, a.conf.Server.Port, a.mux)
 }
 
 func (a *App) loadConfig() {
 	err := godotenv.Load()
-	if err != nil {
-		log.Warn().Err(err).Msg("Error loading .env file")
+	if err != nil && !errors.Is(err, os.ErrNotExist) {
+		log.Warn().Err(err).Msg("error loading .env file")
 	}
 
 	err = a.conf.Load()
@@ -142,12 +152,6 @@ func (a *App) addMediaSrv() {
 
 func (a *App) addDownloadsSrv() {
 	var err error
-
-	//browserData := "browser"
-	//downloaderCli, err := scribe.NewClient(browserData, config.DownloadsDir)
-	//if err != nil {
-	//	log.Fatal().Err(err).Msg("could not create downloader client")
-	//}
 
 	downloadDb := downloads.NewStoreGorm(a.db.GormDB)
 
@@ -266,4 +270,8 @@ func (a *App) addUIHandler(r *http.ServeMux) {
 	}
 
 	r.Handle("/", a.ui)
+}
+
+func (a *App) close() {
+	fu.CloseCloser(a.uiDir)
 }

@@ -17,9 +17,6 @@ type ServerConfig struct {
 	//Cors []string `knob:"default=Cors,env=CORS_CONFIG,help=cors string"`
 }
 
-type DataConfig struct {
-}
-
 type Config struct {
 	Server   ServerConfig
 	Database database.Config

@@ -30,18 +30,16 @@ func NewService(DownloadFolder string, ytd Provider) (*Service, error) {
 }
 
 func (d *Service) init() (err error) {
-	downloadBaseFolder := "downloads"
-	downloadBaseFolder, err = filepath.Abs(downloadBaseFolder)
+	d.DownloadFolder, err = filepath.Abs(d.DownloadFolder)
 	if err != nil {
 		return err
 	}
 
-	err = os.MkdirAll(downloadBaseFolder, os.ModePerm)
+	err = os.MkdirAll(d.DownloadFolder, os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	d.DownloadFolder = downloadBaseFolder
 	return nil
 }
 

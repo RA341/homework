@@ -20,7 +20,7 @@ type ClientUnifiedConfig interface {
 	GetDownloadsDir() string
 }
 
-func NewClientUnified(config ClientUnifiedConfig) (downloads.DownloadClient, error) {
+func NewClientUnified(config FactoryClientConfig) (downloads.DownloadClient, error) {
 	srv, err := ytdlp.NewService(config.GetBrowserDir())
 	if err != nil {
 		return nil, fmt.Errorf("could not create ytdlp service: %w", err)
@@ -39,7 +39,7 @@ type ClientHttpConfig interface {
 	GetServiceUrl() string
 }
 
-func NewClientHttp(config ClientHttpConfig) (downloads.DownloadClient, error) {
+func NewClientHttp(config FactoryClientConfig) (downloads.DownloadClient, error) {
 	url := config.GetServiceUrl()
 	if url == "" {
 

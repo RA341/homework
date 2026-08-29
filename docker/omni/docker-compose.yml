@@ -4,7 +4,8 @@ services:
   hw:
     container_name: homework
 #    image: ghcr.io/ra341/homework/omni:latest
-    image: ra341/homework:omni-latest
+#    image: ra341/homework:omni-latest
+    image: homework:omni-latest
     ports:
       - "9911:9911"
     environment:
@@ -14,10 +15,11 @@ services:
       - HW_CHROMTROL_URL=http://browser:8080
       - HW_CHROMTROL_VNC_URL=http://browser:3000
     volumes:
-      - ./test/appdata:/data
+      - ./test/appdata:/appdata
       - ./test/browser:/browser
       - ./test/assets:/assets
       - ./test/downloads:/downloads
+      - ./test/uploads:/uploads
     restart: unless-stopped
     depends_on:
       browser:
