@@ -12,6 +12,8 @@ import (
 type Loader struct {
 	Prefixer   Prefixer
 	workingDir string
+
+	TypeMapper map[reflect.Type]func()
 }
 
 func LoadConfig(conf any, prefixer Prefixer) error {
@@ -41,6 +43,9 @@ func (k *Loader) assignValue(rv reflect.Value, element *Element, tagValue string
 
 	// assign types
 	switch rv.Type() {
+	case reflect.TypeFor[[]byte]():
+		rv.SetBytes([]byte(strValue))
+		return nil
 	case reflect.TypeFor[time.Duration]():
 		duration, err := time.ParseDuration(strValue)
 		if err != nil {
@@ -50,6 +55,8 @@ func (k *Loader) assignValue(rv reflect.Value, element *Element, tagValue string
 		rv.Set(reflect.ValueOf(duration))
 		return nil
 	}
+
+	_, _ = k.TypeMapper[rv.Type()]
 
 	// assign base values
 	switch rv.Kind() {

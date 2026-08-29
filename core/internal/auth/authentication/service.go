@@ -88,7 +88,7 @@ func (s *Service) generateJWT(userID uint64) (Token, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(s.conf.GetJwtSecret())
+	tokenString, err := token.SignedString(s.conf.JwtSecret)
 	if err != nil {
 		return Token{}, err
 	}
@@ -116,7 +116,7 @@ func (s *Service) verifyJwt(sessionToken string) (*jwt.Token, error) {
 		if _, ok := tok.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", tok.Header["alg"])
 		}
-		return s.conf.GetJwtSecret(), nil
+		return s.conf.JwtSecret, nil
 	})
 
 	return token, err
