@@ -16,4 +16,12 @@ COPY --from=base-frontend /build/build/web web
 
 COPY build/entrypoint.sh entrypoint.sh
 
+ENV HW_DOWNLOAD_DIR=/downloads
+ENV HW_BROWSER_DIR=/browser
+ENV HW_ASSET_DIR=/assets
+ENV HW_DATABASE_DIR=/appdata
+ENV HW_UPLOAD_DIR=/uploads
+
+EXPOSE 9911
+
 ENTRYPOINT ["hwlite"]

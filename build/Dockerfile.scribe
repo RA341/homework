@@ -4,14 +4,22 @@ WORKDIR /app
 
 COPY core .
 
-RUN CGO_ENABLED=0 go build -ldflags "-s -w" -o hwd "./cmd/scribe"
+RUN CGO_ENABLED=0 go build -ldflags "-s -w" -o /app/bin/scribe "./cmd/scribe"
 
 FROM base-yt
 
 WORKDIR /app
 
-COPY --from=builder /app/hwd /usr/bin/hwd
+COPY --from=builder /app/bin/scribe /usr/bin/scribe
 
 COPY build/entrypoint.sh entrypoint.sh
 
-ENTRYPOINT ["./entrypoint.sh", "hwd"]
+ENV SCRIBE_BROWSER_DIR=/browser
+ENV SCRIBE_DOWNLOAD_DIR=/downloads
+
+EXPOSE 9922
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD curl -s -o /dev/null http://localhost:9922/hello || exit 1
+
+ENTRYPOINT ["./entrypoint.sh", "scribe"]

@@ -19,7 +19,7 @@ if ! getent passwd hwuser >/dev/null; then
     useradd -u "$USER_ID" -g "$GROUP_ID" -m -s /bin/bash hwuser
 fi
 
-ENV_VARS=("HW_DOWNLOAD_DIR" "HW_BROWSER_DIR" "HW_ASSET_DIR" "HW_DATABASE_DIR" "HW_UPLOAD_DIR")
+ENV_VARS=("HW_DOWNLOAD_DIR" "HW_BROWSER_DIR" "HW_ASSET_DIR" "HW_DATABASE_DIR" "HW_UPLOAD_DIR" "SCRIBE_BROWSER_DIR" "SCRIBE_DOWNLOAD_DIR")
 
 for var_name in "${ENV_VARS[@]}"; do
     # Resolve the indirect variable reference

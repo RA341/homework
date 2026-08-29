@@ -22,4 +22,6 @@ ENV HW_ASSET_DIR=/assets
 ENV HW_DATABASE_DIR=/appdata
 ENV HW_UPLOAD_DIR=/uploads
 
+EXPOSE 9911
+
 ENTRYPOINT ["./entrypoint.sh", "hwomni"]

@@ -10,14 +10,37 @@ services:
       - PUID=1000
       - PGID=1000
       - HW_JWT_SECRET=somehighentroupesecret
+      - ScribeServiceUrl=http://hw-scribe:9922
     volumes:
-      - ./test/appdata:/data
+      - ./test/appdata:/appdata
       - ./test/browser:/browser
-      - ./test/assets:/assets
       - ./test/downloads:/downloads
+      - ./test/assets:/assets
+      - ./test/uploads:/uploads
     restart: unless-stopped
     depends_on:
       browser:
-        condition: service_started
+        condition: service_healthy
+      hw-scribe:
+        condition: service_healthy
 
   hw-scribe:
+    container_name: homework-scribe
+    image: homework:scribe-latest
+    volumes:
+      - ./test/browser:/browser
+      - ./test/downloads:/downloads
+
+  browser:
+    container_name: homework-browser
+    image: ghcr.io/ra341/chromtrol:latest
+    security_opt:
+      # Prevents Chromium from crashing in Docker
+      - seccomp:unconfined
+    environment:
+      - PUID=1000
+      - PGID=1000
+    #      - CHROME_CLI=--remote-debugging-port=9222 --remote-debugging-address=0.0.0.0
+    volumes:
+      # This volume holds the browser profile and SQLite databases
+      - ./test/browser:/config
