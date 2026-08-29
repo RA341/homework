@@ -4,9 +4,7 @@ import (
 	"context"
 	"net/http"
 	"os"
-	"path/filepath"
 
-	"github.com/joho/godotenv"
 	"github.com/ra341/homework/common/router"
 	"github.com/ra341/homework/internal/auth/authentication"
 	"github.com/ra341/homework/internal/auth/session"
@@ -18,9 +16,10 @@ import (
 	"github.com/ra341/homework/internal/media/content"
 	"github.com/ra341/homework/internal/users"
 	"github.com/ra341/homework/scribe"
+
+	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"gorm.io/gorm"
 )
 
 func init() {
@@ -45,20 +44,21 @@ func init() {
 }
 
 type App struct {
+	mux *http.ServeMux
 	ctx context.Context
 	ui  http.Handler
 
 	conf Config
-	db   *gorm.DB
+	db   *database.Database
 
 	content *content.Service
 	asset   *asset.Service
 	media   *media.Service
 
 	downloads        *downloads.Service
+	browser          *browser.Service
 	scribeCliFactory scribe.ClientFactory
 
-	browser *browser.Service
 	user    *users.Service
 	auth    *authentication.Service
 	session *session.Service
@@ -73,42 +73,33 @@ func (a *App) Run(opts ...Option) {
 	PrintHeader()
 	a.loadConfig()
 
-	mux := http.NewServeMux()
+	a.mux = http.NewServeMux()
 	a.addServices()
-	a.addHandlers(mux)
-
-	//mux.Handle("/", server.base.UIHandler)
-	//allowedOrigins := []string{"https://beacon.pro.radn.dev"}
-	//finalMux := api.WithCors(mux, allowedOrigins)
+	a.addHandlers(a.mux)
 
 	log.Info().Int("port", a.conf.Server.Port).Msg("Starting homework server...")
-	router.RunServer(a.ctx, a.conf.Server.Port, mux)
+	router.RunServer(a.ctx, a.conf.Server.Port, a.mux)
 }
 
 func (a *App) loadConfig() {
-	config := Config{}
 	err := godotenv.Load()
 	if err != nil {
 		log.Warn().Err(err).Msg("Error loading .env file")
 	}
 
-	err = config.Load()
+	err = a.conf.Load()
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to load configuration")
 	}
-
-	a.conf = config
 }
 
 func (a *App) addServices() {
-	workingDir, dataDir := a.initAppDataDir()
-
-	a.initDB(dataDir)
+	a.initDB()
 
 	a.addAssetSrv()
 	a.addContentSrv()
 	a.addBrowserSrv()
-	a.addDownloadsSrv(workingDir)
+	a.addDownloadsSrv()
 	a.addMediaSrv()
 
 	a.addSessionSrv()
@@ -123,7 +114,7 @@ func (a *App) addAuthSrv() {
 func (a *App) addUserSrv() {
 	var err error
 
-	userStore := users.NewStore(a.db)
+	userStore := users.NewStore(a.db.GormDB)
 	a.user, err = users.NewService(userStore, &a.conf.Users)
 	if err != nil {
 		log.Warn().Err(err).Msg("could not init user service")
@@ -131,25 +122,8 @@ func (a *App) addUserSrv() {
 }
 
 func (a *App) addSessionSrv() {
-	sessionDb := session.NewStore(a.db)
+	sessionDb := session.NewStore(a.db.GormDB)
 	a.session = session.NewService(sessionDb, &a.conf.Session)
-}
-
-func (a *App) initAppDataDir() (workingDir string, dataDir string) {
-	var err error
-
-	workingDir, err = os.Getwd()
-	if err != nil {
-		log.Fatal().Err(err).Msg("could not get working directory")
-	}
-
-	dataDir = filepath.Join(workingDir, "data")
-	err = os.MkdirAll(dataDir, 0755)
-	if err != nil {
-		log.Fatal().Err(err).Str("path", dataDir).Msg("could make data dir")
-	}
-
-	return workingDir, dataDir
 }
 
 func (a *App) addMediaSrv() {
@@ -166,7 +140,7 @@ func (a *App) addMediaSrv() {
 	}
 }
 
-func (a *App) addDownloadsSrv(dir string) {
+func (a *App) addDownloadsSrv() {
 	var err error
 
 	//browserData := "browser"
@@ -175,7 +149,7 @@ func (a *App) addDownloadsSrv(dir string) {
 	//	log.Fatal().Err(err).Msg("could not create downloader client")
 	//}
 
-	downloadDb := downloads.NewStoreGorm(a.db)
+	downloadDb := downloads.NewStoreGorm(a.db.GormDB)
 
 	scribeCli, err := a.scribeCliFactory(&a.conf.Downloads)
 	if err != nil {
@@ -196,15 +170,14 @@ func (a *App) addDownloadsSrv(dir string) {
 }
 
 func (a *App) addContentSrv() {
-	contentStore := content.NewStore(a.db)
+	contentStore := content.NewStore(a.db.GormDB)
 	a.content = content.NewService(contentStore)
 }
 
 func (a *App) addAssetSrv() {
 	var err error
 
-	//assetFolder := "assets"
-	assetStore := asset.NewStore(a.db)
+	assetStore := asset.NewStore(a.db.GormDB)
 	a.asset, err = asset.NewService(assetStore, &a.conf.Assets)
 	if err != nil {
 		log.Fatal().Msg("error initializing asset service")
@@ -217,14 +190,12 @@ func (a *App) addBrowserSrv() {
 	return
 }
 
-func (a *App) initDB(dataPath string) {
-	dbPath := filepath.Join(dataPath, "hw.db")
-	db, err := database.InitDB(a.ctx, dbPath)
+func (a *App) initDB() {
+	var err error
+	a.db, err = database.NewDatabase(a.ctx, &a.conf.Database)
 	if err != nil {
-		log.Fatal().Err(err).Str("path", dbPath).Msg("could not init database")
+		log.Fatal().Err(err).Str("path", a.conf.Database.DatabaseDir).Msg("could not init database")
 	}
-
-	a.db = db
 }
 
 func (a *App) addHandlers(r *http.ServeMux) {
@@ -239,7 +210,6 @@ func (a *App) addHandlers(r *http.ServeMux) {
 	ro.AddRouter(ApiPrefix, logger(apiMux))
 
 	a.addUIHandler(r)
-
 }
 
 func (a *App) addApiHandlers(r *http.ServeMux) {

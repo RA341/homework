@@ -5,6 +5,7 @@ import (
 	"github.com/ra341/homework/internal/auth/authentication"
 	"github.com/ra341/homework/internal/auth/session"
 	"github.com/ra341/homework/internal/browser"
+	"github.com/ra341/homework/internal/database"
 	"github.com/ra341/homework/internal/downloads"
 	"github.com/ra341/homework/internal/media"
 	"github.com/ra341/homework/internal/media/asset"
@@ -20,7 +21,8 @@ type DataConfig struct {
 }
 
 type Config struct {
-	Server ServerConfig
+	Server   ServerConfig
+	Database database.Config
 
 	Auth    authentication.Config
 	Session session.Config

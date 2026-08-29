@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path/filepath"
 
 	"github.com/pressly/goose/v3"
 	"github.com/ra341/homework/common/fu"
@@ -14,33 +15,55 @@ import (
 	"github.com/rs/zerolog/log"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 //go:embed migrations/*.sql
 var migrationsFS embed.FS
 
-func InitDB(ctx context.Context, dbPath string) (*gorm.DB, error) {
-	err := createDbFile(dbPath)
+type Database struct {
+	conf   *Config
+	GormDB *gorm.DB
+}
+
+func NewDatabase(ctx context.Context, conf *Config) (*Database, error) {
+	d := &Database{
+		conf: conf,
+	}
+	err := d.Init(ctx)
+	return d, err
+}
+
+func (d *Database) Init(ctx context.Context) (err error) {
+	const dbFile = "hw.db"
+
+	dbPath := filepath.Join(d.conf.DatabaseDir, dbFile)
+	err = createDbFile(dbPath)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	err = migrate(ctx, dbPath)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
+	opts := &gorm.Config{
+		Logger: logger.Default.LogMode(logger.Warn),
+	}
+	db, err := gorm.Open(sqlite.Open(dbPath), opts)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	// Enable Write-Ahead Logging (WAL) mode for better concurrency
-	if err := db.Exec("PRAGMA journal_mode=WAL;").Error; err != nil {
-		return nil, err
+	err = db.Exec("PRAGMA journal_mode=WAL;").Error
+	if err != nil {
+		return err
 	}
 
-	return db, nil
+	d.GormDB = db
+	return nil
 }
 
 func createDbFile(dbPath string) error {
@@ -64,12 +87,12 @@ func migrate(ctx context.Context, dbPath string) error {
 		return fmt.Errorf("could not open fs: %w", err)
 	}
 
-	logger := &GooseZerolog{logger: log.Logger}
+	gooseLog := &GooseZerolog{logger: log.Logger}
 	provider, err := goose.NewProvider(
 		goose.DialectSQLite3,
 		db,
 		migrationDir,
-		goose.WithLogger(logger),
+		goose.WithLogger(gooseLog),
 	)
 	if err != nil {
 		return fmt.Errorf("could not create goose provider: %w", err)
