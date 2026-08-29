@@ -13,8 +13,7 @@ func AbsDirValueLoader() ValueLoader {
 			return strValue, err
 		}
 
-		val, ok := tagMap["filepath"]
-		if !ok || val != "true" {
+		if _, ok := tagMap["filepath"]; !ok {
 			return strValue, err
 		}
 

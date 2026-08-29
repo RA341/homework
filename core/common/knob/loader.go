@@ -76,8 +76,6 @@ func (k *Loader) assignValue(rv reflect.Value, element *Element, tagValue string
 }
 
 func (k *Loader) loadValues(element *Element, tagValue string) (string, error) {
-	// todo potentially look at file
-
 	prefixedEnv := k.EnvPrefixer(element.Env)
 	strValue, ok := os.LookupEnv(prefixedEnv)
 	if !ok {
@@ -86,7 +84,7 @@ func (k *Loader) loadValues(element *Element, tagValue string) (string, error) {
 		}
 
 		if element.Default == "" {
-			return "", fmt.Errorf("value has no defaults, any non-required value must have defaults, add 'default:some_default' to your struct tag %s", tagValue)
+			return "", fmt.Errorf("value has no defaults, any non-required value must have defaults, add 'default=some_default' to your struct tag %s", tagValue)
 		}
 
 		strValue = element.Default

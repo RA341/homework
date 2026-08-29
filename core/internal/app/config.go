@@ -35,7 +35,8 @@ type Config struct {
 }
 
 func (c *Config) Load() error {
-	prefixer := knob.NewPrefixer("HW_")
+	const EnvPrefix = "HW_"
+	prefixer := knob.NewPrefixer(EnvPrefix)
 
 	err := knob.LoadConfig(
 		c,

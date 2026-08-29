@@ -5,8 +5,8 @@ import "time"
 type Config struct {
 	ScribeServiceUrl string `knob:"default=http://localhost:9922,env=SCRIBE_URL,help=url for the scribe service if running in separate containers"`
 
-	DownloadsDir string `knob:"default=downloads,env=DOWNLOAD_DIR,filepath=true,help=dir to store temp downloaded files"`
-	BrowserDir   string `knob:"default=browser,env=BROWSER_DIR,filepath=true,help=dir to find browser configs and cookies"`
+	DownloadsDir string `knob:"default=downloads,env=DOWNLOAD_DIR,filepath,help=dir to store temp downloaded files"`
+	BrowserDir   string `knob:"default=browser,env=BROWSER_DIR,filepath,help=dir to find browser configs and cookies"`
 
 	CheckThreshold    int           `knob:"default=3,env=PROGRESS_CHECK_THRESHOLD,help=amount of times to retry progress check after a failed check"`
 	CheckIntervalSecs time.Duration `knob:"default=5s,env=PROGRESS_INTERVAL_DUR,help=time between a progress check for a download"`

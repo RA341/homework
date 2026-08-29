@@ -1,10 +1,8 @@
 package knob
 
 import (
-	"fmt"
 	"maps"
 	"reflect"
-	"time"
 )
 
 type Opt func(l *Loader)
@@ -32,23 +30,5 @@ func WithTypeMappers(mapper map[reflect.Type]TypeMapFn) Opt {
 func WithTypeMappersMerge(mapper map[reflect.Type]TypeMapFn) Opt {
 	return func(l *Loader) {
 		maps.Copy(l.TypeMapper, mapper)
-	}
-}
-
-func DefaultMappers() map[reflect.Type]TypeMapFn {
-	return map[reflect.Type]TypeMapFn{
-		reflect.TypeFor[[]byte](): func(rv reflect.Value, value string, ele *Element) error {
-			rv.SetBytes([]byte(value))
-			return nil
-		},
-		reflect.TypeFor[time.Duration](): func(rv reflect.Value, value string, ele *Element) error {
-			duration, err := time.ParseDuration(value)
-			if err != nil {
-				return fmt.Errorf("%s = invalid duration str: %s", ele.Path, err)
-			}
-
-			rv.Set(reflect.ValueOf(duration))
-			return nil
-		},
 	}
 }
