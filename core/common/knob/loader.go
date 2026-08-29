@@ -3,28 +3,28 @@ package knob
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"reflect"
 	"strconv"
-	"time"
 )
 
-type Loader struct {
-	Prefixer   Prefixer
-	workingDir string
+type TypeMapFn func(rv reflect.Value, value string, ele *Element) error
 
-	TypeMapper map[reflect.Type]func()
+type ValueLoader func(tagValue string, element *Element, fieldStrValue string) (string, error)
+
+type Loader struct {
+	EnvPrefixer EnvPrefixer
+	TypeMapper  map[reflect.Type]TypeMapFn
+
+	ValueLoaders []ValueLoader
 }
 
-func LoadConfig(conf any, prefixer Prefixer) error {
-	workingDir, err := os.Getwd()
-	if err != nil {
-		return err
+func LoadConfig(conf any, opts ...Opt) (err error) {
+	l := &Loader{
+		TypeMapper: DefaultMappers(),
 	}
 
-	l := &Loader{
-		Prefixer:   prefixer,
-		workingDir: workingDir,
+	for _, op := range opts {
+		op(l)
 	}
 
 	k := Knob{
@@ -36,29 +36,17 @@ func LoadConfig(conf any, prefixer Prefixer) error {
 }
 
 func (k *Loader) assignValue(rv reflect.Value, element *Element, tagValue string) error {
-	strValue, err := k.readValues(element, tagValue)
+	strValue, err := k.loadValues(element, tagValue)
 	if err != nil {
 		return err
 	}
 
-	// assign types
-	switch rv.Type() {
-	case reflect.TypeFor[[]byte]():
-		rv.SetBytes([]byte(strValue))
-		return nil
-	case reflect.TypeFor[time.Duration]():
-		duration, err := time.ParseDuration(strValue)
-		if err != nil {
-			return fmt.Errorf("%s = invalid duration str: %s", element.Path, err)
-		}
-
-		rv.Set(reflect.ValueOf(duration))
-		return nil
+	mapFn, ok := k.TypeMapper[rv.Type()]
+	if ok {
+		return mapFn(rv, strValue, element)
 	}
 
-	_, _ = k.TypeMapper[rv.Type()]
-
-	// assign base values
+	// primitive base values
 	switch rv.Kind() {
 	case reflect.String:
 		rv.SetString(strValue)
@@ -87,10 +75,10 @@ func (k *Loader) assignValue(rv reflect.Value, element *Element, tagValue string
 	return nil
 }
 
-func (k *Loader) readValues(element *Element, tagValue string) (string, error) {
+func (k *Loader) loadValues(element *Element, tagValue string) (string, error) {
 	// todo potentially look at file
 
-	prefixedEnv := k.Prefixer(element.Env)
+	prefixedEnv := k.EnvPrefixer(element.Env)
 	strValue, ok := os.LookupEnv(prefixedEnv)
 	if !ok {
 		if element.Required {
@@ -104,10 +92,10 @@ func (k *Loader) readValues(element *Element, tagValue string) (string, error) {
 		strValue = element.Default
 	}
 
-	if element.IsFilePath && !filepath.IsAbs(strValue) {
-		strValue = filepath.Join(k.workingDir, strValue)
-
-		err := os.MkdirAll(strValue, os.ModePerm)
+	var err error
+	// run custom value loaders hooks
+	for _, vl := range k.ValueLoaders {
+		strValue, err = vl(tagValue, element, strValue)
 		if err != nil {
 			return "", err
 		}

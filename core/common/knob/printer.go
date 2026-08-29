@@ -31,10 +31,10 @@ var (
 
 type Printer struct {
 	Elements []ElementWithVal
-	prefixer Prefixer
+	prefixer EnvPrefixer
 }
 
-func PrettyPrint(conf any, prefixer Prefixer) {
+func PrettyPrint(conf any, prefixer EnvPrefixer) {
 	p := Printer{
 		prefixer: prefixer,
 	}

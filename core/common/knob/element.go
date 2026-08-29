@@ -17,9 +17,9 @@ type Element struct {
 	IsFilePath bool
 }
 
-func (ke *Element) parseTag(tagValue string) error {
+func (ke *Element) load(tagValue string) error {
 	keyMap := make(map[string]string)
-	err := ke.loadKeymap(tagValue, keyMap)
+	err := ParseTag(tagValue, keyMap)
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,9 @@ func (ke *Element) parseTag(tagValue string) error {
 	return nil
 }
 
-func (ke *Element) loadKeymap(tagValue string, keyMap map[string]string) error {
+// ParseTag parses tag values and breaks into map[string]string
+// use this parse tag value to extract custom attributes
+func ParseTag(tagValue string, keyMap map[string]string) error {
 	tagValue = strings.TrimSpace(tagValue)
 	keyvalues := strings.SplitSeq(tagValue, ",")
 

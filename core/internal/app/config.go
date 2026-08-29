@@ -36,7 +36,12 @@ type Config struct {
 
 func (c *Config) Load() error {
 	prefixer := knob.NewPrefixer("HW_")
-	err := knob.LoadConfig(c, prefixer)
+
+	err := knob.LoadConfig(
+		c,
+		knob.WithEnvPrefixer(prefixer),
+		knob.WithValueLoaders(knob.AbsDirValueLoader()),
+	)
 	if err != nil {
 		return err
 	}

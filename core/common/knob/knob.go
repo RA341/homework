@@ -55,16 +55,6 @@ func (k *Knob) walkValue(rv reflect.Value, sf *reflect.StructField, path string)
 			}
 		}
 
-	//case reflect.Slice, reflect.Array:
-	//	for i := 0; i < rv.Len(); i++ {
-	//		k.walkValue(rv.Index(i), nil, fmt.Sprintf("%s[%d]", path, i))
-	//	}
-	//
-	//case reflect.Map:
-	//	for _, key := range rv.MapKeys() {
-	//		k.walkValue(rv.MapIndex(key), nil, fmt.Sprintf("%s[%v]", path, key.Interface()))
-	//	}
-
 	default:
 		if sf == nil {
 			fmt.Println("no struct value found to load tags from", path)
@@ -82,7 +72,7 @@ func (k *Knob) walkValue(rv reflect.Value, sf *reflect.StructField, path string)
 			Path: path,
 		}
 
-		err = knobElement.parseTag(tagValue)
+		err = knobElement.load(tagValue)
 		if err != nil {
 			return fmt.Errorf("could not parse tag: %w", err)
 		}
